@@ -523,12 +523,13 @@ export const useDataCollections = (filters?: {
 // ----- Hook de recherche globale -----
 
 export const useSearch = () => {
-  const searchAll = useCallback(async (): Promise<{
+  const searchAll = useCallback(async (query: string): Promise<{
     indicators: Indicator[];
     geographic: GeographicEntity[];
     facilities: (HealthFacility | EducationFacility)[];
   }> => {
     // TODO: Implement real backend search or use existing loaded data
+    console.log('Searching for:', query);
     return {
       indicators: [],
       geographic: [],

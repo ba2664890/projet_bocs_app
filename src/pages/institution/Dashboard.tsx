@@ -34,7 +34,7 @@ export const InstitutionDashboard = () => {
   const navigate = useNavigate();
   const { alerts, unreadAlertsCount, markAsRead } = useAlerts();
   const { allValues } = useIndicatorValues({ sector: 'health' });
-  const { facilities } = useHealthFacilities();
+  const { } = useHealthFacilities();
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {

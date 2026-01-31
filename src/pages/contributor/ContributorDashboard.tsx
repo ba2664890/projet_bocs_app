@@ -45,14 +45,6 @@ interface CollectionTask {
   facilityCount: number;
 }
 
-interface Notification {
-  id: string;
-  title: string;
-  message: string;
-  type: 'info' | 'success' | 'warning';
-  date: string;
-  read: boolean;
-}
 
 export const ContributorDashboard = () => {
   const navigate = useNavigate();
@@ -86,9 +78,9 @@ export const ContributorDashboard = () => {
     description: c.description || 'Pas de description',
     dueDate: c.endDate,
     status: (c.status.toLowerCase() as any) || 'pending',
-    progress: c.progress || 0,
-    sector: c.sector?.toLowerCase() as any || 'health',
-    facilityCount: c.targetedFacilitiesCount || 0,
+    progress: 0,
+    sector: (c.sector?.toLowerCase() as any) || 'health',
+    facilityCount: 0,
   }));
 
   const getStatusBadge = (status: CollectionTask['status']) => {
@@ -151,7 +143,7 @@ export const ContributorDashboard = () => {
                 <ClipboardList className="h-8 w-8 opacity-80" />
                 <div>
                   <p className="text-sm opacity-80">Collectes en cours</p>
-                  <p className="text-2xl font-bold">{collections.filter(c => c.status === 'in_progress').length}</p>
+                  <p className="text-2xl font-bold">{collections.filter(c => c.status === 'ongoing').length}</p>
                 </div>
               </div>
             </CardContent>
@@ -163,7 +155,7 @@ export const ContributorDashboard = () => {
                 <CheckCircle className="h-8 w-8 opacity-80" />
                 <div>
                   <p className="text-sm opacity-80">Complétées</p>
-                  <p className="text-2xl font-bold">{collections.filter(c => c.status === 'completed' || c.status === 'validated').length}</p>
+                  <p className="text-2xl font-bold">{collections.filter(c => c.status === 'completed').length}</p>
                 </div>
               </div>
             </CardContent>
@@ -226,10 +218,10 @@ export const ContributorDashboard = () => {
                     {/* Left side - Icon & Status */}
                     <div
                       className={`flex items-center justify-center p-4 sm:w-20 ${task.status === 'pending'
-                          ? 'bg-slate-100 dark:bg-slate-800'
-                          : task.status === 'in_progress'
-                            ? 'bg-blue-100 dark:bg-blue-900/30'
-                            : 'bg-emerald-100 dark:bg-emerald-900/30'
+                        ? 'bg-slate-100 dark:bg-slate-800'
+                        : task.status === 'in_progress'
+                          ? 'bg-blue-100 dark:bg-blue-900/30'
+                          : 'bg-emerald-100 dark:bg-emerald-900/30'
                         }`}
                     >
                       {getStatusIcon(task.status)}
@@ -391,10 +383,10 @@ export const ContributorDashboard = () => {
                       >
                         <div
                           className={`mt-1 h-2 w-2 rounded-full ${alert.severity === 'critical'
-                              ? 'bg-red-500'
-                              : alert.severity === 'high'
-                                ? 'bg-amber-500'
-                                : 'bg-blue-500'
+                            ? 'bg-red-500'
+                            : alert.severity === 'high'
+                              ? 'bg-amber-500'
+                              : 'bg-blue-500'
                             }`}
                         />
                         <div className="flex-1">

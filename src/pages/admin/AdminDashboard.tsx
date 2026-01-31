@@ -59,7 +59,7 @@ export const AdminDashboard = () => {
   const navigate = useNavigate();
   const { unreadAlertsCount } = useAlerts();
   const { values, allValues } = useIndicatorValues({ status: 'pending' });
-  const { users, isLoading: isLoadingUsers } = useUsers();
+  const { users } = useUsers();
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -462,12 +462,12 @@ export const AdminDashboard = () => {
                       <div key={i} className="flex items-start gap-3 rounded-lg border p-3">
                         <div
                           className={`h-2 w-2 mt-2 rounded-full ${log.type === 'success'
-                              ? 'bg-emerald-500'
-                              : log.type === 'error'
-                                ? 'bg-red-500'
-                                : log.type === 'warning'
-                                  ? 'bg-amber-500'
-                                  : 'bg-blue-500'
+                            ? 'bg-emerald-500'
+                            : log.type === 'error'
+                              ? 'bg-red-500'
+                              : log.type === 'warning'
+                                ? 'bg-amber-500'
+                                : 'bg-blue-500'
                             }`}
                         />
                         <div className="flex-1">

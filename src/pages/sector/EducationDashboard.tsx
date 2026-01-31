@@ -37,7 +37,7 @@ import type { KPIData } from '@/types';
 export const EducationDashboard = () => {
   const navigate = useNavigate();
   const { values, allValues } = useIndicatorValues({ sector: 'education' });
-  const { facilities, isLoading: isLoadingFacilities } = useEducationFacilities();
+  const { facilities } = useEducationFacilities();
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -260,7 +260,7 @@ export const EducationDashboard = () => {
                           </p>
                         </div>
                         <Badge
-                          variant={value.achievementRate >= 80 ? 'default' : 'secondary'}
+                          variant={(value.achievementRate ?? 0) >= 80 ? 'default' : 'secondary'}
                         >
                           {value.achievementRate?.toFixed(0) || 0}%
                         </Badge>

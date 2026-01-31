@@ -34,7 +34,7 @@ import type { KPIData } from '@/types';
 export const HealthDashboard = () => {
   const navigate = useNavigate();
   const { values, allValues } = useIndicatorValues({ sector: 'health' });
-  const { facilities, isLoading: isLoadingFacilities } = useHealthFacilities();
+  const { facilities } = useHealthFacilities();
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -256,7 +256,7 @@ export const HealthDashboard = () => {
                           </p>
                         </div>
                         <Badge
-                          variant={value.achievementRate >= 80 ? 'default' : 'secondary'}
+                          variant={(value.achievementRate ?? 0) >= 80 ? 'default' : 'secondary'}
                         >
                           {value.achievementRate?.toFixed(0) || 0}%
                         </Badge>
