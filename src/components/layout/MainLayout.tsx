@@ -11,15 +11,16 @@ import { cn } from '@/lib/utils';
 interface MainLayoutProps {
   children: React.ReactNode;
   space?: 'institution' | 'sector' | 'admin' | 'contributor';
+  title?: string;
 }
 
-export const MainLayout = ({ children, space = 'institution' }: MainLayoutProps) => {
+export const MainLayout = ({ children, space = 'institution', title }: MainLayoutProps) => {
   const { sidebarCollapsed, sidebarMobileOpen, theme } = useUIStore();
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
     setMounted(true);
-    
+
     // Appliquer le thème
     if (theme === 'dark') {
       document.documentElement.classList.add('dark');
@@ -74,6 +75,11 @@ export const MainLayout = ({ children, space = 'institution' }: MainLayoutProps)
         <Header space={space} />
         <main className="flex-1 p-4 pt-20 lg:p-6 lg:pt-24">
           <div className="animate-fade-in">
+            {title && (
+              <div className="mb-6">
+                <h1 className="text-2xl font-bold tracking-tight">{title}</h1>
+              </div>
+            )}
             {children}
           </div>
         </main>
