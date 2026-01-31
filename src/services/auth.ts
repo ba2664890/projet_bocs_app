@@ -33,6 +33,15 @@ export const authService = {
     },
 
     /**
+     * Register new user
+     */
+    async register(data: any): Promise<LoginResponse> {
+        // registration action is at /users/register/
+        const response = await apiClient.post<LoginResponse>('/auth/users/register/', data);
+        return response.data;
+    },
+
+    /**
      * Logout current user
      */
     async logout(): Promise<void> {

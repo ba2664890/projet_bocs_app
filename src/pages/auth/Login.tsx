@@ -3,7 +3,7 @@
 // ============================================
 
 import { useState, useEffect, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { gsap } from 'gsap';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
@@ -87,7 +87,7 @@ export const Login = () => {
 
     try {
       const result = await login(formData.email, formData.password);
-      
+
       if (result.success) {
         // Redirection selon l'espace sélectionné
         switch (selectedSpace) {
@@ -271,6 +271,14 @@ export const Login = () => {
               </div>
             </div>
           </CardContent>
+          <CardFooter className="flex flex-col items-center gap-2 border-t py-4">
+            <p className="text-sm text-muted-foreground">
+              Pas encore de compte ?{' '}
+              <Link to="/register" className="font-medium text-primary hover:underline">
+                Créer un compte
+              </Link>
+            </p>
+          </CardFooter>
         </Card>
       </div>
 

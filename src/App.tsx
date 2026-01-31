@@ -5,6 +5,7 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { useAuthStore } from '@/store';
 import { Login } from '@/pages/auth/Login';
+import { Register } from '@/pages/auth/Register';
 import { InstitutionDashboard } from '@/pages/institution/Dashboard';
 import { HealthDashboard } from '@/pages/sector/HealthDashboard';
 import { EducationDashboard } from '@/pages/sector/EducationDashboard';
@@ -14,11 +15,11 @@ import { ContributorDashboard } from '@/pages/contributor/ContributorDashboard';
 // Composant de protection des routes
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
-  
+
   if (!isAuthenticated) {
     return <Navigate to="/login" replace />;
   }
-  
+
   return <>{children}</>;
 };
 
@@ -26,11 +27,11 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
 const DefaultRoute = () => {
   const user = useAuthStore((state) => state.user);
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
-  
+
   if (!isAuthenticated) {
     return <Navigate to="/login" replace />;
   }
-  
+
   // Redirection selon le rôle
   switch (user?.role) {
     case 'admin':
@@ -55,10 +56,11 @@ function App() {
       <Routes>
         {/* Auth */}
         <Route path="/login" element={<Login />} />
-        
+        <Route path="/register" element={<Register />} />
+
         {/* Default */}
         <Route path="/" element={<DefaultRoute />} />
-        
+
         {/* Institution Space */}
         <Route
           path="/institution"
@@ -76,7 +78,7 @@ function App() {
             </ProtectedRoute>
           }
         />
-        
+
         {/* Sector Space - Health */}
         <Route
           path="/sector/health"
@@ -86,7 +88,7 @@ function App() {
             </ProtectedRoute>
           }
         />
-        
+
         {/* Sector Space - Education */}
         <Route
           path="/sector/education"
@@ -96,7 +98,7 @@ function App() {
             </ProtectedRoute>
           }
         />
-        
+
         {/* Admin Space */}
         <Route
           path="/admin"
@@ -114,7 +116,7 @@ function App() {
             </ProtectedRoute>
           }
         />
-        
+
         {/* Contributor Space */}
         <Route
           path="/contributor"
@@ -132,7 +134,7 @@ function App() {
             </ProtectedRoute>
           }
         />
-        
+
         {/* Fallback */}
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>

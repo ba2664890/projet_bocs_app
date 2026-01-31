@@ -43,7 +43,41 @@ export const useAuth = () => {
     } finally {
       setLoading(false);
     }
-  }, [storeLogin, setLoading]);
+  }, [storeLogin, storeLogout, setLoading]);
+
+  const register = useCallback(async (data: any): Promise<{ success: boolean; error?: string }> => {
+    setLoading(true);
+
+    try {
+      // Ensure any previous session is cleared
+      storeLogout();
+
+      // Call real API
+      const response = await authService.register(data);
+
+      // Store authentication data
+      storeLogin(response.user, response.token, response.refresh_token);
+
+      return { success: true };
+    } catch (error: any) {
+      console.error('Registration error:', error);
+
+      let errorMessage = "Erreur lors de la création du compte. Veuillez réessayer.";
+
+      if (error.response?.data) {
+        const data = error.response.data;
+        // Collect field specific errors if they exist
+        const fieldErrors = Object.keys(data)
+          .map(key => `${key}: ${Array.isArray(data[key]) ? data[key].join(', ') : data[key]}`)
+          .join(' | ');
+        if (fieldErrors) errorMessage = fieldErrors;
+      }
+
+      return { success: false, error: errorMessage };
+    } finally {
+      setLoading(false);
+    }
+  }, [storeLogin, storeLogout, setLoading]);
 
   const logout = useCallback(async () => {
     try {
@@ -117,6 +151,7 @@ export const useAuth = () => {
     isAuthenticated,
     isLoading,
     login,
+    register,
     logout,
     refreshProfile,
     hasPermission,
