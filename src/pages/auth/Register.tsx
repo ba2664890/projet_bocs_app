@@ -17,7 +17,6 @@ import {
     Mail,
     Lock,
     User,
-    Shield,
     ArrowRight,
     AlertCircle,
     Building2,
