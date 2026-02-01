@@ -44,7 +44,7 @@ import {
 import { useSearch } from '@/hooks/useData';
 
 interface HeaderProps {
-  space: 'institution' | 'sector' | 'admin' | 'contributor';
+  space: 'institution' | 'sector' | 'admin' | 'contributor' | 'annonceur';
 }
 
 const getSpaceTitle = (space: string) => {
@@ -57,6 +57,8 @@ const getSpaceTitle = (space: string) => {
       return 'Espace Administration';
     case 'contributor':
       return 'Espace Contributeur';
+    case 'annonceur':
+      return 'Espace Annonceur';
     default:
       return 'FATI';
   }
@@ -69,7 +71,7 @@ export const Header = ({ space }: HeaderProps) => {
   const { logout } = useAuth();
   const { unreadAlertsCount } = useAlerts();
   const { searchAll } = useSearch();
-  
+
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<{
@@ -221,7 +223,7 @@ export const Header = ({ space }: HeaderProps) => {
         />
         <CommandList>
           <CommandEmpty>Aucun résultat trouvé.</CommandEmpty>
-          
+
           {searchResults.indicators.length > 0 && (
             <CommandGroup heading="Indicateurs">
               {searchResults.indicators.map((indicator) => (

@@ -26,6 +26,7 @@ import {
   ClipboardList,
   Shield,
   Smartphone,
+  Megaphone,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -33,7 +34,7 @@ import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 
 interface SidebarProps {
-  space: 'institution' | 'sector' | 'admin' | 'contributor';
+  space: 'institution' | 'sector' | 'admin' | 'contributor' | 'annonceur';
   collapsed: boolean;
   isMobile?: boolean;
 }
@@ -100,6 +101,14 @@ const getNavigation = (space: string): NavItem[] => {
         { label: 'Notifications', path: `/${space}/notifications`, icon: Bell },
       ];
 
+    case 'annonceur':
+      return [
+        { label: 'Tableau de bord', path: `/${space}`, icon: LayoutDashboard },
+        { label: 'Campagnes', path: `/${space}/campaigns`, icon: Megaphone },
+        { label: 'Audiences', path: `/${space}/audiences`, icon: Users },
+        { label: 'Rapports', path: `/${space}/reports`, icon: FileText },
+      ];
+
     default:
       return baseNav;
   }
@@ -130,6 +139,12 @@ const getSpaceConfig = (space: string) => {
         name: 'Contributeur',
         color: 'bg-amber-600',
         icon: Smartphone,
+      };
+    case 'annonceur':
+      return {
+        name: 'Annonceurs',
+        color: 'bg-indigo-600',
+        icon: Megaphone,
       };
     default:
       return {

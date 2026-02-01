@@ -5,13 +5,14 @@
 
 // ----- Utilisateurs & Authentification -----
 
-export type UserRole = 
-  | 'admin' 
-  | 'institution' 
-  | 'sector_health' 
-  | 'sector_education' 
-  | 'local_manager' 
-  | 'contributor' 
+export type UserRole =
+  | 'admin'
+  | 'institution'
+  | 'sector_health'
+  | 'sector_education'
+  | 'local_manager'
+  | 'contributor'
+  | 'annonceur'
   | 'viewer';
 
 export type UserStatus = 'active' | 'inactive' | 'pending' | 'suspended';
@@ -84,13 +85,13 @@ export type Sector = 'health' | 'education';
 
 // ----- Indicateurs -----
 
-export type IndicatorCategory = 
-  | 'access' 
-  | 'quality' 
-  | 'resources' 
-  | 'outcomes' 
-  | 'infrastructure' 
-  | 'personnel' 
+export type IndicatorCategory =
+  | 'access'
+  | 'quality'
+  | 'resources'
+  | 'outcomes'
+  | 'infrastructure'
+  | 'personnel'
   | 'finance';
 
 export type IndicatorType = 'number' | 'percentage' | 'ratio' | 'currency' | 'count';
@@ -388,15 +389,15 @@ export interface Report {
 
 // ----- Journal d'audit -----
 
-export type AuditAction = 
-  | 'create' 
-  | 'update' 
-  | 'delete' 
-  | 'validate' 
-  | 'reject' 
-  | 'export' 
-  | 'login' 
-  | 'logout' 
+export type AuditAction =
+  | 'create'
+  | 'update'
+  | 'delete'
+  | 'validate'
+  | 'reject'
+  | 'export'
+  | 'login'
+  | 'logout'
   | 'view';
 
 export interface AuditLog {

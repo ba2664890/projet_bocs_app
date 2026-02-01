@@ -117,7 +117,7 @@ export const EducationDashboard = () => {
 
   return (
     <MainLayout space="sector">
-      <div ref={containerRef} className="space-y-6">
+      <div ref={containerRef} className="max-w-[1600px] mx-auto space-y-10 pb-12">
         {/* Header */}
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-center gap-3">
@@ -144,27 +144,27 @@ export const EducationDashboard = () => {
         </div>
 
         {/* Navigation secondaire */}
-        <div className="flex flex-wrap gap-2">
-          <Button variant="secondary" className="gap-2">
+        <div className="flex flex-wrap gap-3 p-1.5 bg-muted/30 rounded-xl w-fit">
+          <Button variant="secondary" className="gap-2 shadow-sm">
             <TrendingUp className="h-4 w-4" />
             Indicateurs
           </Button>
-          <Button variant="outline" className="gap-2" onClick={() => navigate('/sector/facilities')}>
+          <Button variant="ghost" className="gap-2 hover:bg-background/50" onClick={() => navigate('/sector/facilities')}>
             <Building2 className="h-4 w-4" />
             Établissements
           </Button>
-          <Button variant="outline" className="gap-2" onClick={() => navigate('/sector/collections')}>
+          <Button variant="ghost" className="gap-2 hover:bg-background/50" onClick={() => navigate('/sector/collections')}>
             <Filter className="h-4 w-4" />
             Collectes
           </Button>
-          <Button variant="outline" className="gap-2" onClick={() => navigate('/sector/analytics')}>
+          <Button variant="ghost" className="gap-2 hover:bg-background/50" onClick={() => navigate('/sector/analytics')}>
             <TrendingUp className="h-4 w-4" />
             Analyses
           </Button>
         </div>
 
         {/* KPIs */}
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
           {educationKPIs.map((kpi) => (
             <KPICard key={kpi.id} data={kpi} />
           ))}
@@ -399,6 +399,6 @@ export const EducationDashboard = () => {
           </CardContent>
         </Card>
       </div>
-    </MainLayout>
+    </MainLayout >
   );
 };

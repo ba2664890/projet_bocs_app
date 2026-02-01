@@ -11,6 +11,7 @@ import { HealthDashboard } from '@/pages/sector/HealthDashboard';
 import { EducationDashboard } from '@/pages/sector/EducationDashboard';
 import { AdminDashboard } from '@/pages/admin/AdminDashboard';
 import { ContributorDashboard } from '@/pages/contributor/ContributorDashboard';
+import { AnnonceurDashboard } from '@/pages/annonceur/AnnonceurDashboard';
 
 import { MapPage } from '@/pages/common/MapPage';
 import { IndicatorsPage } from '@/pages/common/IndicatorsPage';
@@ -68,6 +69,8 @@ const DefaultRoute = () => {
     case 'local_manager':
     case 'contributor':
       return <Navigate to="/contributor" replace />;
+    case 'annonceur':
+      return <Navigate to="/annonceur" replace />;
     default:
       return <Navigate to="/institution" replace />;
   }
@@ -126,6 +129,9 @@ function App() {
         {/* Forms and Notifications could reuse existing or need new ones, mapping to Collections for now to avoid 404 */}
         <Route path="/contributor/forms" element={<ProtectedRoute><CollectionsPage /></ProtectedRoute>} />
         <Route path="/contributor/notifications" element={<ProtectedRoute><AlertsPage /></ProtectedRoute>} />
+
+        {/* Annonceur Space */}
+        <Route path="/annonceur" element={<ProtectedRoute><AnnonceurDashboard /></ProtectedRoute>} />
 
         {/* Fallback */}
         <Route path="*" element={<Navigate to="/" replace />} />

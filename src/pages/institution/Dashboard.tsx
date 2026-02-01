@@ -27,14 +27,13 @@ import {
   Calendar,
   Filter,
 } from 'lucide-react';
-import { useAlerts, useIndicatorValues, useHealthFacilities } from '@/hooks/useData';
+import { useAlerts, useIndicatorValues } from '@/hooks/useData';
 import type { KPIData } from '@/types';
 
 export const InstitutionDashboard = () => {
   const navigate = useNavigate();
   const { alerts, unreadAlertsCount, markAsRead } = useAlerts();
   const { allValues } = useIndicatorValues({ sector: 'health' });
-  const { } = useHealthFacilities();
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -128,7 +127,7 @@ export const InstitutionDashboard = () => {
 
   return (
     <MainLayout space="institution">
-      <div ref={containerRef} className="space-y-6">
+      <div ref={containerRef} className="max-w-[1600px] mx-auto space-y-10 pb-12">
         {/* Header */}
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
