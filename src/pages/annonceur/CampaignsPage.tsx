@@ -15,7 +15,6 @@ import {
     MoreVertical,
     BarChart3,
     Calendar,
-    Target,
     Loader2
 } from 'lucide-react';
 import {
@@ -168,7 +167,7 @@ export const CampaignsPage = () => {
                                             </TableCell>
                                             <TableCell>
                                                 <Badge variant="outline" className="capitalize">
-                                                    {campaign.sector === 'both' ? 'Santé & Éducation' : campaign.sector}
+                                                    {campaign.sector as string === 'both' ? 'Santé & Éducation' : campaign.sector}
                                                 </Badge>
                                             </TableCell>
                                             <TableCell>{getStatusBadge(campaign.status)}</TableCell>
