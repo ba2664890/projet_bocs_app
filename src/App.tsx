@@ -12,6 +12,9 @@ import { EducationDashboard } from '@/pages/sector/EducationDashboard';
 import { AdminDashboard } from '@/pages/admin/AdminDashboard';
 import { ContributorDashboard } from '@/pages/contributor/ContributorDashboard';
 import { AnnonceurDashboard } from '@/pages/annonceur/AnnonceurDashboard';
+import { CampaignsPage } from '@/pages/annonceur/CampaignsPage';
+import { AudiencesPage } from '@/pages/annonceur/AudiencesPage';
+import { ReportsPage as AnnonceurReportsPage } from '@/pages/annonceur/ReportsPage';
 
 import { MapPage } from '@/pages/common/MapPage';
 import { IndicatorsPage } from '@/pages/common/IndicatorsPage';
@@ -132,6 +135,9 @@ function App() {
 
         {/* Annonceur Space */}
         <Route path="/annonceur" element={<ProtectedRoute><AnnonceurDashboard /></ProtectedRoute>} />
+        <Route path="/annonceur/campaigns" element={<ProtectedRoute><CampaignsPage /></ProtectedRoute>} />
+        <Route path="/annonceur/audiences" element={<ProtectedRoute><AudiencesPage /></ProtectedRoute>} />
+        <Route path="/annonceur/reports" element={<ProtectedRoute><AnnonceurReportsPage /></ProtectedRoute>} />
 
         {/* Fallback */}
         <Route path="*" element={<Navigate to="/" replace />} />
