@@ -58,9 +58,20 @@ export const EducationDashboard = () => {
 
   // KPIs Éducation à partir des données réelles
   const calculateKPIs = (): KPIData[] => {
-    const scolValue = allValues.find(v => (v.indicatorName || '').toLowerCase().includes('scolarisation'));
-    const ratioValue = allValues.find(v => (v.indicatorName || '').toLowerCase().includes('ratio') || (v.indicatorName || '').toLowerCase().includes('élève'));
-    const reusValue = allValues.find(v => (v.indicatorName || '').toLowerCase().includes('réussite') || (v.indicatorName || '').toLowerCase().includes('bfem'));
+    // Search for specific indicators in the loaded values
+    const scolValue = allValues.find(v =>
+      (v.indicatorName || '').toLowerCase().includes('scolar') ||
+      (v.indicatorCode || '').toLowerCase().includes('scol')
+    );
+    const reusValue = allValues.find(v =>
+      (v.indicatorName || '').toLowerCase().includes('réussite') ||
+      (v.indicatorCode || '').toLowerCase().includes('reuss') ||
+      (v.indicatorName || '').toLowerCase().includes('bfem')
+    );
+    const ratioValue = allValues.find(v =>
+      (v.indicatorName || '').toLowerCase().includes('ratio') ||
+      (v.indicatorName || '').toLowerCase().includes('élève')
+    );
 
     return [
       {
@@ -69,7 +80,7 @@ export const EducationDashboard = () => {
         value: scolValue?.value || 94.2,
         formattedValue: scolValue?.valueFormatted || '94.2%',
         variation: scolValue?.variation || 0.4,
-        variationType: 'positive',
+        variationType: (scolValue?.variation || 0) >= 0 ? 'positive' : 'negative',
         target: 100,
         achievementRate: scolValue?.achievementRate || 94.2,
         unit: '%',
@@ -81,7 +92,7 @@ export const EducationDashboard = () => {
         value: reusValue?.value || 78.5,
         formattedValue: reusValue?.valueFormatted || '78.5%',
         variation: reusValue?.variation || 4.4,
-        variationType: 'positive',
+        variationType: (reusValue?.variation || 0) >= 0 ? 'positive' : 'negative',
         target: 95,
         achievementRate: reusValue?.achievementRate || 82.6,
         unit: '%',
@@ -93,7 +104,7 @@ export const EducationDashboard = () => {
         value: ratioValue?.value || 48.5,
         formattedValue: ratioValue?.valueFormatted || '48.5:1',
         variation: ratioValue?.variation || -7.3,
-        variationType: 'positive',
+        variationType: (ratioValue?.variation || 0) <= 0 ? 'positive' : 'negative',
         target: 40,
         achievementRate: ratioValue?.achievementRate || 82.5,
         unit: ':1',

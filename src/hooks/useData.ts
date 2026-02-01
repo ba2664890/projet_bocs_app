@@ -177,7 +177,22 @@ export const useIndicatorValues = (filters?: {
   const loadValues = useCallback(async (signal?: AbortSignal) => {
     try {
       setLoading('isLoadingValues', true);
-      const response = await indicatorsService.getIndicatorValues({ page_size: 1000 }, signal);
+      // Pass sector directly to API if available in filters
+      const apiParams: any = { page_size: 1000 };
+      if (filters?.sector) {
+        apiParams['indicator__sector'] = filters.sector;
+      }
+      if (filters?.indicatorId) {
+        apiParams['indicator'] = filters.indicatorId;
+      }
+      if (filters?.year) {
+        apiParams['year'] = filters.year;
+      }
+      if (filters?.status) {
+        apiParams['status'] = filters.status;
+      }
+
+      const response = await indicatorsService.getIndicatorValues(apiParams, signal);
       // Map properties to match interface
       const mappedResults = response.results.map((v: any) => ({
         ...v,
@@ -213,11 +228,14 @@ export const useIndicatorValues = (filters?: {
     if (filters?.year) {
       result = result.filter((v) => v.year === filters.year);
     }
-    if (filters?.sector) {
-      // Filter values by sector (this requires joining with indicators which might not be efficient)
-      // For now, assume values don't directly have sector unless enriched or specific query
-      // We'll rely on client side filtering if possible or modify API query
-      // Ideally we pass sector to API.
+    if (filters?.indicatorId) {
+      result = result.filter((v) => v.indicatorId === filters.indicatorId);
+    }
+    if (filters?.geographicId) {
+      result = result.filter((v) => v.geographicId === filters.geographicId);
+    }
+    if (filters?.year) {
+      result = result.filter((v) => v.year === filters.year);
     }
     if (filters?.status) {
       result = result.filter((v) => v.status === filters.status);

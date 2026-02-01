@@ -55,18 +55,28 @@ export const HealthDashboard = () => {
 
   // KPIs Santé à partir des données réelles
   const calculateKPIs = (): KPIData[] => {
-    const vaccValue = allValues.find(v => (v.indicatorName || '').toLowerCase().includes('vaccination'));
-    const mortValue = allValues.find(v => (v.indicatorName || '').toLowerCase().includes('mortalité'));
-    const paluValue = allValues.find(v => (v.indicatorName || '').toLowerCase().includes('paludisme'));
+    // Search for specific indicators in the loaded values
+    const vaccValue = allValues.find(v =>
+      (v.indicatorName || '').toLowerCase().includes('vaccin') ||
+      (v.indicatorCode || '').toLowerCase().includes('vacc')
+    );
+    const mortValue = allValues.find(v =>
+      (v.indicatorName || '').toLowerCase().includes('mortal') ||
+      (v.indicatorCode || '').toLowerCase().includes('mort')
+    );
+    const paluValue = allValues.find(v =>
+      (v.indicatorName || '').toLowerCase().includes('palu') ||
+      (v.indicatorCode || '').toLowerCase().includes('palu')
+    );
 
     return [
       {
         id: 'h_kpi1',
-        title: 'Couverture vaccinale DTC3',
+        title: 'Couverture vaccinale',
         value: vaccValue?.value || 87.3,
         formattedValue: vaccValue?.valueFormatted || '87.3%',
         variation: vaccValue?.variation || 3.8,
-        variationType: 'positive',
+        variationType: (vaccValue?.variation || 0) >= 0 ? 'positive' : 'negative',
         target: 95,
         achievementRate: vaccValue?.achievementRate || 91.9,
         unit: '%',
@@ -78,7 +88,7 @@ export const HealthDashboard = () => {
         value: mortValue?.value || 315,
         formattedValue: mortValue?.valueFormatted || '315',
         variation: mortValue?.variation || -5.2,
-        variationType: 'positive',
+        variationType: (mortValue?.variation || 0) <= 0 ? 'positive' : 'negative',
         target: 200,
         achievementRate: mortValue?.achievementRate || 63,
         color: 'red',
@@ -89,7 +99,7 @@ export const HealthDashboard = () => {
         value: paluValue?.value || 4.2,
         formattedValue: paluValue?.valueFormatted || '4.2%',
         variation: paluValue?.variation || -10.5,
-        variationType: 'positive',
+        variationType: (paluValue?.variation || 0) <= 0 ? 'positive' : 'negative',
         target: 2,
         achievementRate: paluValue?.achievementRate || 40,
         unit: '%',
