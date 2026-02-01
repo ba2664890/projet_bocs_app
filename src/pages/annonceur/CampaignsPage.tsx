@@ -215,7 +215,3 @@ export const CampaignsPage = () => {
         </MainLayout>
     );
 };
-            </div >
-        </MainLayout >
-    );
-};
