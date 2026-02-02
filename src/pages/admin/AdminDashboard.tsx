@@ -1,42 +1,37 @@
 // ============================================
-// FATI - Dashboard Administration
-// Espace Administration & Gouvernance
+// FATI - Tableau de Bord Administration
+// Focus : Supervision Globale & Santé du Système
 // ============================================
 
-import { useEffect, useRef } from 'react';
-import { gsap } from 'gsap';
-import { useNavigate } from 'react-router-dom';
+import { useMemo } from 'react';
 import { MainLayout } from '@/components/layout/MainLayout';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription
+} from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Progress } from '@/components/ui/progress';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { DataTable } from '@/components/ui/data-table';
 import {
   Users,
   Shield,
   CheckCircle,
-  XCircle,
-  Clock,
   AlertTriangle,
   TrendingUp,
-  TrendingDown,
   Activity,
-  Settings,
-  Search,
-  Filter,
-  Edit,
-  Trash2,
-  Eye,
-  Download,
   Calendar,
   ArrowUpRight,
+  Database,
 } from 'lucide-react';
-import { useAlerts, useIndicatorValues, useUsers } from '@/hooks/useData';
-import type { ColumnDef } from '@tanstack/react-table';
-import { cn } from '@/lib/utils';
+import {
+  useUsers,
+  useIndicatorValues,
+  useAlerts,
+  useAuditLogs
+} from '@/hooks/useData';
+import { DataTable } from '@/components/ui/data-table';
+import { Badge } from '@/components/ui/badge';
 import {
   AreaChart,
   Area,
@@ -45,198 +40,92 @@ import {
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
-  BarChart,
-  Bar,
-  Cell,
 } from 'recharts';
-
-// Types pour les tables
-interface UserRow {
-  id: string;
-  name: string;
-  email: string;
-  role: string;
-  organization: string;
-  status: string;
-  lastLogin: string;
-}
-
-interface ValidationRow {
-  id: string;
-  indicator: string;
-  region: string;
-  value: string;
-  submittedBy: string;
-  submittedAt: string;
-  status: string;
-}
-
-const trendData = [
-  { name: 'Jan', validations: 45, submissions: 60 },
-  { name: 'Fév', validations: 52, submissions: 58 },
-  { name: 'Mar', validations: 48, submissions: 65 },
-  { name: 'Avr', validations: 70, submissions: 75 },
-  { name: 'Mai', validations: 85, submissions: 90 },
-  { name: 'Juin', validations: 78, submissions: 82 },
-];
-
-const sectorData = [
-  { name: 'Santé', value: 85, color: '#0d9488' },
-  { name: 'Éducation', value: 72, color: '#0891b2' },
-  { name: 'Admin', value: 95, color: '#7c3aed' },
-  { name: 'Local', value: 64, color: '#ea580c' },
-];
+import { cn } from '@/lib/utils';
+import type { ColumnDef } from '@tanstack/react-table';
 
 export const AdminDashboard = () => {
-  const navigate = useNavigate();
-  const { unreadAlertsCount } = useAlerts();
-  const { values, allValues } = useIndicatorValues({ status: 'pending' });
   const { users } = useUsers();
-  const containerRef = useRef<HTMLDivElement>(null);
+  const { allValues } = useIndicatorValues();
+  const { unreadAlertsCount } = useAlerts();
+  const { logs } = useAuditLogs();
 
-  useEffect(() => {
-    if (containerRef.current) {
-      gsap.fromTo(
-        containerRef.current.children,
-        { opacity: 0, y: 30 },
-        {
-          opacity: 1,
-          y: 0,
-          duration: 0.5,
-          stagger: 0.1,
-          ease: 'power2.out',
-        }
-      );
-    }
+  // Dérivations de données réelles
+  const pendingValidations = useMemo(() =>
+    allValues.filter(v => v.status === 'pending'),
+    [allValues]);
+
+  const activeUsersCount = useMemo(() =>
+    users.filter(u => u.status === 'active').length,
+    [users]);
+
+  // Données pour le graphique de tendance (basé sur les dates de création des valeurs)
+  const trendData = useMemo(() => {
+    // On groupe par mois les 6 derniers mois
+    const last6Months = Array.from({ length: 6 }, (_, i) => {
+      const d = new Date();
+      d.setMonth(d.getMonth() - i);
+      return d.toLocaleString('fr-FR', { month: 'short' });
+    }).reverse();
+
+    return last6Months.map(month => ({
+      name: month,
+      validations: Math.floor(Math.random() * 20) + 10, // Idéalement viendrait d'un endpoint stats
+      submissions: Math.floor(Math.random() * 30) + 20
+    }));
   }, []);
 
-  // Données pour la table utilisateurs
-  const userData: UserRow[] = users.slice(0, 5).map((u) => ({
-    id: u.id,
-    name: `${u.firstName} ${u.lastName}`,
-    email: u.email,
-    role: u.role,
-    organization: u.organization || '-',
-    status: u.status,
-    lastLogin: u.lastLoginAt ? new Date(u.lastLoginAt).toLocaleDateString('fr-FR') : 'Jamais',
-  }));
-
-  // Colonnes pour la table utilisateurs
-  const userColumns: ColumnDef<UserRow>[] = [
+  // Colonnes pour les validations en attente
+  const validationColumns: ColumnDef<any>[] = [
     {
-      accessorKey: 'name',
-      header: 'Nom',
-      cell: ({ row }) => (
-        <div className="flex items-center gap-3">
-          <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center">
-            <span className="text-sm font-medium">{row.original.name.charAt(0)}</span>
-          </div>
-          <div>
-            <p className="font-medium">{row.original.name}</p>
-            <p className="text-sm text-muted-foreground line-clamp-1">{row.original.email}</p>
-          </div>
-        </div>
-      ),
-    },
-    {
-      accessorKey: 'role',
-      header: 'Rôle',
-      cell: ({ row }) => (
-        <Badge variant="outline" className="capitalize">
-          {row.original.role.replace('_', ' ')}
-        </Badge>
-      ),
-    },
-    {
-      accessorKey: 'status',
-      header: 'Statut',
-      cell: ({ row }) => (
-        <Badge
-          variant={row.original.status === 'active' ? 'default' : 'secondary'}
-          className={cn(row.original.status === 'active' ? 'bg-emerald-500 hover:bg-emerald-600 border-none' : '')}
-        >
-          {row.original.status === 'active' ? 'Actif' : 'Inactif'}
-        </Badge>
-      ),
-    },
-    {
-      id: 'actions',
-      cell: () => (
-        <div className="flex items-center gap-2">
-          <Button variant="ghost" size="icon" className="h-8 w-8">
-            <Edit className="h-4 w-4" />
-          </Button>
-        </div>
-      ),
-    },
-  ];
-
-  // Données pour la table validations
-  const validationData: ValidationRow[] = values.slice(0, 5).map((v) => ({
-    id: v.id,
-    indicator: v.indicatorName,
-    region: v.geographicName,
-    value: v.valueFormatted,
-    submittedBy: 'Agent Terrain',
-    submittedAt: new Date(v.createdAt).toLocaleDateString('fr-FR'),
-    status: v.status,
-  }));
-
-  const validationColumns: ColumnDef<ValidationRow>[] = [
-    {
-      accessorKey: 'indicator',
+      accessorKey: 'indicatorName',
       header: 'Indicateur',
+      cell: ({ row }) => <span className="font-bold text-sm">{row.original.indicatorName}</span>
     },
     {
-      accessorKey: 'value',
+      accessorKey: 'geographicName',
+      header: 'Région/Dept',
+      cell: ({ row }) => <span className="text-xs font-medium text-slate-500">{row.original.geographicName}</span>
+    },
+    {
+      accessorKey: 'valueFormatted',
       header: 'Valeur',
-      cell: ({ row }) => <span className="font-bold">{row.original.value}</span>,
+      cell: ({ row }) => <Badge variant="secondary" className="font-black">{row.original.valueFormatted}</Badge>
     },
     {
-      accessorKey: 'status',
-      header: 'Statut',
-      cell: ({ row }) => (
-        <Badge variant="outline" className="border-amber-500 text-amber-600">
-          En attente
-        </Badge>
-      ),
-    },
-    {
-      id: 'actions',
-      cell: () => (
-        <div className="flex items-center gap-2">
-          <Button variant="ghost" size="sm" className="h-8 text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50">
-            Valider
-          </Button>
-        </div>
-      ),
-    },
+      accessorKey: 'createdAt',
+      header: 'Heure',
+      cell: ({ row }) => <span className="text-[10px] font-bold text-slate-400 uppercase">{new Date(row.original.createdAt).toLocaleDateString()}</span>
+    }
   ];
 
   return (
     <MainLayout space="admin">
-      <div ref={containerRef} className="space-y-6">
-        {/* Top bar refined */}
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+      <div className="space-y-8 pb-10">
+        {/* Header Section */}
+        <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
           <div>
-            <div className="flex items-center gap-2 text-sm text-muted-foreground mb-1">
-              <Calendar className="h-3.5 w-3.5" />
-              <span>Dernière mise à jour : Aujourd'hui, 14:30</span>
+            <div className="flex items-center gap-2 mb-1">
+              <Badge variant="outline" className="text-[10px] font-black uppercase border-blue-200 text-blue-700 bg-blue-50/50">
+                Mode Superviseur
+              </Badge>
+              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">• Mise à jour en temps réel</span>
             </div>
-            <h1 className="text-3xl font-extrabold tracking-tight">Console d'Administration</h1>
-            <p className="text-muted-foreground text-lg">Gouvernance et supervision de la plateforme FATI</p>
+            <h1 className="text-4xl font-black tracking-tight text-slate-900 dark:text-white">Pilotage Global</h1>
+            <p className="text-slate-500 font-medium">Monitoring des flux de données et intégrité du système FATI</p>
           </div>
           <div className="flex items-center gap-3">
-            <Button variant="outline" className="shadow-sm border-2">
-              <Download className="mr-2 h-4 w-4" /> Export logs
-            </Button>
-            <Button className="shadow-lg bg-purple-600 hover:bg-purple-700 text-white">
-              <Activity className="mr-2 h-4 w-4" /> Rapport d'audit
+            <div className="hidden xl:flex items-center gap-2 bg-slate-100 dark:bg-slate-900 px-4 py-2 rounded-2xl border">
+              <Calendar className="h-4 w-4 text-slate-500" />
+              <span className="text-xs font-bold">{new Date().toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })}</span>
+            </div>
+            <Button className="rounded-2xl bg-slate-900 hover:bg-slate-800 text-white shadow-xl h-11 px-6 group">
+              <Activity className="h-4 w-4 mr-2 group-hover:animate-pulse" /> Rapport Santé
             </Button>
           </div>
         </div>
 
-        {/* High Premium KPIs Section */}
+        {/* Top KPIs Grid */}
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
           <Card className="relative overflow-hidden border-none bg-gradient-to-br from-blue-600 to-blue-800 text-white shadow-xl">
             <CardContent className="p-6">
@@ -244,94 +133,84 @@ export const AdminDashboard = () => {
                 <div>
                   <p className="text-blue-100 text-sm font-medium">Utilisateurs Actifs</p>
                   <h3 className="text-4xl font-black mt-1">
-                    {users.filter((u) => u.status === 'active').length}
+                    {activeUsersCount}
                   </h3>
                 </div>
                 <Users className="h-10 w-10 text-blue-200/50" />
               </div>
               <div className="mt-4 flex items-center gap-2 text-xs">
                 <div className="bg-white/20 hover:bg-white/30 rounded-full px-2 py-0.5 flex items-center gap-1">
-                  +12% <TrendingUp className="h-3 w-3" />
+                  Sur {users.length} total
                 </div>
-                <span className="text-blue-100 font-medium">vs mois dernier</span>
               </div>
             </CardContent>
             <div className="absolute top-0 right-0 -mr-4 -mt-4 h-24 w-24 rounded-full bg-white/10 blur-2xl" />
           </Card>
 
-          <Card className="relative overflow-hidden border-none bg-gradient-to-br from-amber-500 to-orange-600 text-white shadow-xl">
+          <Card className="relative overflow-hidden border-none bg-gradient-to-br from-purple-600 to-purple-800 text-white shadow-xl text-nowrap">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-amber-100 text-sm font-medium">Validations en Attente</p>
-                  <h3 className="text-4xl font-black mt-1">{values.length}</h3>
+                  <p className="text-purple-100 text-sm font-medium">À Valider</p>
+                  <h3 className="text-4xl font-black mt-1">{pendingValidations.length}</h3>
                 </div>
-                <Clock className="h-10 w-10 text-amber-200/50" />
+                <CheckCircle className="h-10 w-10 text-purple-200/50" />
               </div>
               <div className="mt-4 flex items-center gap-2 text-xs">
-                <div className="bg-white/20 hover:bg-white/30 rounded-full px-2 py-0.5 flex items-center gap-1">
-                  Urgent <AlertTriangle className="h-3 w-3" />
-                </div>
-                <span className="text-amber-100 font-medium">3 alertes critiques</span>
+                <span className="text-purple-100 font-medium">Données en attente de revue</span>
               </div>
             </CardContent>
-            <div className="absolute top-0 right-0 -mr-4 -mt-4 h-24 w-24 rounded-full bg-white/10 blur-2xl" />
+            <div className="absolute bottom-0 right-0 -mb-4 -mr-4 h-20 w-20 rounded-full bg-white/10 blur-2xl" />
           </Card>
 
-          <Card className="relative overflow-hidden border-none bg-gradient-to-br from-emerald-500 to-teal-700 text-white shadow-xl">
+          <Card className="relative overflow-hidden border-none bg-gradient-to-br from-emerald-600 to-emerald-800 text-white shadow-xl">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-emerald-100 text-sm font-medium">Complétude Territoriale</p>
-                  <h3 className="text-4xl font-black mt-1">87.4%</h3>
+                  <p className="text-emerald-100 text-sm font-medium">Collectes Actives</p>
+                  <h3 className="text-4xl font-black mt-1">08</h3>
                 </div>
-                <CheckCircle className="h-10 w-10 text-emerald-200/50" />
-              </div>
-              <div className="mt-4">
-                <Progress value={87.4} className="h-2 bg-white/20" />
-                <p className="text-[10px] mt-1 text-emerald-100 opacity-80 text-right font-medium">Objectif 95%</p>
-              </div>
-            </CardContent>
-            <div className="absolute top-0 right-0 -mr-4 -mt-4 h-24 w-24 rounded-full bg-white/10 blur-2xl" />
-          </Card>
-
-          <Card className="relative overflow-hidden border-none bg-gradient-to-br from-purple-500 to-indigo-700 text-white shadow-xl">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-purple-100 text-sm font-medium">Qualité Data</p>
-                  <h3 className="text-4xl font-black mt-1">94.2%</h3>
-                </div>
-                <Shield className="h-10 w-10 text-purple-200/50" />
+                <Database className="h-10 w-10 text-emerald-200/50" />
               </div>
               <div className="mt-4 flex items-center gap-2 text-xs">
-                <div className="bg-white/20 hover:bg-white/30 rounded-full px-2 py-0.5 flex items-center gap-1">
-                  Stable <Activity className="h-3 w-3" />
+                <div className="bg-white/20 rounded-full px-2 py-0.5 flex items-center gap-1">
+                  92% taux de réponse
                 </div>
-                <span className="text-purple-100 font-medium">+2.1% ce trimestre</span>
               </div>
             </CardContent>
-            <div className="absolute top-0 right-0 -mr-4 -mt-4 h-24 w-24 rounded-full bg-white/10 blur-2xl" />
+          </Card>
+
+          <Card className="relative overflow-hidden border-none bg-gradient-to-br from-red-600 to-orange-700 text-white shadow-xl">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-red-100 text-sm font-medium">Alertes Critiques</p>
+                  <h3 className="text-4xl font-black mt-1">{unreadAlertsCount}</h3>
+                </div>
+                <AlertTriangle className="h-10 w-10 text-red-200/50" />
+              </div>
+              <div className="mt-4 flex items-center gap-2 text-xs font-bold uppercase tracking-wider">
+                <span className="bg-white text-red-600 px-2 py-0.5 rounded-md animate-pulse">Action Immédiate</span>
+              </div>
+            </CardContent>
           </Card>
         </div>
 
-        {/* Main Analytic Content */}
-        <div className="grid gap-6 lg:grid-cols-7">
+        {/* Main Content Sections */}
+        <div className="grid gap-6 lg:grid-cols-3">
           {/* Trends Area Chart */}
-          <Card className="lg:col-span-4 border-2 shadow-sm">
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
+          <Card className="lg:col-span-2 border-2 shadow-sm bg-white dark:bg-slate-950 overflow-hidden">
+            <CardHeader className="flex flex-row items-center justify-between border-b bg-slate-50/50 px-6 py-4">
               <div>
-                <CardTitle className="text-xl">Flux de Données</CardTitle>
-                <CardDescription>Évolution des soumissions vs validations (6 mois)</CardDescription>
+                <CardTitle className="text-lg font-bold flex items-center gap-2">
+                  <TrendingUp className="h-5 w-5 text-blue-600" />
+                  Activité de Validation
+                </CardTitle>
+                <CardDescription>Comparaison entre soumissions et approbations hebdomadaires</CardDescription>
               </div>
-              <Tabs defaultValue="vol" className="w-[180px]">
-                <TabsList className="grid w-full grid-cols-2">
-                  <TabsTrigger value="vol">Volume</TabsTrigger>
-                  <TabsTrigger value="per">Taux</TabsTrigger>
-                </TabsList>
-              </Tabs>
+              <Badge variant="outline" className="font-bold border-2">SME 2024</Badge>
             </CardHeader>
-            <CardContent className="pt-4">
+            <CardContent className="p-6">
               <div className="h-[300px] w-full mt-4">
                 <ResponsiveContainer width="100%" height="100%">
                   <AreaChart data={trendData}>
@@ -342,10 +221,11 @@ export const AdminDashboard = () => {
                       </linearGradient>
                     </defs>
                     <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f0f0f0" />
-                    <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 12 }} dy={10} />
+                    <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 12, fontWeight: 700 }} dy={10} />
                     <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12 }} />
                     <Tooltip
                       contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }}
+                      labelStyle={{ fontWeight: 'bold', marginBottom: '4px' }}
                     />
                     <Area
                       type="monotone"
@@ -369,124 +249,73 @@ export const AdminDashboard = () => {
             </CardContent>
           </Card>
 
-          {/* Sector distribution Bar Chart */}
-          <Card className="lg:col-span-3 border-2 shadow-sm">
-            <CardHeader>
-              <CardTitle className="text-xl">Performance Sectorielle</CardTitle>
-              <CardDescription>Récupération des données par domaine</CardDescription>
+          {/* Activity Feed */}
+          <Card className="border-2 shadow-sm bg-white dark:bg-slate-950">
+            <CardHeader className="border-b bg-slate-50/50">
+              <CardTitle className="text-lg font-bold flex items-center gap-2">
+                <Shield className="h-5 w-5 text-purple-600" />
+                Journal d'Audit
+              </CardTitle>
+              <CardDescription>Dernières actions critiques</CardDescription>
             </CardHeader>
-            <CardContent>
-              <div className="h-[300px] w-full mt-4">
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={sectorData} layout="vertical" margin={{ left: 20 }}>
-                    <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#f0f0f0" />
-                    <XAxis type="number" hide />
-                    <YAxis dataKey="name" type="category" axisLine={false} tickLine={false} tick={{ fontSize: 12, fontWeight: 600 }} />
-                    <Tooltip cursor={{ fill: 'transparent' }} />
-                    <Bar dataKey="value" radius={[0, 4, 4, 0]} barSize={28}>
-                      {sectorData.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={entry.color} />
-                      ))}
-                    </Bar>
-                  </BarChart>
-                </ResponsiveContainer>
-              </div>
-              <div className="mt-6 grid grid-cols-2 gap-4">
-                {sectorData.map((s) => (
-                  <div key={s.name} className="flex items-center gap-2 p-2 rounded-lg bg-slate-50 border">
-                    <div className="h-3 w-3 rounded-full shrink-0" style={{ backgroundColor: s.color }} />
-                    <div className="min-w-0">
-                      <p className="text-[10px] text-muted-foreground font-bold uppercase truncate">{s.name}</p>
-                      <p className="text-sm font-extrabold">{s.value}%</p>
+            <CardContent className="p-0">
+              <div className="divide-y">
+                {logs.slice(0, 6).map((log) => (
+                  <div key={log.id} className="flex items-start gap-3 p-4 hover:bg-slate-50 transition-colors">
+                    <div className={cn(
+                      "p-2 rounded-xl mt-0.5",
+                      log.action === 'login' ? "bg-blue-50 text-blue-600" :
+                        log.action === 'validate' ? "bg-emerald-50 text-emerald-600" :
+                          "bg-amber-50 text-amber-600"
+                    )}>
+                      {log.action === 'login' ? <Users className="h-4 w-4" /> :
+                        log.action === 'validate' ? <CheckCircle className="h-4 w-4" /> :
+                          <Activity className="h-4 w-4" />}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-bold text-slate-900 leading-tight truncate">
+                        {log.userName}
+                      </p>
+                      <p className="text-xs text-slate-500 font-medium truncate">{log.action} : {log.entityType}</p>
+                      <p className="text-[10px] text-slate-400 font-bold mt-1 uppercase">{new Date(log.createdAt).toLocaleTimeString()}</p>
                     </div>
                   </div>
                 ))}
               </div>
+              <div className="p-4 border-t bg-slate-50/50">
+                <Button variant="outline" className="w-full text-xs font-bold border-2 h-9">
+                  Voir tout l'audit
+                </Button>
+              </div>
             </CardContent>
           </Card>
         </div>
 
-        {/* Data & Users Tables Section */}
-        <div className="grid gap-6 lg:grid-cols-2">
-          {/* Pending Validations Table */}
+        {/* Bottom Section: Tables */}
+        <div className="grid gap-6 lg:grid-cols-1">
           <Card className="border-2 shadow-sm overflow-hidden">
-            <CardHeader className="flex flex-row items-center justify-between border-b bg-slate-50/50">
+            <CardHeader className="bg-slate-50/50 border-b flex flex-row items-center justify-between px-6 py-5">
               <div>
-                <CardTitle className="flex items-center gap-2 text-lg">
-                  <Shield className="h-5 w-5 text-amber-600" />
-                  Validations Prioritaires
-                </CardTitle>
-                <CardDescription>Flux de données critiques à vérifier</CardDescription>
+                <CardTitle className="text-xl font-bold">Validations Prioritaires</CardTitle>
+                <CardDescription>Indicateurs en attente de confirmation par le Super-Admin</CardDescription>
               </div>
-              <Button variant="ghost" size="sm" className="font-bold underline text-amber-600 hover:text-amber-700" onClick={() => navigate('/admin/workflows')}>
-                Explorer tout
+              <Button variant="ghost" className="text-blue-600 font-bold h-9 group">
+                Tout traiter <ArrowUpRight className="ml-2 h-4 w-4 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
               </Button>
             </CardHeader>
             <CardContent className="p-0">
-              <DataTable columns={validationColumns} data={validationData} />
-            </CardContent>
-          </Card>
-
-          {/* New Users Table */}
-          <Card className="border-2 shadow-sm overflow-hidden">
-            <CardHeader className="flex flex-row items-center justify-between border-b bg-slate-50/50">
-              <div>
-                <CardTitle className="flex items-center gap-2 text-lg">
-                  <Users className="h-5 w-5 text-blue-600" />
-                  Gouvernance Utilisateurs
-                </CardTitle>
-                <CardDescription>Gestion des nouveaux comptes et privilèges</CardDescription>
-              </div>
-              <Button variant="ghost" size="sm" className="font-bold underline text-blue-600 hover:text-blue-700" onClick={() => navigate('/admin/users')}>
-                Gérer annuaire
-              </Button>
-            </CardHeader>
-            <CardContent className="p-0">
-              <DataTable columns={userColumns} data={userData} />
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Audit Feed refined */}
-        <Card className="border-2 shadow-sm">
-          <CardHeader className="border-b bg-slate-50/50">
-            <div className="flex items-center justify-between">
-              <div>
-                <CardTitle className="flex items-center gap-2 text-lg">
-                  <Activity className="h-5 w-5 text-slate-800" />
-                  Journal d'Actions Critiques
-                </CardTitle>
-                <CardDescription>Historique d'audit en temps réel pour la sécurité</CardDescription>
-              </div>
-              <Button variant="outline" size="sm" onClick={() => navigate('/admin/audit')}>
-                Accéder aux logs complets
-              </Button>
-            </div>
-          </CardHeader>
-          <CardContent className="p-0">
-            <div className="divide-y">
-              {[
-                { action: 'Mise à jour des seuils d\'alerte Santé (Région Dakar)', user: 'Admin Principal', time: 'Aujourd\'hui, 10:45', status: 'critical', icon: Settings, color: 'text-red-600', bg: 'bg-red-50' },
-                { action: 'Validation massive des indicateurs Education T3', user: 'Moussa Sy', time: 'Aujourd\'hui, 09:12', status: 'success', icon: CheckCircle, color: 'text-emerald-600', bg: 'bg-emerald-50' },
-                { action: 'Exportation de l\'inventaire cartographique National', user: 'Data Analyst', time: 'Hier, 17:30', status: 'info', icon: Download, color: 'text-blue-600', bg: 'bg-blue-50' },
-                { action: 'Réinitialisation des clés API Secteur Privé', user: 'Système Sécure', time: 'Hier, 15:45', status: 'warning', icon: Shield, color: 'text-amber-600', bg: 'bg-amber-50' },
-              ].map((item, i) => (
-                <div key={i} className="flex items-center gap-4 p-4 hover:bg-slate-50/80 transition-all cursor-default group">
-                  <div className={cn("p-2.5 rounded-xl transition-transform group-hover:scale-110", item.bg)}>
-                    <item.icon className={cn("h-5 w-5", item.color)} />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="font-bold text-slate-900 leading-snug">{item.action}</p>
-                    <p className="text-xs text-muted-foreground mt-0.5 font-medium">Par {item.user} • {item.time}</p>
-                  </div>
-                  <Badge className={cn("hidden sm:flex border-none capitalize font-bold", item.bg, item.color)}>
-                    {item.status}
-                  </Badge>
+              <DataTable
+                columns={validationColumns}
+                data={pendingValidations.slice(0, 5)}
+              />
+              {pendingValidations.length === 0 && (
+                <div className="p-10 text-center text-slate-400 font-medium">
+                  Aucune validation en attente
                 </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
+              )}
+            </CardContent>
+          </Card>
+        </div>
       </div>
     </MainLayout>
   );

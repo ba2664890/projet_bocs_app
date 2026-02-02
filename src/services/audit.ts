@@ -4,8 +4,8 @@ import type { AuditLog } from '@/types';
 
 export const auditService = {
     // Logs
-    async getLogs(params?: any): Promise<PaginatedResponse<AuditLog>> {
-        const response = await apiClient.get<PaginatedResponse<AuditLog>>('/audit/logs/', { params });
+    async getLogs(params?: any, signal?: AbortSignal): Promise<PaginatedResponse<AuditLog>> {
+        const response = await apiClient.get<PaginatedResponse<AuditLog>>('/audit/logs/', { params, signal });
         return response.data;
     },
 

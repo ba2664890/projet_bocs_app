@@ -14,7 +14,6 @@ import {
 } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import {
-    Plus,
     Search,
     Filter,
     MoreHorizontal,
@@ -67,7 +66,7 @@ interface UserRow {
     email: string;
     role: string;
     organization: string;
-    status: 'active' | 'inactive' | 'pending';
+    status: 'active' | 'inactive' | 'pending' | 'suspended';
     lastLogin: string;
     avatar?: string;
 }
@@ -77,11 +76,24 @@ export const UsersPage = () => {
     const [searchQuery, setSearchQuery] = useState('');
     const [roleFilter, setRoleFilter] = useState('all');
 
+    // Stats calculées sur les vraies données
+    const stats = useMemo(() => {
+        return {
+            total: users.length,
+            active: users.filter(u => u.status === 'active').length,
+            pending: users.filter(u => u.status === 'pending').length,
+            // On simule "connecté" si lastLogin est inférieur à 15min (si on avait la donnée)
+            // On va juste mettre une valeur basée sur les actifs pour l'instant
+            online: Math.ceil(users.filter(u => u.status === 'active').length * 0.2),
+        };
+    }, [users]);
+
     // Transformation des données pour la table
     const data: UserRow[] = useMemo(() => {
         return users
             .filter(u => {
-                const matchesSearch = `${u.firstName} ${u.lastName} ${u.email}`.toLowerCase().includes(searchQuery.toLowerCase());
+                const fullName = `${u.firstName} ${u.lastName}`.toLowerCase();
+                const matchesSearch = fullName.includes(searchQuery.toLowerCase()) || u.email.toLowerCase().includes(searchQuery.toLowerCase());
                 const matchesRole = roleFilter === 'all' || u.role === roleFilter;
                 return matchesSearch && matchesRole;
             })
@@ -91,7 +103,7 @@ export const UsersPage = () => {
                 email: u.email,
                 role: u.role,
                 organization: u.organization || 'Non assigné',
-                status: (u.status as any) || 'active',
+                status: u.status,
                 lastLogin: u.lastLoginAt ? new Date(u.lastLoginAt).toLocaleDateString('fr-FR') : 'Jamais',
                 avatar: u.avatar
             }));
@@ -157,13 +169,15 @@ export const UsersPage = () => {
                     <div className="flex items-center gap-2">
                         <div className={cn(
                             "h-2 w-2 rounded-full",
-                            status === 'active' ? "bg-emerald-500 animate-pulse" : "bg-slate-300"
+                            status === 'active' ? "bg-emerald-500 animate-pulse" :
+                                status === 'pending' ? "bg-amber-500" : "bg-slate-300"
                         )} />
                         <span className={cn(
                             "text-xs font-bold",
-                            status === 'active' ? "text-emerald-600" : "text-slate-500"
+                            status === 'active' ? "text-emerald-600" :
+                                status === 'pending' ? "text-amber-600" : "text-slate-500"
                         )}>
-                            {status === 'active' ? 'Actif' : 'Désactivé'}
+                            {status === 'active' ? 'Actif' : status === 'pending' ? 'Invitation' : 'Désactivé'}
                         </span>
                     </div>
                 );
@@ -190,14 +204,14 @@ export const UsersPage = () => {
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end" className="w-[160px]">
                         <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                        <DropdownMenuItem className="gap-2">
+                        <DropdownMenuItem className="gap-2 font-bold">
                             <UserCheck className="h-4 w-4" /> Modifier rattach.
                         </DropdownMenuItem>
-                        <DropdownMenuItem className="gap-2 text-blue-600">
+                        <DropdownMenuItem className="gap-2 text-blue-600 font-bold">
                             <Mail className="h-4 w-4" /> Envoyer accès
                         </DropdownMenuItem>
                         <DropdownMenuSeparator />
-                        <DropdownMenuItem className="gap-2 text-destructive focus:text-destructive">
+                        <DropdownMenuItem className="gap-2 text-destructive focus:text-destructive font-bold">
                             <UserMinus className="h-4 w-4" /> Suspendre
                         </DropdownMenuItem>
                     </DropdownMenuContent>
@@ -271,7 +285,7 @@ export const UsersPage = () => {
                         <CardContent className="p-4 flex items-center justify-between">
                             <div>
                                 <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest leading-none">Total Comptes</p>
-                                <p className="text-2xl font-black mt-1">{users.length}</p>
+                                <p className="text-2xl font-black mt-1">{stats.total}</p>
                             </div>
                             <div className="h-10 w-10 rounded-xl bg-white dark:bg-slate-800 flex items-center justify-center shadow-sm border">
                                 <Shield className="h-5 w-5 text-purple-600" />
@@ -281,8 +295,8 @@ export const UsersPage = () => {
                     <Card className="border-none bg-emerald-50/50 dark:bg-emerald-950/20">
                         <CardContent className="p-4 flex items-center justify-between">
                             <div>
-                                <p className="text-[10px] font-bold text-emerald-600 uppercase tracking-widest leading-none">Actifs (24h)</p>
-                                <p className="text-2xl font-black mt-1">{Math.floor(users.length * 0.7)}</p>
+                                <p className="text-[10px] font-bold text-emerald-600 uppercase tracking-widest leading-none">Actifs</p>
+                                <p className="text-2xl font-black mt-1">{stats.active}</p>
                             </div>
                             <div className="h-10 w-10 rounded-xl bg-white dark:bg-slate-800 flex items-center justify-center shadow-sm border">
                                 <UserCheck className="h-5 w-5 text-emerald-600" />
@@ -292,8 +306,8 @@ export const UsersPage = () => {
                     <Card className="border-none bg-blue-50/50 dark:bg-blue-950/20">
                         <CardContent className="p-4 flex items-center justify-between">
                             <div>
-                                <p className="text-[10px] font-bold text-blue-600 uppercase tracking-widest leading-none">Connectés</p>
-                                <p className="text-2xl font-black mt-1">12</p>
+                                <p className="text-[10px] font-bold text-blue-600 uppercase tracking-widest leading-none">Connectés (estim.)</p>
+                                <p className="text-2xl font-black mt-1">{stats.online}</p>
                             </div>
                             <div className="h-10 w-10 rounded-xl bg-white dark:bg-slate-800 flex items-center justify-center shadow-sm border animate-pulse">
                                 <div className="h-2 w-2 rounded-full bg-blue-600" />
@@ -304,7 +318,7 @@ export const UsersPage = () => {
                         <CardContent className="p-4 flex items-center justify-between">
                             <div>
                                 <p className="text-[10px] font-bold text-amber-600 uppercase tracking-widest leading-none">Invitations</p>
-                                <p className="text-2xl font-black mt-1">5</p>
+                                <p className="text-2xl font-black mt-1">{stats.pending}</p>
                             </div>
                             <div className="h-10 w-10 rounded-xl bg-white dark:bg-slate-800 flex items-center justify-center shadow-sm border">
                                 <Mail className="h-5 w-5 text-amber-600" />
@@ -326,13 +340,13 @@ export const UsersPage = () => {
                                     <Search className="absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                                     <Input
                                         placeholder="Chercher par nom, email..."
-                                        className="pl-9 h-9"
+                                        className="pl-9 h-9 border-2"
                                         value={searchQuery}
                                         onChange={(e) => setSearchQuery(e.target.value)}
                                     />
                                 </div>
                                 <Select value={roleFilter} onValueChange={setRoleFilter}>
-                                    <SelectTrigger className="w-[150px] h-9">
+                                    <SelectTrigger className="w-[150px] h-9 border-2">
                                         <Filter className="h-3.5 w-3.5 mr-2" />
                                         <SelectValue placeholder="Rôle" />
                                     </SelectTrigger>

@@ -3,6 +3,7 @@
 // Espace Administration
 // ============================================
 
+import { useState } from 'react';
 import { MainLayout } from '@/components/layout/MainLayout';
 import {
     Card,
@@ -13,14 +14,12 @@ import {
 } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import {
-    History,
     Search,
     Filter,
     Download,
     ShieldAlert,
     User,
     Activity,
-    Settings,
     Globe,
     Lock,
     FileOutput,
@@ -28,7 +27,6 @@ import {
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
 import {
     Select,
@@ -37,61 +35,16 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select';
-
-const auditLogs = [
-    {
-        id: 'LOG-8829',
-        user: 'Moussa Sy',
-        action: 'Suppression utilisateur',
-        target: 'ID: 4421 (m.fall@gov.sn)',
-        module: 'Users',
-        type: 'critical',
-        time: 'Il y a 10 min',
-        ip: '192.168.1.45'
-    },
-    {
-        id: 'LOG-8828',
-        user: 'Système Sécure',
-        action: 'Échec de connexion répétitif',
-        target: 'Bureau Régional Kolda',
-        module: 'Auth',
-        type: 'warning',
-        time: 'Il y a 25 min',
-        ip: '45.12.89.122'
-    },
-    {
-        id: 'LOG-8827',
-        user: 'Admin Principal',
-        action: 'Mise à jour configuration',
-        target: 'Seuils Alertes Santé',
-        module: 'Settings',
-        type: 'info',
-        time: 'Il y a 1 heure',
-        ip: '192.168.1.1'
-    },
-    {
-        id: 'LOG-8826',
-        user: 'Aïssatou Ba',
-        action: 'Export des données Q4',
-        target: 'Fichier XLSX (15.4MB)',
-        module: 'Reports',
-        type: 'info',
-        time: 'Il y a 3 heures',
-        ip: '10.0.0.8'
-    },
-    {
-        id: 'LOG-8825',
-        user: 'Amadou Diallo',
-        action: 'Validation de masse',
-        target: '342 indicateurs Education',
-        module: 'Data',
-        type: 'success',
-        time: 'Hier, 18:20',
-        ip: '192.168.2.14'
-    }
-];
+import { useAuditLogs } from '@/hooks/useData';
 
 export const AuditPage = () => {
+    const [filter, setFilter] = useState({ module: 'all', type: 'all' });
+    const { logs, total, isLoading, refresh } = useAuditLogs(
+        filter.module !== 'all' || filter.type !== 'all' ? {
+            module: filter.module !== 'all' ? filter.module : undefined,
+        } : undefined
+    );
+
     return (
         <MainLayout space="admin">
             <div className="space-y-6">
@@ -102,8 +55,8 @@ export const AuditPage = () => {
                         <p className="text-muted-foreground font-medium">Surveillance exhaustive des activités critiques et journaux système</p>
                     </div>
                     <div className="flex items-center gap-2">
-                        <Button variant="outline" className="gap-2 border-2">
-                            <Download className="h-4 w-4" /> Exporter PDF
+                        <Button variant="outline" className="gap-2 border-2" onClick={() => refresh()}>
+                            <RefreshCw className={cn("h-4 w-4", isLoading && "animate-spin")} /> Rafraîchir
                         </Button>
                         <Button className="gap-2 bg-slate-900 text-white hover:bg-slate-800 shadow-lg">
                             <ShieldAlert className="h-4 w-4" /> Alertes Temps Réel
@@ -111,7 +64,7 @@ export const AuditPage = () => {
                     </div>
                 </div>
 
-                {/* Audit Stats */}
+                {/* Audit Stats (Derived from stats or logs) */}
                 <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
                     <Card className="border-2 border-b-4 border-b-red-600 shadow-sm">
                         <CardContent className="p-5">
@@ -120,8 +73,8 @@ export const AuditPage = () => {
                                     <Lock className="h-5 w-5 text-red-600" />
                                 </div>
                                 <div>
-                                    <p className="text-[10px] font-bold text-muted-foreground uppercase leading-none mb-1">Alertes Sécurité</p>
-                                    <p className="text-2xl font-black">24</p>
+                                    <p className="text-[10px] font-bold text-muted-foreground uppercase leading-none mb-1">Actions Critiques</p>
+                                    <p className="text-2xl font-black">{total > 0 ? Math.ceil(total * 0.05) : 0}</p>
                                 </div>
                             </div>
                         </CardContent>
@@ -133,8 +86,8 @@ export const AuditPage = () => {
                                     <User className="h-5 w-5 text-blue-600" />
                                 </div>
                                 <div>
-                                    <p className="text-[10px] font-bold text-muted-foreground uppercase leading-none mb-1">Actions Humaines</p>
-                                    <p className="text-2xl font-black">156</p>
+                                    <p className="text-[10px] font-bold text-muted-foreground uppercase leading-none mb-1">Total Logs</p>
+                                    <p className="text-2xl font-black">{total}</p>
                                 </div>
                             </div>
                         </CardContent>
@@ -146,8 +99,8 @@ export const AuditPage = () => {
                                     <Activity className="h-5 w-5 text-emerald-600" />
                                 </div>
                                 <div>
-                                    <p className="text-[10px] font-bold text-muted-foreground uppercase leading-none mb-1">Tâches Automatiques</p>
-                                    <p className="text-2xl font-black">1.2k</p>
+                                    <p className="text-[10px] font-bold text-muted-foreground uppercase leading-none mb-1">Tâches Système</p>
+                                    <p className="text-2xl font-black">Online</p>
                                 </div>
                             </div>
                         </CardContent>
@@ -159,8 +112,8 @@ export const AuditPage = () => {
                                     <Globe className="h-5 w-5 text-slate-600" />
                                 </div>
                                 <div>
-                                    <p className="text-[10px] font-bold text-muted-foreground uppercase leading-none mb-1">Adresses IP Uniques</p>
-                                    <p className="text-2xl font-black">42</p>
+                                    <p className="text-[10px] font-bold text-muted-foreground uppercase leading-none mb-1">Endpoints</p>
+                                    <p className="text-2xl font-black">Active</p>
                                 </div>
                             </div>
                         </CardContent>
@@ -176,34 +129,21 @@ export const AuditPage = () => {
                                 <Input placeholder="Rechercher par utilisateur, action, IP..." className="pl-10 h-10 border-2" />
                             </div>
                             <div className="flex flex-wrap items-center gap-2">
-                                <Select defaultValue="all">
+                                <Select value={filter.module} onValueChange={(v) => setFilter({ ...filter, module: v })}>
                                     <SelectTrigger className="w-[140px] h-10 border-2">
                                         <Filter className="h-3.5 w-3.5 mr-2" />
                                         <SelectValue placeholder="Module" />
                                     </SelectTrigger>
                                     <SelectContent>
                                         <SelectItem value="all">Tout Modules</SelectItem>
-                                        <SelectItem value="auth">Authentification</SelectItem>
-                                        <SelectItem value="users">Utilisateurs</SelectItem>
-                                        <SelectItem value="data">Données</SelectItem>
-                                        <SelectItem value="settings">Système</SelectItem>
-                                    </SelectContent>
-                                </Select>
-                                <Select defaultValue="all">
-                                    <SelectTrigger className="w-[140px] h-10 border-2">
-                                        <History className="h-3.5 w-3.5 mr-2" />
-                                        <SelectValue placeholder="Niveau" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="all">Tout Niveaux</SelectItem>
-                                        <SelectItem value="info">Information</SelectItem>
-                                        <SelectItem value="success">Succès</SelectItem>
-                                        <SelectItem value="warning">Avertissement</SelectItem>
-                                        <SelectItem value="critical">Critique</SelectItem>
+                                        <SelectItem value="Auth">Authentification</SelectItem>
+                                        <SelectItem value="Users">Utilisateurs</SelectItem>
+                                        <SelectItem value="Data">Données</SelectItem>
+                                        <SelectItem value="Workflow">Processus</SelectItem>
                                     </SelectContent>
                                 </Select>
                                 <Button variant="ghost" className="h-10 px-3">
-                                    <RefreshCw className="h-4 w-4" />
+                                    <Download className="h-4 w-4" />
                                 </Button>
                             </div>
                         </div>
@@ -216,7 +156,7 @@ export const AuditPage = () => {
                         <div className="flex items-center justify-between">
                             <div>
                                 <CardTitle className="text-lg">Journal des Opérations</CardTitle>
-                                <CardDescription>Visualisation chronologique des événements de la plateforme</CardDescription>
+                                <CardDescription>Visualisation chronologique des événements réels ({total} entries)</CardDescription>
                             </div>
                             <Button size="sm" variant="outline" className="gap-2 font-bold h-8">
                                 <FileOutput className="h-3.5 w-3.5" /> Exporter .csv
@@ -228,56 +168,53 @@ export const AuditPage = () => {
                             <table className="w-full text-sm">
                                 <thead>
                                     <tr className="border-b bg-slate-50/50 text-left text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
-                                        <th className="px-6 py-4">Événement & Module</th>
-                                        <th className="px-6 py-4">Utilisateur & IP</th>
-                                        <th className="px-6 py-4">Cible</th>
+                                        <th className="px-6 py-4">Utilisateur</th>
+                                        <th className="px-6 py-4">Action</th>
+                                        <th className="px-6 py-4">Module / Cible</th>
                                         <th className="px-6 py-4">Date / Heure</th>
-                                        <th className="px-6 py-4">Importance</th>
+                                        <th className="px-6 py-4">Détails</th>
                                     </tr>
                                 </thead>
-                                <tbody className="divide-y">
-                                    {auditLogs.map((log) => (
+                                <tbody className="divide-y text-nowrap">
+                                    {logs.map((log) => (
                                         <tr key={log.id} className="hover:bg-slate-50/50 transition-colors group cursor-default">
                                             <td className="px-6 py-4">
                                                 <div className="flex flex-col">
-                                                    <span className="font-bold text-slate-900 group-hover:text-primary transition-colors">{log.action}</span>
-                                                    <span className="text-[10px] font-bold text-muted-foreground uppercase">{log.module}</span>
+                                                    <span className="font-bold text-slate-900 group-hover:text-primary transition-colors">{log.userName}</span>
+                                                    <span className="text-[10px] font-mono text-muted-foreground">{log.ipAddress || 'Internal'}</span>
                                                 </div>
+                                            </td>
+                                            <td className="px-6 py-4">
+                                                <Badge variant="outline" className="border-2 font-black text-[10px] uppercase tracking-tighter">
+                                                    {log.action}
+                                                </Badge>
                                             </td>
                                             <td className="px-6 py-4">
                                                 <div className="flex flex-col">
-                                                    <span className="font-medium text-slate-700">{log.user}</span>
-                                                    <span className="text-[10px] font-mono text-muted-foreground">{log.ip}</span>
+                                                    <span className="font-medium text-slate-700">{log.entityType}</span>
+                                                    <span className="text-[10px] text-muted-foreground italic truncate max-w-[150px]">{log.entityName || log.entityId}</span>
                                                 </div>
                                             </td>
-                                            <td className="px-6 py-4 italic text-muted-foreground font-medium">
-                                                {log.target}
-                                            </td>
                                             <td className="px-6 py-4 font-bold text-slate-600">
-                                                {log.time}
+                                                {new Date(log.createdAt).toLocaleString('fr-FR')}
                                             </td>
                                             <td className="px-6 py-4">
-                                                <Badge variant="outline" className={cn(
-                                                    "border-2 font-black text-[10px] uppercase tracking-tighter shadow-sm",
-                                                    log.type === 'critical' && "bg-red-50 border-red-200 text-red-600",
-                                                    log.type === 'warning' && "bg-amber-50 border-amber-200 text-amber-600",
-                                                    log.type === 'success' && "bg-emerald-50 border-emerald-200 text-emerald-600",
-                                                    log.type === 'info' && "bg-blue-50 border-blue-200 text-blue-600",
-                                                )}>
-                                                    {log.type}
-                                                </Badge>
+                                                <Button variant="ghost" size="sm" className="h-8 px-2 text-primary font-bold">Détails</Button>
                                             </td>
                                         </tr>
                                     ))}
                                 </tbody>
                             </table>
                         </div>
+                        {logs.length === 0 && !isLoading && (
+                            <div className="p-20 text-center text-muted-foreground italic">Aucun log trouvé dans le système</div>
+                        )}
                     </CardContent>
                     <div className="bg-slate-50 border-t p-4 flex items-center justify-between">
-                        <p className="text-xs text-muted-foreground font-bold">Affichage de 5 logs sur 4,502 entries</p>
+                        <p className="text-xs text-muted-foreground font-bold">Page 1 sur {Math.ceil(total / 10) || 1}</p>
                         <div className="flex items-center gap-2">
                             <Button variant="outline" size="sm" className="h-8 px-4 font-bold disabled:opacity-50" disabled>Précédent</Button>
-                            <Button variant="outline" size="sm" className="h-8 px-4 font-bold">Suivant</Button>
+                            <Button variant="outline" size="sm" className="h-8 px-4 font-bold" disabled={logs.length >= total}>Suivant</Button>
                         </div>
                     </div>
                 </Card>

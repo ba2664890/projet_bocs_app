@@ -12,6 +12,7 @@ import {
   workflowsService,
   dashboardsService,
   dataCollectionService,
+  auditService,
 } from '@/services';
 import type {
   GeographicEntity,
@@ -26,6 +27,7 @@ import type {
   ValidationStatus,
   User,
   DataCollection,
+  AuditLog,
 } from '@/types';
 import { authService } from '@/services/auth';
 
@@ -557,3 +559,61 @@ export const useSearch = () => {
 
   return { searchAll };
 };
+
+// ----- Hook pour l'audit et les métriques système -----
+
+export const useAuditLogs = (filters?: {
+  module?: string;
+  type?: string;
+  userId?: string;
+}) => {
+  const [logs, setLogs] = useState<AuditLog[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [total, setTotal] = useState(0);
+
+  const loadLogs = useCallback(async (params?: any, signal?: AbortSignal) => {
+    try {
+      setIsLoading(true);
+      const response = await auditService.getLogs({ ...filters, ...params }, signal);
+      setLogs(response.results);
+      setTotal(response.count);
+    } catch (e) {
+      if (axios.isCancel(e)) return;
+      console.error("Failed to load audit logs", e);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [JSON.stringify(filters)]);
+
+  useEffect(() => {
+    const controller = new AbortController();
+    loadLogs({}, controller.signal);
+    return () => controller.abort();
+  }, [loadLogs]);
+
+  return { logs, total, isLoading, refresh: loadLogs };
+};
+
+export const useSystemStats = () => {
+  const [stats, setStats] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState(false);
+
+  const loadStats = useCallback(async () => {
+    try {
+      setIsLoading(true);
+      const data = await auditService.getGlobalStats();
+      setStats(data);
+    } catch (e) {
+      console.error("Failed to load system stats", e);
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    loadStats();
+  }, [loadStats]);
+
+  return { stats, isLoading, refresh: loadStats };
+};
+

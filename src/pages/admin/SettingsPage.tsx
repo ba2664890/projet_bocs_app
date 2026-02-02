@@ -13,20 +13,17 @@ import {
 } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import {
-    Settings,
+    Key,
+    Save,
+    RefreshCw,
+    Monitor,
+    Lock,
     ShieldCheck,
     Bell,
     Globe,
     Database,
     Palette,
     Mail,
-    Key,
-    Save,
-    RefreshCw,
-    Monitor,
-    Cpu,
-    Smartphone,
-    Check,
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -39,6 +36,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select';
+import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 
 export const SettingsPage = () => {

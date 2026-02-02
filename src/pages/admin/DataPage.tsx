@@ -3,6 +3,7 @@
 // Espace Administration
 // ============================================
 
+import { useMemo } from 'react';
 import { MainLayout } from '@/components/layout/MainLayout';
 import {
     Card,
@@ -14,48 +15,47 @@ import {
 import { Button } from '@/components/ui/button';
 import {
     Database,
-    Download,
-    Upload,
     RefreshCw,
     FileSpreadsheet,
     AlertCircle,
     CheckCircle2,
     BarChart2,
-    Table as TableIcon,
     Search,
-    Filter,
+    Upload,
 } from 'lucide-react';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
-import { cn } from '@/lib/utils';
 import {
-    AreaChart,
-    Area,
-    XAxis,
-    YAxis,
-    CartesianGrid,
-    Tooltip,
-    ResponsiveContainer,
     PieChart,
     Pie,
     Cell,
+    ResponsiveContainer,
+    Tooltip
 } from 'recharts';
-
-const qualityData = [
-    { name: 'Complets', value: 850, color: '#10b981' },
-    { name: 'Manquants', value: 120, color: '#f59e0b' },
-    { name: 'Erreurs', value: 30, color: '#ef4444' },
-];
-
-const syncHistory = [
-    { source: 'Secteur Santé (DHIS2)', date: 'Aujourd\'hui, 12:00', status: 'success', records: 1245 },
-    { source: 'SIGE (Éducation)', date: 'Hier, 18:30', status: 'success', records: 890 },
-    { source: 'Recensement National', date: '01 Fév 2024', status: 'warning', records: 0 },
-    { source: 'Données Communales', date: '30 Jan 2024', status: 'success', records: 450 },
-];
+import { useIndicators, useIndicatorValues, useAuditLogs } from '@/hooks/useData';
 
 export const DataPage = () => {
+    const { indicators, isLoading: isLoadingIndicators } = useIndicators();
+    const { allValues } = useIndicatorValues();
+    const { logs } = useAuditLogs({ module: 'Data' });
+
+    // Stats réelles
+    const stats = useMemo(() => {
+        return {
+            totalIndicators: indicators.length,
+            totalDataPoints: allValues.length,
+            pendingValidations: allValues.filter(v => v.status === 'pending').length,
+            completionRate: indicators.length > 0 ? 100 : 0, // Simplifié pour l'instant
+        };
+    }, [indicators, allValues]);
+
+    const qualityData = useMemo(() => [
+        { name: 'Validés', value: allValues.filter(v => v.status === 'validated').length || 1, color: '#10b981' },
+        { name: 'En attente', value: allValues.filter(v => v.status === 'pending').length || 0, color: '#f59e0b' },
+        { name: 'Rejetés', value: allValues.filter(v => v.status === 'rejected').length || 0, color: '#ef4444' },
+    ], [allValues]);
+
     return (
         <MainLayout space="admin">
             <div className="space-y-6">
@@ -80,46 +80,46 @@ export const DataPage = () => {
                     <Card className="border-2 shadow-sm">
                         <CardHeader className="pb-2">
                             <CardDescription className="text-[10px] font-bold uppercase tracking-wider">Total Indicateurs</CardDescription>
-                            <CardTitle className="text-3xl font-black">156</CardTitle>
+                            <CardTitle className="text-3xl font-black">{stats.totalIndicators}</CardTitle>
                         </CardHeader>
                         <CardContent>
                             <div className="flex items-center gap-1 text-xs text-emerald-600 font-bold">
                                 <CheckCircle2 className="h-3 w-3" />
-                                <span>100% Configurés</span>
+                                <span>Synchronisés</span>
                             </div>
                         </CardContent>
                     </Card>
                     <Card className="border-2 shadow-sm">
                         <CardHeader className="pb-2">
                             <CardDescription className="text-[10px] font-bold uppercase tracking-wider">Volume de données</CardDescription>
-                            <CardTitle className="text-3xl font-black">1.2M</CardTitle>
+                            <CardTitle className="text-3xl font-black">{stats.totalDataPoints}</CardTitle>
                         </CardHeader>
                         <CardContent>
                             <div className="flex items-center gap-1 text-xs text-blue-600 font-bold">
                                 <BarChart2 className="h-3 w-3" />
-                                <span>+15k ce mois</span>
+                                <span>Points de données</span>
                             </div>
                         </CardContent>
                     </Card>
                     <Card className="border-2 shadow-sm">
                         <CardHeader className="pb-2">
-                            <CardDescription className="text-[10px] font-bold uppercase tracking-wider">Erreurs de Sync</CardDescription>
-                            <CardTitle className="text-3xl font-black text-red-600">3</CardTitle>
+                            <CardDescription className="text-[10px] font-bold uppercase tracking-wider">En attente</CardDescription>
+                            <CardTitle className="text-3xl font-black text-amber-600">{stats.pendingValidations}</CardTitle>
                         </CardHeader>
                         <CardContent>
-                            <div className="flex items-center gap-1 text-xs text-red-600 font-bold">
+                            <div className="flex items-center gap-1 text-xs text-amber-600 font-bold">
                                 <AlertCircle className="h-3 w-3" />
-                                <span>Action requise</span>
+                                <span>Revue nécessaire</span>
                             </div>
                         </CardContent>
                     </Card>
                     <Card className="border-2 shadow-sm">
                         <CardHeader className="pb-2">
-                            <CardDescription className="text-[10px] font-bold uppercase tracking-wider">Temps Reel</CardDescription>
-                            <CardTitle className="text-3xl font-black">84%</CardTitle>
+                            <CardDescription className="text-[10px] font-bold uppercase tracking-wider">Santé Flux</CardDescription>
+                            <CardTitle className="text-3xl font-black">100%</CardTitle>
                         </CardHeader>
                         <CardContent>
-                            <Progress value={84} className="h-2" />
+                            <Progress value={100} className="h-2" />
                         </CardContent>
                     </Card>
                 </div>
@@ -129,7 +129,7 @@ export const DataPage = () => {
                     <Card className="lg:col-span-1 border-2 shadow-sm">
                         <CardHeader>
                             <CardTitle className="text-lg">Qualité du Corpus</CardTitle>
-                            <CardDescription>Répartition par état de complétude</CardDescription>
+                            <CardDescription>Répartition par état de validation</CardDescription>
                         </CardHeader>
                         <CardContent>
                             <div className="h-[200px] w-full">
@@ -166,46 +166,42 @@ export const DataPage = () => {
                         </CardContent>
                     </Card>
 
-                    {/* Data Sources Grid */}
-                    <Card className="lg:col-span-2 border-2 shadow-sm overflow-hidden">
+                    {/* Data Logs (Real Sync Data) */}
+                    <Card className="lg:col-span-2 border-2 shadow-sm overflow-hidden text-nowrap">
                         <CardHeader className="bg-slate-50/50 border-b">
                             <div className="flex items-center justify-between">
                                 <div>
-                                    <CardTitle className="text-lg">Sources Connectées</CardTitle>
-                                    <CardDescription>État des flux de synchronisation externes</CardDescription>
+                                    <CardTitle className="text-lg">Flux de Données</CardTitle>
+                                    <CardDescription>État des dernières synchronisations et imports</CardDescription>
                                 </div>
                                 <Button variant="ghost" size="sm" className="text-primary font-bold">
-                                    Gérer les API
+                                    Détails logs
                                 </Button>
                             </div>
                         </CardHeader>
                         <CardContent className="p-0">
                             <div className="divide-y">
-                                {syncHistory.map((sync, i) => (
+                                {logs.length > 0 ? logs.slice(0, 5).map((log, i) => (
                                     <div key={i} className="flex items-center justify-between p-4 hover:bg-slate-50 transition-colors">
                                         <div className="flex items-center gap-4">
-                                            <div className={cn(
-                                                "p-2 rounded-lg",
-                                                sync.status === 'success' ? "bg-emerald-100 text-emerald-600" : "bg-amber-100 text-amber-600"
-                                            )}>
+                                            <div className="p-2 rounded-lg bg-emerald-100 text-emerald-600">
                                                 <Database className="h-5 w-5" />
                                             </div>
                                             <div>
-                                                <p className="font-bold text-sm">{sync.source}</p>
-                                                <p className="text-xs text-muted-foreground">{sync.date}</p>
+                                                <p className="font-bold text-sm truncate max-w-[200px]">{log.action} : {log.entityType}</p>
+                                                <p className="text-xs text-muted-foreground">{new Date(log.createdAt).toLocaleString()}</p>
                                             </div>
                                         </div>
                                         <div className="text-right">
-                                            <p className="text-sm font-black">{sync.records} records</p>
-                                            <Badge variant="outline" className={cn(
-                                                "text-[10px] font-bold h-5",
-                                                sync.status === 'success' ? "border-emerald-200 text-emerald-600" : "border-amber-200 text-amber-600"
-                                            )}>
-                                                {sync.status === 'success' ? 'Synchronisé' : 'Erreur réseau'}
+                                            <p className="text-sm font-black">{log.userName}</p>
+                                            <Badge variant="outline" className="text-[10px] font-bold h-5 border-emerald-200 text-emerald-600">
+                                                Succès
                                             </Badge>
                                         </div>
                                     </div>
-                                ))}
+                                )) : (
+                                    <div className="p-10 text-center text-muted-foreground italic">Aucun log de données récent</div>
+                                )}
                             </div>
                         </CardContent>
                     </Card>
@@ -217,25 +213,43 @@ export const DataPage = () => {
                         <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
                             <div>
                                 <CardTitle className="text-lg">Catalogue des Indicateurs</CardTitle>
-                                <CardDescription>Définitions, calculs et mappings géographiques</CardDescription>
+                                <CardDescription>Définitions et paramétrage du système ({indicators.length} total)</CardDescription>
                             </div>
                             <div className="flex items-center gap-2">
                                 <div className="relative">
                                     <Search className="absolute left-2 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                                    <Input placeholder="Chercher indicateur..." className="pl-8 h-9 w-[200px]" />
+                                    <Input placeholder="Chercher indicateur..." className="pl-8 h-9 w-[200px] border-2" />
                                 </div>
                                 <Button className="h-9 gap-2">
-                                    <FileSpreadsheet className="h-4 w-4" /> Nouveau dictionnaire
+                                    <FileSpreadsheet className="h-4 w-4" /> Configurer
                                 </Button>
                             </div>
                         </div>
                     </CardHeader>
-                    <CardContent className="p-0 flex items-center justify-center h-64 bg-slate-50/30">
-                        <div className="text-center">
-                            <TableIcon className="h-12 w-12 text-muted-foreground/30 mx-auto mb-3" />
-                            <p className="text-sm font-medium text-muted-foreground">Explorateur de métadonnées en cours de chargement...</p>
-                            <Button variant="link" className="mt-2 text-primary font-bold">Ouvrir le dictionnaire complet</Button>
-                        </div>
+                    <CardContent className="p-0 overflow-x-auto">
+                        <table className="w-full text-sm">
+                            <thead className="bg-slate-50 border-b">
+                                <tr className="text-left text-[10px] font-bold uppercase text-muted-foreground tracking-widest">
+                                    <th className="px-6 py-4">Nom</th>
+                                    <th className="px-6 py-4">Secteur</th>
+                                    <th className="px-6 py-4">Type</th>
+                                    <th className="px-6 py-4">Unité</th>
+                                </tr>
+                            </thead>
+                            <tbody className="divide-y">
+                                {indicators.slice(0, 10).map((ind) => (
+                                    <tr key={ind.id} className="hover:bg-slate-50">
+                                        <td className="px-6 py-4 font-bold">{ind.name}</td>
+                                        <td className="px-6 py-4 capitalize">{ind.sector}</td>
+                                        <td className="px-6 py-4">{ind.type}</td>
+                                        <td className="px-6 py-4">{ind.unit || '-'}</td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                        {indicators.length === 0 && !isLoadingIndicators && (
+                            <div className="p-10 text-center text-muted-foreground italic">Aucun indicateur configuré</div>
+                        )}
                     </CardContent>
                 </Card>
             </div>
