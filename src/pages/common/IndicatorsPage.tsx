@@ -1,9 +1,13 @@
+import { useLocation } from 'react-router-dom';
 import { MainLayout } from '@/components/layout/MainLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 export const IndicatorsPage = () => {
+    const location = useLocation();
+    const space = location.pathname.split('/')[1] as any;
+
     return (
-        <MainLayout title="Indicateurs">
+        <MainLayout space={space} title="Indicateurs">
             <Card className="min-h-[400px]">
                 <CardHeader>
                     <CardTitle>Tableau de bord des Indicateurs</CardTitle>

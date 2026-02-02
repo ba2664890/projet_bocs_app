@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 export const DataPage = () => {
     return (
-        <MainLayout title="Gestion des Données">
+        <MainLayout space="admin" title="Gestion des Données">
             <Card>
                 <CardHeader>
                     <CardTitle>Base de Données Territoriale</CardTitle>

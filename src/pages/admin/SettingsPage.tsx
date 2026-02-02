@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 export const SettingsPage = () => {
     return (
-        <MainLayout title="Paramètres Système">
+        <MainLayout space="admin" title="Paramètres Système">
             <Card>
                 <CardHeader>
                     <CardTitle>Configuration de la Plateforme</CardTitle>

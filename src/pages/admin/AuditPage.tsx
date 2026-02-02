@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 export const AuditPage = () => {
     return (
-        <MainLayout title="Journal d'Audit">
+        <MainLayout space="admin" title="Journal d'Audit">
             <Card>
                 <CardHeader>
                     <CardTitle>Historique des Activités</CardTitle>

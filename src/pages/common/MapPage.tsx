@@ -1,9 +1,13 @@
+import { useLocation } from 'react-router-dom';
 import { MainLayout } from '@/components/layout/MainLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 export const MapPage = () => {
+    const location = useLocation();
+    const space = location.pathname.split('/')[1] as any;
+
     return (
-        <MainLayout title="Cartographie">
+        <MainLayout space={space} title="Cartographie">
             <Card className="h-[600px] w-full">
                 <CardHeader>
                     <CardTitle>Carte Interactive</CardTitle>

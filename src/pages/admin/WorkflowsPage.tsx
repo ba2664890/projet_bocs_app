@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 export const WorkflowsPage = () => {
     return (
-        <MainLayout title="Workflows de Validation">
+        <MainLayout space="admin" title="Workflows de Validation">
             <Card>
                 <CardHeader>
                     <CardTitle>Suivi des Processus</CardTitle>

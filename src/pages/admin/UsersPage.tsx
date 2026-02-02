@@ -6,7 +6,7 @@ export const UsersPage = () => {
     const { users } = useUsers();
 
     return (
-        <MainLayout title="Gestion des Utilisateurs">
+        <MainLayout space="admin" title="Gestion des Utilisateurs">
             <Card>
                 <CardHeader>
                     <CardTitle>Liste des Utilisateurs ({users.length})</CardTitle>
