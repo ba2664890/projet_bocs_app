@@ -3,7 +3,7 @@ import { useIndicators } from '@/hooks/useData';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { ArrowRight, Activity, GraduationCap, Syringe, Baby, BookOpen, School, TrendingUp } from 'lucide-react';
+import { ArrowRight, Activity, GraduationCap, Syringe, Baby, BookOpen, School } from 'lucide-react';
 
 export const SectorsPage = () => {
     const { indicators } = useIndicators();
@@ -12,17 +12,17 @@ export const SectorsPage = () => {
     const healthIndicators = indicators.filter(i => (i.sector === 'health' || i.category?.toLowerCase().includes('santé')));
     const educationIndicators = indicators.filter(i => (i.sector === 'education' || i.category?.toLowerCase().includes('éducation')));
 
-    // Mock sub-sector data
+    // Metrics counts from API data
     const healthSubSectors = [
-        { name: 'Vaccination', count: healthIndicators.filter(i => i.name.toLowerCase().includes('vaccin')).length || 12, icon: Syringe, trend: '+5%' },
-        { name: 'Santé Maternelle', count: healthIndicators.filter(i => i.name.toLowerCase().includes('maternell')).length || 8, icon: Baby, trend: '+2%' },
-        { name: 'Maladies', count: healthIndicators.filter(i => i.name.toLowerCase().includes('palu') || i.name.toLowerCase().includes('vih')).length || 15, icon: Activity, trend: '-1%' },
+        { name: 'Vaccination', count: healthIndicators.filter(i => i.name.toLowerCase().includes('vaccin')).length, icon: Syringe, trend: '...' },
+        { name: 'Santé Maternelle', count: healthIndicators.filter(i => i.name.toLowerCase().includes('maternell')).length, icon: Baby, trend: '...' },
+        { name: 'Maladies', count: healthIndicators.filter(i => i.name.toLowerCase().includes('palu') || i.name.toLowerCase().includes('vih')).length, icon: Activity, trend: '...' },
     ];
 
     const educationSubSectors = [
-        { name: 'Primaire', count: educationIndicators.filter(i => i.name.toLowerCase().includes('primaire')).length || 20, icon: School, trend: '+4%' },
-        { name: 'Secondaire', count: educationIndicators.filter(i => i.name.toLowerCase().includes('secondaire')).length || 18, icon: BookOpen, trend: '+3%' },
-        { name: 'Supérieur', count: educationIndicators.filter(i => i.name.toLowerCase().includes('supérieur')).length || 10, icon: GraduationCap, trend: '+1%' },
+        { name: 'Primaire', count: educationIndicators.filter(i => i.name.toLowerCase().includes('primaire')).length, icon: School, trend: '...' },
+        { name: 'Secondaire', count: educationIndicators.filter(i => i.name.toLowerCase().includes('secondaire')).length, icon: BookOpen, trend: '...' },
+        { name: 'Supérieur', count: educationIndicators.filter(i => i.name.toLowerCase().includes('supérieur')).length, icon: GraduationCap, trend: '...' },
     ];
 
     return (
@@ -56,7 +56,7 @@ export const SectorsPage = () => {
                                             <div className="p-2 rounded-full bg-blue-100 text-blue-600">
                                                 <sub.icon className="h-4 w-4" />
                                             </div>
-                                            <span className="text-xs font-semibold text-green-600 bg-green-50 px-2 py-0.5 rounded-full">{sub.trend}</span>
+                                            <span className="text-xs font-semibold text-muted-foreground bg-slate-100 px-2 py-0.5 rounded-full">{sub.trend}</span>
                                         </div>
                                         <h4 className="font-semibold text-sm">{sub.name}</h4>
                                         <p className="text-xs text-muted-foreground">{sub.count} mesures actives</p>
@@ -66,17 +66,6 @@ export const SectorsPage = () => {
                             <Button className="w-full bg-blue-600 hover:bg-blue-700" onClick={() => navigate('/institution/sectors/health')}>
                                 Accéder au Dashboard Santé <ArrowRight className="ml-2 h-4 w-4" />
                             </Button>
-                        </CardContent>
-                    </Card>
-
-                    {/* Key Health Metric Preview */}
-                    <Card className="bg-blue-50/50 dark:bg-slate-900/50 border-blue-100 dark:border-blue-900/30">
-                        <CardContent className="p-4 flex items-center gap-4">
-                            <TrendingUp className="h-8 w-8 text-blue-500" />
-                            <div>
-                                <p className="text-sm font-medium text-blue-900 dark:text-blue-100">Taux de couverture vaccinale</p>
-                                <p className="text-2xl font-bold text-blue-700 dark:text-blue-300">88.5% <span className="text-sm font-normal text-muted-foreground">Moyenne nationale</span></p>
-                            </div>
                         </CardContent>
                     </Card>
                 </div>
@@ -104,7 +93,7 @@ export const SectorsPage = () => {
                                             <div className="p-2 rounded-full bg-emerald-100 text-emerald-600">
                                                 <sub.icon className="h-4 w-4" />
                                             </div>
-                                            <span className="text-xs font-semibold text-green-600 bg-green-50 px-2 py-0.5 rounded-full">{sub.trend}</span>
+                                            <span className="text-xs font-semibold text-muted-foreground bg-slate-100 px-2 py-0.5 rounded-full">{sub.trend}</span>
                                         </div>
                                         <h4 className="font-semibold text-sm">{sub.name}</h4>
                                         <p className="text-xs text-muted-foreground">{sub.count} mesures actives</p>
@@ -114,17 +103,6 @@ export const SectorsPage = () => {
                             <Button className="w-full bg-emerald-600 hover:bg-emerald-700" onClick={() => navigate('/institution/sectors/education')}>
                                 Accéder au Dashboard Éducation <ArrowRight className="ml-2 h-4 w-4" />
                             </Button>
-                        </CardContent>
-                    </Card>
-
-                    {/* Key Education Metric Preview */}
-                    <Card className="bg-emerald-50/50 dark:bg-slate-900/50 border-emerald-100 dark:border-emerald-900/30">
-                        <CardContent className="p-4 flex items-center gap-4">
-                            <TrendingUp className="h-8 w-8 text-emerald-500" />
-                            <div>
-                                <p className="text-sm font-medium text-emerald-900 dark:text-emerald-100">Taux de scolarisation (Primaire)</p>
-                                <p className="text-2xl font-bold text-emerald-700 dark:text-emerald-300">92.1% <span className="text-sm font-normal text-muted-foreground">Moyenne nationale</span></p>
-                            </div>
                         </CardContent>
                     </Card>
                 </div>

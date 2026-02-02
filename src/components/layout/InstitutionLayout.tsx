@@ -1,7 +1,7 @@
 import { useLocation, useNavigate, Outlet } from 'react-router-dom';
 import { MainLayout } from '@/components/layout/MainLayout';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Card } from '@/components/ui/card';
+
 import {
     LayoutDashboard,
     Map,

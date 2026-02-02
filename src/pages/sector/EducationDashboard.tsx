@@ -76,41 +76,49 @@ export const EducationDashboard = () => {
       {
         id: 'e_kpi1',
         title: 'Taux de scolarisation (PRI)',
-        value: scolValue?.value || 94.2,
-        formattedValue: scolValue?.valueFormatted || '94.2%',
-        variation: scolValue?.variation || 0.4,
+        value: scolValue?.value || 0,
+        formattedValue: scolValue?.valueFormatted || '0%',
+        variation: scolValue?.variation || 0,
         variationType: (scolValue?.variation || 0) >= 0 ? 'positive' : 'negative',
         target: 100,
-        achievementRate: scolValue?.achievementRate || 94.2,
+        achievementRate: scolValue?.achievementRate || 0,
         unit: '%',
         color: 'teal',
-        trend: [92, 92.5, 93, 93.5, 93.8, 94.2]
+        trend: allValues
+          .filter(v => v.indicatorId === scolValue?.indicatorId)
+          .sort((a, b) => a.year - b.year)
+          .map(v => v.value)
       },
       {
         id: 'e_kpi2',
         title: 'Taux de réussite BFEM',
-        value: reusValue?.value || 78.5,
-        formattedValue: reusValue?.valueFormatted || '78.5%',
-        variation: reusValue?.variation || 4.4,
+        value: reusValue?.value || 0,
+        formattedValue: reusValue?.valueFormatted || '0%',
+        variation: reusValue?.variation || 0,
         variationType: (reusValue?.variation || 0) >= 0 ? 'positive' : 'negative',
         target: 95,
-        achievementRate: reusValue?.achievementRate || 82.6,
+        achievementRate: reusValue?.achievementRate || 0,
         unit: '%',
         color: 'blue',
-        trend: [72, 74, 75, 76, 74, 78.5]
+        trend: allValues
+          .filter(v => v.indicatorId === reusValue?.indicatorId)
+          .sort((a, b) => a.year - b.year)
+          .map(v => v.value)
       },
       {
         id: 'e_kpi3',
-        title: 'Ratio élèves-maître',
-        value: ratioValue?.value || 48.5,
-        formattedValue: ratioValue?.valueFormatted || '48.5:1',
-        variation: ratioValue?.variation || -7.3,
+        title: 'Ratio Élèves/Maître',
+        value: ratioValue?.value || 0,
+        formattedValue: ratioValue?.valueFormatted || '0',
+        variation: ratioValue?.variation || 0,
         variationType: (ratioValue?.variation || 0) <= 0 ? 'positive' : 'negative',
         target: 40,
-        achievementRate: ratioValue?.achievementRate || 82.5,
-        unit: ':1',
-        color: 'indigo',
-        trend: [55, 53, 52, 50, 49, 48.5]
+        achievementRate: ratioValue?.achievementRate || 0,
+        color: 'amber',
+        trend: allValues
+          .filter(v => v.indicatorId === ratioValue?.indicatorId)
+          .sort((a, b) => a.year - b.year)
+          .map(v => v.value)
       },
       {
         id: 'e_kpi4',

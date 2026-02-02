@@ -9,7 +9,6 @@ import { useNavigate } from 'react-router-dom';
 import { MainLayout } from '@/components/layout/MainLayout';
 import { KPICard } from '@/components/cards/KPICard';
 import { TrendChart } from '@/components/charts/TrendChart';
-import { ComparisonChart } from '@/components/charts/ComparisonChart';
 import { MapContainer } from '@/components/map/MapContainer';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -26,16 +25,14 @@ import {
   TrendingUp,
   MapPin,
   Filter,
-  Activity,
-  Syringe,
-  Baby
+  Activity
 } from 'lucide-react';
 import { useHealthFacilities, useIndicatorValues } from '@/hooks/useData';
 import type { KPIData } from '@/types';
 
 export const HealthDashboard = () => {
   const navigate = useNavigate();
-  const { values, allValues } = useIndicatorValues({ sector: 'health' });
+  const { allValues } = useIndicatorValues({ sector: 'health' });
   const { facilities } = useHealthFacilities();
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -75,40 +72,49 @@ export const HealthDashboard = () => {
       {
         id: 'h_kpi1',
         title: 'Couverture vaccinale',
-        value: vaccValue?.value || 87.3,
-        formattedValue: vaccValue?.valueFormatted || '87.3%',
-        variation: vaccValue?.variation || 3.8,
+        value: vaccValue?.value || 0,
+        formattedValue: vaccValue?.valueFormatted || '0%',
+        variation: vaccValue?.variation || 0,
         variationType: (vaccValue?.variation || 0) >= 0 ? 'positive' : 'negative',
-        target: 95,
-        achievementRate: vaccValue?.achievementRate || 91.9,
+        target: 100,
+        achievementRate: vaccValue?.achievementRate || 0,
         unit: '%',
         color: 'blue',
-        trend: [82, 84, 85, 86, 86.5, 87.3]
+        trend: allValues
+          .filter(v => v.indicatorId === vaccValue?.indicatorId)
+          .sort((a, b) => a.year - b.year)
+          .map(v => v.value)
       },
       {
         id: 'h_kpi2',
         title: 'Mortalité maternelle',
-        value: mortValue?.value || 315,
-        formattedValue: mortValue?.valueFormatted || '315',
-        variation: mortValue?.variation || -5.2,
+        value: mortValue?.value || 0,
+        formattedValue: mortValue?.valueFormatted || '0',
+        variation: mortValue?.variation || 0,
         variationType: (mortValue?.variation || 0) <= 0 ? 'positive' : 'negative',
         target: 200,
-        achievementRate: mortValue?.achievementRate || 63,
+        achievementRate: mortValue?.achievementRate || 0,
         color: 'red',
-        trend: [340, 335, 330, 325, 320, 315]
+        trend: allValues
+          .filter(v => v.indicatorId === mortValue?.indicatorId)
+          .sort((a, b) => a.year - b.year)
+          .map(v => v.value)
       },
       {
         id: 'h_kpi3',
         title: 'Prévalence Paludisme',
-        value: paluValue?.value || 4.2,
-        formattedValue: paluValue?.valueFormatted || '4.2%',
-        variation: paluValue?.variation || -10.5,
+        value: paluValue?.value || 0,
+        formattedValue: paluValue?.valueFormatted || '0%',
+        variation: paluValue?.variation || 0,
         variationType: (paluValue?.variation || 0) <= 0 ? 'positive' : 'negative',
-        target: 2,
-        achievementRate: paluValue?.achievementRate || 40,
+        target: 1,
+        achievementRate: paluValue?.achievementRate || 0,
         unit: '%',
-        color: 'teal',
-        trend: [6.5, 6.0, 5.5, 5.0, 4.5, 4.2]
+        color: 'amber',
+        trend: allValues
+          .filter(v => v.indicatorId === paluValue?.indicatorId)
+          .sort((a, b) => a.year - b.year)
+          .map(v => v.value)
       },
       {
         id: 'h_kpi4',

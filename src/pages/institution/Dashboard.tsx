@@ -12,12 +12,9 @@ import {
   FileText,
   Map as MapIcon,
   AlertTriangle,
-  Calendar,
-  Filter,
   TrendingUp,
   Activity,
-  Zap,
-  MoreHorizontal
+  Zap
 } from 'lucide-react';
 import { useAlerts, useIndicatorValues } from '@/hooks/useData';
 import type { KPIData } from '@/types';
@@ -25,11 +22,10 @@ import { MapContainer } from '@/components/map/MapContainer';
 import { KPICard } from '@/components/cards/KPICard';
 import { AlertCard } from '@/components/cards/AlertCard';
 import { TrendChart } from '@/components/charts/TrendChart';
-import { ComparisonChart } from '@/components/charts/ComparisonChart';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
 

@@ -74,6 +74,22 @@ export const AnalyticsPage = () => {
         })).slice(0, 5);
     }, [allValues]);
 
+    // Derived KPIs
+    const kpis = useMemo(() => {
+        if (allValues.length === 0) return { realized: 0, increasing: 0, total: 0, alerts: 0 };
+
+        const avgAchievement = allValues.reduce((acc, v) => acc + (v.achievementRate || 0), 0) / allValues.length;
+        const indicatorsIncr = allValues.filter(v => (v.variation || 0) > 0).length;
+        const indicatorsTotal = new Set(allValues.map(v => v.indicatorId)).size;
+
+        return {
+            realized: (avgAchievement * 100).toFixed(1),
+            increasing: indicatorsIncr,
+            total: indicatorsTotal,
+            alerts: allValues.filter(v => (v.achievementRate || 0) < 0.5).length // Poor performance as "alerts"
+        };
+    }, [allValues]);
+
     return (
         <MainLayout space="sector">
             <div className="max-w-[1600px] mx-auto space-y-8 pb-12 animate-in fade-in duration-500">
@@ -147,8 +163,8 @@ export const AnalyticsPage = () => {
                                     <TrendingUp className="h-4 w-4 text-muted-foreground" />
                                 </CardHeader>
                                 <CardContent>
-                                    <div className="text-2xl font-bold">87.5%</div>
-                                    <p className="text-xs text-muted-foreground">+2.5% par rapport au mois dernier</p>
+                                    <div className="text-2xl font-bold">{kpis.realized}%</div>
+                                    <p className="text-xs text-muted-foreground">Moyenne globale des objectifs</p>
                                 </CardContent>
                             </Card>
                             <Card>
@@ -157,8 +173,8 @@ export const AnalyticsPage = () => {
                                     <BarChart2 className="h-4 w-4 text-green-500" />
                                 </CardHeader>
                                 <CardContent>
-                                    <div className="text-2xl font-bold">12</div>
-                                    <p className="text-xs text-muted-foreground">Sur 18 indicateurs clés</p>
+                                    <div className="text-2xl font-bold">{kpis.increasing}</div>
+                                    <p className="text-xs text-muted-foreground">Sur {kpis.total} indicateurs suivis</p>
                                 </CardContent>
                             </Card>
                             <Card>
@@ -167,8 +183,8 @@ export const AnalyticsPage = () => {
                                     <Filter className="h-4 w-4 text-orange-500" />
                                 </CardHeader>
                                 <CardContent>
-                                    <div className="text-2xl font-bold">3</div>
-                                    <p className="text-xs text-muted-foreground">Zones nécessitant une intervention</p>
+                                    <div className="text-2xl font-bold">{kpis.alerts}</div>
+                                    <p className="text-xs text-muted-foreground">Indicateurs &lt; 50% de l'objectif</p>
                                 </CardContent>
                             </Card>
                         </div>

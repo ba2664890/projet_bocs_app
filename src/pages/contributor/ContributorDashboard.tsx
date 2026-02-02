@@ -3,7 +3,7 @@
 // Espace Responsable Local / Contributeur
 // ============================================
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useMemo } from 'react';
 import { gsap } from 'gsap';
 import { useNavigate } from 'react-router-dom';
 import { MainLayout } from '@/components/layout/MainLayout';
@@ -22,17 +22,15 @@ import {
   TrendingUp,
   Plus,
   Building2,
-  Users,
   BarChart3,
   Bell,
   ChevronRight,
   FileText,
-  School,
-  GraduationCap,
-  HeartPulse,
+  Loader2,
 } from 'lucide-react';
 import { useAuthStore } from '@/store';
-import { useAlerts, useDataCollections } from '@/hooks/useData';
+import { useAlerts, useDataCollections, useHealthFacilities, useEducationFacilities } from '@/hooks/useData';
+import { dataCollectionService } from '@/services';
 
 interface CollectionTask {
   id: string;
@@ -51,9 +49,13 @@ export const ContributorDashboard = () => {
   const user = useAuthStore((state) => state.user);
   const containerRef = useRef<HTMLDivElement>(null);
   const [activeTab, setActiveTab] = useState('collections');
+  const [forms, setForms] = useState<any[]>([]);
+  const [isLoadingForms, setIsLoadingForms] = useState(false);
 
   const { collections, isLoading: isLoadingCollections } = useDataCollections();
   const { alerts, unreadAlertsCount, markAllAsRead } = useAlerts();
+  const { facilities: allHealth } = useHealthFacilities();
+  const { facilities: allEdu } = useEducationFacilities();
 
   useEffect(() => {
     if (containerRef.current) {
@@ -71,8 +73,31 @@ export const ContributorDashboard = () => {
     }
   }, []);
 
+  useEffect(() => {
+    const fetchForms = async () => {
+      try {
+        setIsLoadingForms(true);
+        const res = await dataCollectionService.getForms();
+        setForms(res.results);
+      } catch (err) {
+        console.error('Failed to fetch forms', err);
+      } finally {
+        setIsLoadingForms(false);
+      }
+    };
+    fetchForms();
+  }, []);
+
+  // Filter facilities by organization or department if user has them
+  const myFacilities = useMemo(() => {
+    const combined = [...allHealth, ...allEdu];
+    if (user?.departmentId) return combined.filter(f => f.departmentId === user.departmentId);
+    if (user?.regionId) return combined.filter(f => f.regionId === user.regionId);
+    return combined;
+  }, [allHealth, allEdu, user]);
+
   // Tâches de collecte - transformées depuis l'API si nécessaire
-  const transformedTasks = collections.map(c => ({
+  const transformedTasks = useMemo(() => collections.map(c => ({
     id: c.id,
     title: c.name,
     description: c.description || 'Pas de description',
@@ -81,7 +106,7 @@ export const ContributorDashboard = () => {
     progress: 0,
     sector: (c.sector?.toLowerCase() as any) || 'health',
     facilityCount: 0,
-  }));
+  })), [collections]);
 
   const getStatusBadge = (status: CollectionTask['status']) => {
     switch (status) {
@@ -164,9 +189,9 @@ export const ContributorDashboard = () => {
           <Card className="bg-gradient-to-br from-amber-500 to-amber-600 text-white">
             <CardContent className="p-4">
               <div className="flex items-center gap-3">
-                <Clock className="h-8 w-8 opacity-80" />
+                <Bell className="h-8 w-8 opacity-80" />
                 <div>
-                  <p className="text-sm opacity-80">Notifications</p>
+                  <p className="text-sm opacity-80">Alertes</p>
                   <p className="text-2xl font-bold">{unreadAlertsCount}</p>
                 </div>
               </div>
@@ -179,7 +204,7 @@ export const ContributorDashboard = () => {
                 <Building2 className="h-8 w-8 opacity-80" />
                 <div>
                   <p className="text-sm opacity-80">Structures</p>
-                  <p className="text-2xl font-bold">--</p>
+                  <p className="text-2xl font-bold">{myFacilities.length}</p>
                 </div>
               </div>
             </CardContent>
@@ -278,8 +303,7 @@ export const ContributorDashboard = () => {
                       {task.status === 'in_progress' && (
                         <div className="mt-4">
                           <div className="flex items-center justify-between text-sm">
-                            <span className="text-muted-foreground">Progression</span>
-                            <span className="font-medium">{task.progress}%</span>
+                            <span className="text-muted-foreground">Progression {task.progress}%</span>
                           </div>
                           <Progress value={task.progress} className="mt-2 h-2" />
                         </div>
@@ -297,15 +321,15 @@ export const ContributorDashboard = () => {
               </CardHeader>
               <CardContent>
                 <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-                  <Button variant="outline" className="h-auto flex-col items-start gap-2 p-4">
+                  <Button variant="outline" className="h-auto flex-col items-start gap-2 p-4" onClick={() => navigate('/contributor/forms')}>
                     <Plus className="h-5 w-5" />
                     <span className="font-medium">Nouvelle collecte</span>
                     <span className="text-xs text-muted-foreground">Démarrer un formulaire</span>
                   </Button>
-                  <Button variant="outline" className="h-auto flex-col items-start gap-2 p-4">
+                  <Button variant="outline" className="h-auto flex-col items-start gap-2 p-4" onClick={() => navigate('/contributor/facilities')}>
                     <Building2 className="h-5 w-5" />
                     <span className="font-medium">Mes structures</span>
-                    <span className="text-xs text-muted-foreground">25 structures assignées</span>
+                    <span className="text-xs text-muted-foreground">{myFacilities.length} structures assignées</span>
                   </Button>
                   <Button variant="outline" className="h-auto flex-col items-start gap-2 p-4">
                     <BarChart3 className="h-5 w-5" />
@@ -329,31 +353,30 @@ export const ContributorDashboard = () => {
                 <CardDescription>Sélectionnez un formulaire pour démarrer une collecte</CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                  {[
-                    { name: 'Indicateurs de santé trimestriels', sector: 'health', icon: HeartPulse, color: 'red' },
-                    { name: 'Indicateurs d\'éducation trimestriels', sector: 'education', icon: GraduationCap, color: 'teal' },
-                    { name: 'Mise à jour structures santé', sector: 'health', icon: Building2, color: 'blue' },
-                    { name: 'Mise à jour établissements', sector: 'education', icon: School, color: 'green' },
-                    { name: 'Ressources humaines santé', sector: 'health', icon: Users, color: 'purple' },
-                    { name: 'Ressources humaines éducation', sector: 'education', icon: Users, color: 'amber' },
-                  ].map((form, i) => (
-                    <Card key={i} className="cursor-pointer transition-colors hover:bg-muted/50">
-                      <CardContent className="flex items-center gap-4 p-4">
-                        <div className={`flex h-12 w-12 items-center justify-center rounded-xl bg-${form.color}-100 dark:bg-${form.color}-900/30`}>
-                          <form.icon className={`h-6 w-6 text-${form.color}-600 dark:text-${form.color}-400`} />
-                        </div>
-                        <div className="flex-1">
-                          <p className="font-medium">{form.name}</p>
-                          <Badge variant="outline" className="mt-1 text-xs">
-                            {form.sector === 'health' ? 'Santé' : 'Éducation'}
-                          </Badge>
-                        </div>
-                        <ChevronRight className="h-5 w-5 text-muted-foreground" />
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
+                {isLoadingForms ? (
+                  <div className="flex justify-center p-8"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>
+                ) : forms.length === 0 ? (
+                  <p className="text-center py-8 text-muted-foreground">Aucun formulaire disponible.</p>
+                ) : (
+                  <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                    {forms.map((form) => (
+                      <Card key={form.id} className="cursor-pointer transition-colors hover:bg-muted/50">
+                        <CardContent className="flex items-center gap-4 p-4">
+                          <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-blue-100 dark:bg-blue-900/30">
+                            <FileText className="h-6 w-6 text-blue-600 dark:text-blue-400" />
+                          </div>
+                          <div className="flex-1">
+                            <p className="font-medium">{form.name}</p>
+                            <Badge variant="outline" className="mt-1 text-xs">
+                              Formulaire
+                            </Badge>
+                          </div>
+                          <ChevronRight className="h-5 w-5 text-muted-foreground" />
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                )}
               </CardContent>
             </Card>
           </TabsContent>
