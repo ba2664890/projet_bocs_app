@@ -21,6 +21,10 @@ import {
   ChevronLeft,
   ChevronRight,
   LogOut,
+  Database,
+  ClipboardList,
+  Shield,
+  X,
   Smartphone,
   Megaphone,
   ShieldCheck,
@@ -164,6 +168,8 @@ export const Sidebar = ({ space, collapsed, isMobile }: SidebarProps) => {
   const { logout } = useAuth();
   const { unreadAlertsCount } = useAlerts();
   const [expandedItems, setExpandedItems] = useState<string[]>([]);
+  const user = useAuthStore((state) => state.user);
+
   const navigation = getNavigation(space, location.pathname);
   const spaceConfig = getSpaceConfig(space);
 
