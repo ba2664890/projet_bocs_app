@@ -23,6 +23,14 @@ import {
     Phone,
 } from 'lucide-react';
 
+const BackgroundGradient = () => (
+    <div className="fixed inset-0 -z-10 overflow-hidden">
+        <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-blue-500/20 blur-[120px] animate-pulse" />
+        <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] rounded-full bg-teal-500/20 blur-[120px] animate-pulse" style={{ animationDelay: '1s' }} />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[60%] h-[60%] rounded-full bg-purple-500/10 blur-[150px]" />
+    </div>
+);
+
 export const Register = () => {
     const navigate = useNavigate();
     const { register, isAuthenticated } = useAuth();
@@ -50,20 +58,34 @@ export const Register = () => {
     }, [isAuthenticated, navigate]);
 
     useEffect(() => {
-        if (containerRef.current) {
-            gsap.fromTo(
-                containerRef.current,
-                { opacity: 0 },
-                { opacity: 1, duration: 0.5 }
-            );
-        }
-        if (formRef.current) {
-            gsap.fromTo(
-                formRef.current,
-                { opacity: 0, y: 30 },
-                { opacity: 1, y: 0, duration: 0.6, delay: 0.2, ease: 'power2.out' }
-            );
-        }
+        const tl = gsap.timeline();
+
+        tl.fromTo(
+            containerRef.current,
+            { opacity: 0 },
+            { opacity: 1, duration: 1 }
+        );
+
+        tl.fromTo(
+            ".auth-header",
+            { opacity: 0, y: -20 },
+            { opacity: 1, y: 0, duration: 0.8, ease: "power3.out" },
+            "-=0.5"
+        );
+
+        tl.fromTo(
+            formRef.current,
+            { opacity: 0, y: 40, scale: 0.95 },
+            { opacity: 1, y: 0, scale: 1, duration: 0.8, ease: "power4.out" },
+            "-=0.6"
+        );
+
+        tl.fromTo(
+            ".auth-footer",
+            { opacity: 0 },
+            { opacity: 1, duration: 1 },
+            "-=0.4"
+        );
     }, []);
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -103,23 +125,25 @@ export const Register = () => {
     return (
         <div
             ref={containerRef}
-            className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100 p-4 dark:from-slate-900 dark:to-slate-800"
+            className="relative flex min-h-screen flex-col items-center justify-center bg-slate-50 dark:bg-slate-950 p-4 transition-colors duration-500"
         >
+            <BackgroundGradient />
+
             {/* Logo & Header */}
-            <div className="mb-8 text-center">
-                <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-primary to-primary/80 shadow-lg">
-                    <UserPlus className="h-8 w-8 text-white" />
+            <div className="auth-header mb-8 text-center text-balance">
+                <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-3xl bg-gradient-to-tr from-primary via-primary/90 to-blue-400 shadow-2xl shadow-primary/20 ring-4 ring-white/50 dark:ring-white/10 rotate-3 hover:rotate-0 transition-transform duration-500">
+                    <UserPlus className="h-10 w-10 text-white" />
                 </div>
-                <h1 className="text-3xl font-bold tracking-tight">FATI</h1>
-                <p className="text-muted-foreground">Création de votre compte</p>
+                <h1 className="text-4xl font-extrabold tracking-tighter text-slate-900 dark:text-white sm:text-5xl">FATI</h1>
+                <p className="mt-2 text-lg font-medium text-slate-500 dark:text-slate-400">Création de votre compte professionnel</p>
             </div>
 
             {/* Register Card */}
             <div ref={formRef} className="w-full max-w-lg">
-                <Card className="border-0 shadow-2xl">
-                    <CardHeader>
-                        <CardTitle>S'inscrire</CardTitle>
-                        <CardDescription>
+                <Card className="glass-card border-white/20 dark:border-slate-800/50 shadow-[0_32px_64px_-16px_rgba(0,0,0,0.1)] overflow-hidden">
+                    <CardHeader className="pb-4">
+                        <CardTitle className="text-3xl font-bold tracking-tight">S'inscrire</CardTitle>
+                        <CardDescription className="text-base font-medium">
                             Rejoignez la plateforme FATI pour le suivi territorial
                         </CardDescription>
                     </CardHeader>
@@ -252,27 +276,41 @@ export const Register = () => {
                                 </div>
                             </div>
 
-                            <Button type="submit" className="w-full gap-2 mt-6" disabled={isLoading}>
+                            <Button
+                                type="submit"
+                                className="w-full h-12 gap-2 mt-6 text-base font-bold shadow-lg shadow-primary/20 bg-primary hover:bg-primary/90 text-white rounded-xl transition-all duration-300 hover:scale-[1.01] active:scale-95"
+                                disabled={isLoading}
+                            >
                                 {isLoading ? (
                                     <span className="animate-pulse">Création du compte...</span>
                                 ) : (
                                     <>
-                                        S'inscrire
+                                        Créer mon compte
                                         <ArrowRight className="h-4 w-4" />
                                     </>
                                 )}
                             </Button>
                         </form>
                     </CardContent>
-                    <CardFooter className="flex justify-center border-t py-4">
-                        <p className="text-sm text-muted-foreground">
+                    <CardFooter className="flex justify-center border-t border-slate-200/50 dark:border-slate-800/50 py-6">
+                        <p className="text-sm text-slate-500 dark:text-slate-400 font-medium">
                             Déjà un compte ?{' '}
-                            <Link to="/login" className="font-medium text-primary hover:underline">
+                            <Link to="/login" className="font-bold text-primary hover:text-primary/80 transition-colors">
                                 Se connecter
                             </Link>
                         </p>
                     </CardFooter>
                 </Card>
+            </div>
+
+            {/* Footer */}
+            <div className="auth-footer mt-12 text-center text-sm">
+                <p className="text-slate-500 dark:text-slate-400 font-medium">© 2024 FATI - Fond d'Analyse Territoriale Intégrée</p>
+                <div className="mt-2 flex items-center justify-center gap-4">
+                    <span className="h-px w-8 bg-slate-300 dark:bg-slate-700"></span>
+                    <p className="text-[10px] text-slate-400 dark:text-slate-500 uppercase tracking-widest font-bold">Ministère de la Santé & de l'Éducation</p>
+                    <span className="h-px w-8 bg-slate-300 dark:bg-slate-700"></span>
+                </div>
             </div>
         </div>
     );
