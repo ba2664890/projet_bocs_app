@@ -545,19 +545,44 @@ export const useDataCollections = (filters?: {
 // ----- Hook de recherche globale -----
 
 export const useSearch = () => {
+  const { indicators, regions, departments, communes, healthFacilities, educationFacilities } = useDataStore();
+
   const searchAll = useCallback(async (query: string): Promise<{
     indicators: Indicator[];
     geographic: GeographicEntity[];
     facilities: (HealthFacility | EducationFacility)[];
   }> => {
-    // TODO: Implement real backend search or use existing loaded data
-    console.log('Searching for:', query);
-    return {
-      indicators: [],
-      geographic: [],
-      facilities: []
+    if (!query || query.length < 2) {
+      return { indicators: [], geographic: [], facilities: [] };
     }
-  }, []);
+
+    const q = query.toLowerCase();
+
+    const filteredIndicators = indicators.filter(i =>
+      i.name.toLowerCase().includes(q) ||
+      i.description?.toLowerCase().includes(q) ||
+      i.code.toLowerCase().includes(q)
+    );
+
+    const geoCombined = [...regions, ...departments, ...communes];
+    const filteredGeographic = geoCombined.filter(g =>
+      g.name.toLowerCase().includes(q) ||
+      g.code.toLowerCase().includes(q)
+    );
+
+    const facCombined = [...healthFacilities, ...educationFacilities];
+    const filteredFacilities = facCombined.filter(f =>
+      f.name.toLowerCase().includes(q) ||
+      f.code.toLowerCase().includes(q) ||
+      f.type.toLowerCase().includes(q)
+    );
+
+    return {
+      indicators: filteredIndicators.slice(0, 10),
+      geographic: filteredGeographic.slice(0, 10),
+      facilities: filteredFacilities.slice(0, 10)
+    };
+  }, [indicators, regions, departments, communes, healthFacilities, educationFacilities]);
 
   return { searchAll };
 };
