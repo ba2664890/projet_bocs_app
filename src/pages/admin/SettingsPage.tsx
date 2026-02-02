@@ -38,8 +38,47 @@ import {
 } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
+import { useSettings } from '@/hooks/useSettings';
+import { useState, useEffect } from 'react';
+import { toast } from 'sonner';
 
 export const SettingsPage = () => {
+    const {
+        siteName, contactEmail, timezone, currency, language,
+        performanceMode, autoOptimization, twoFactorAuth, sessionTimeout,
+        updateSettings, resetSettings
+    } = useSettings();
+    const [localSettings, setLocalSettings] = useState({
+        siteName, contactEmail, timezone, currency, language,
+        performanceMode, autoOptimization, twoFactorAuth, sessionTimeout
+    });
+
+    // Update local state when hook state changes (initial load)
+    useEffect(() => {
+        setLocalSettings({
+            siteName, contactEmail, timezone, currency, language,
+            performanceMode, autoOptimization, twoFactorAuth, sessionTimeout
+        });
+    }, [siteName, contactEmail, timezone, currency, language, performanceMode, autoOptimization, twoFactorAuth, sessionTimeout]);
+
+    const handleSave = () => {
+        updateSettings(localSettings);
+        toast.success("Paramètres enregistrés", {
+            description: "Les modifications ont été prises en compte."
+        });
+    };
+
+    const handleReset = () => {
+        resetSettings();
+        toast.info("Paramètres réinitialisés", {
+            description: "Retour aux valeurs par défaut."
+        });
+    };
+
+    const updateLocal = (key: string, value: any) => {
+        setLocalSettings(prev => ({ ...prev, [key]: value }));
+    };
+
     return (
         <MainLayout space="admin">
             <div className="space-y-6">
@@ -50,10 +89,10 @@ export const SettingsPage = () => {
                         <p className="text-muted-foreground font-medium">Réglages globaux, sécurité et personnalisation de l'écosystème FATI</p>
                     </div>
                     <div className="flex items-center gap-2">
-                        <Button variant="outline" className="gap-2 border-2">
+                        <Button variant="outline" className="gap-2 border-2" onClick={handleReset}>
                             <RefreshCw className="h-4 w-4" /> Réinitialiser
                         </Button>
-                        <Button className="gap-2 bg-purple-600 hover:bg-purple-700 text-white shadow-lg">
+                        <Button className="gap-2 bg-purple-600 hover:bg-purple-700 text-white shadow-lg" onClick={handleSave}>
                             <Save className="h-4 w-4" /> Enregistrer les modifications
                         </Button>
                     </div>
@@ -126,11 +165,21 @@ export const SettingsPage = () => {
                                         <div className="grid gap-4 sm:grid-cols-2">
                                             <div className="space-y-2">
                                                 <Label htmlFor="site-name" className="text-xs font-black uppercase">Nom de la plateforme</Label>
-                                                <Input id="site-name" defaultValue="FATI - Fond d'Analyse Territoriale" className="border-2 h-10" />
+                                                <Input
+                                                    id="site-name"
+                                                    value={localSettings.siteName}
+                                                    onChange={(e) => updateLocal('siteName', e.target.value)}
+                                                    className="border-2 h-10"
+                                                />
                                             </div>
                                             <div className="space-y-2">
                                                 <Label htmlFor="contact-email" className="text-xs font-black uppercase">Email de contact</Label>
-                                                <Input id="contact-email" defaultValue="support@fati.gov.sn" className="border-2 h-10" />
+                                                <Input
+                                                    id="contact-email"
+                                                    value={localSettings.contactEmail}
+                                                    onChange={(e) => updateLocal('contactEmail', e.target.value)}
+                                                    className="border-2 h-10"
+                                                />
                                             </div>
                                         </div>
 
@@ -139,7 +188,7 @@ export const SettingsPage = () => {
                                             <div className="grid gap-4 sm:grid-cols-3">
                                                 <div className="space-y-2">
                                                     <Label className="text-[10px] font-bold uppercase">Fuseau Horaire</Label>
-                                                    <Select defaultValue="utc">
+                                                    <Select value={localSettings.timezone} onValueChange={(v) => updateLocal('timezone', v)}>
                                                         <SelectTrigger className="border-2 h-10">
                                                             <SelectValue />
                                                         </SelectTrigger>
@@ -151,7 +200,7 @@ export const SettingsPage = () => {
                                                 </div>
                                                 <div className="space-y-2">
                                                     <Label className="text-[10px] font-bold uppercase">Devise locale</Label>
-                                                    <Select defaultValue="xof">
+                                                    <Select value={localSettings.currency} onValueChange={(v) => updateLocal('currency', v)}>
                                                         <SelectTrigger className="border-2 h-10">
                                                             <SelectValue />
                                                         </SelectTrigger>
@@ -163,7 +212,7 @@ export const SettingsPage = () => {
                                                 </div>
                                                 <div className="space-y-2">
                                                     <Label className="text-[10px] font-bold uppercase">Langue par défaut</Label>
-                                                    <Select defaultValue="fr">
+                                                    <Select value={localSettings.language} onValueChange={(v) => updateLocal('language', v)}>
                                                         <SelectTrigger className="border-2 h-10">
                                                             <SelectValue />
                                                         </SelectTrigger>
@@ -194,7 +243,10 @@ export const SettingsPage = () => {
                                                     <p className="text-xs text-muted-foreground">Active la mise en cache agressive des indicateurs.</p>
                                                 </div>
                                             </div>
-                                            <Switch defaultChecked />
+                                            <Switch
+                                                checked={localSettings.performanceMode}
+                                                onCheckedChange={(c) => updateLocal('performanceMode', c)}
+                                            />
                                         </div>
                                         <div className="flex items-center justify-between p-4 rounded-xl border-2 bg-slate-50">
                                             <div className="flex items-center gap-3">
@@ -206,7 +258,10 @@ export const SettingsPage = () => {
                                                     <p className="text-xs text-muted-foreground">Indexation hebdomadaire intelligente.</p>
                                                 </div>
                                             </div>
-                                            <Switch defaultChecked />
+                                            <Switch
+                                                checked={localSettings.autoOptimization}
+                                                onCheckedChange={(c) => updateLocal('autoOptimization', c)}
+                                            />
                                         </div>
                                     </CardContent>
                                 </Card>
@@ -228,11 +283,14 @@ export const SettingsPage = () => {
                                                 <p className="font-bold text-sm">Double Authentification (2FA)</p>
                                                 <p className="text-xs text-muted-foreground">Obligatoire pour les administrateurs et directeurs.</p>
                                             </div>
-                                            <Switch defaultChecked />
+                                            <Switch
+                                                checked={localSettings.twoFactorAuth}
+                                                onCheckedChange={(c) => updateLocal('twoFactorAuth', c)}
+                                            />
                                         </div>
                                         <div className="space-y-4 pt-4 border-t">
                                             <Label className="text-xs font-black uppercase">Expiration des Sessions (Minutes)</Label>
-                                            <Select defaultValue="60">
+                                            <Select value={localSettings.sessionTimeout} onValueChange={(v) => updateLocal('sessionTimeout', v)}>
                                                 <SelectTrigger className="border-2 h-10 w-full sm:w-[200px]">
                                                     <SelectValue />
                                                 </SelectTrigger>
