@@ -40,11 +40,23 @@ import { AuditPage } from '@/pages/admin/AuditPage';
 import { SettingsPage } from '@/pages/admin/SettingsPage';
 
 // Composant de protection des routes
-const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
-  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+interface ProtectedRouteProps {
+  children: React.ReactNode;
+  allowedRoles?: string[];
+}
+
+const ProtectedRoute = ({ children, allowedRoles }: ProtectedRouteProps) => {
+  const { isAuthenticated, user } = useAuthStore((state) => ({
+    isAuthenticated: state.isAuthenticated,
+    user: state.user
+  }));
 
   if (!isAuthenticated) {
     return <Navigate to="/login" replace />;
+  }
+
+  if (allowedRoles && user && !allowedRoles.includes(user.role) && user.role !== 'admin') {
+    return <Navigate to="/" replace />;
   }
 
   return <>{children}</>;
@@ -92,7 +104,7 @@ function App() {
         <Route path="/" element={<DefaultRoute />} />
 
         {/* Institution Space */}
-        <Route path="/institution" element={<ProtectedRoute><InstitutionLayout /></ProtectedRoute>}>
+        <Route path="/institution" element={<ProtectedRoute allowedRoles={['institution']}><InstitutionLayout /></ProtectedRoute>}>
           <Route index element={<InstitutionDashboard />} />
           <Route path="map" element={<MapPage />} />
           <Route path="indicators" element={<IndicatorsPage />} />
@@ -103,44 +115,43 @@ function App() {
         </Route>
 
         {/* Sector Space - Health */}
-        <Route path="/sector/health" element={<ProtectedRoute><HealthDashboard /></ProtectedRoute>} />
-        <Route path="/sector/health/map" element={<ProtectedRoute><MapPage /></ProtectedRoute>} />
-        <Route path="/sector/health/indicators" element={<ProtectedRoute><IndicatorsPage /></ProtectedRoute>} />
-        <Route path="/sector/health/facilities" element={<ProtectedRoute><FacilitiesPage /></ProtectedRoute>} />
-        <Route path="/sector/health/collections" element={<ProtectedRoute><CollectionsPage /></ProtectedRoute>} />
-        <Route path="/sector/health/analytics" element={<ProtectedRoute><AnalyticsPage /></ProtectedRoute>} />
-        <Route path="/sector/health/exports" element={<ProtectedRoute><ExportsPage /></ProtectedRoute>} />
+        <Route path="/sector/health" element={<ProtectedRoute allowedRoles={['sector_health']}><HealthDashboard /></ProtectedRoute>} />
+        <Route path="/sector/health/map" element={<ProtectedRoute allowedRoles={['sector_health']}><MapPage /></ProtectedRoute>} />
+        <Route path="/sector/health/indicators" element={<ProtectedRoute allowedRoles={['sector_health']}><IndicatorsPage /></ProtectedRoute>} />
+        <Route path="/sector/health/facilities" element={<ProtectedRoute allowedRoles={['sector_health']}><FacilitiesPage /></ProtectedRoute>} />
+        <Route path="/sector/health/collections" element={<ProtectedRoute allowedRoles={['sector_health']}><CollectionsPage /></ProtectedRoute>} />
+        <Route path="/sector/health/analytics" element={<ProtectedRoute allowedRoles={['sector_health']}><AnalyticsPage /></ProtectedRoute>} />
+        <Route path="/sector/health/exports" element={<ProtectedRoute allowedRoles={['sector_health']}><ExportsPage /></ProtectedRoute>} />
 
         {/* Sector Space - Education */}
-        <Route path="/sector/education" element={<ProtectedRoute><EducationDashboard /></ProtectedRoute>} />
-        <Route path="/sector/education/map" element={<ProtectedRoute><MapPage /></ProtectedRoute>} />
-        <Route path="/sector/education/indicators" element={<ProtectedRoute><IndicatorsPage /></ProtectedRoute>} />
-        <Route path="/sector/education/facilities" element={<ProtectedRoute><FacilitiesPage /></ProtectedRoute>} />
-        <Route path="/sector/education/collections" element={<ProtectedRoute><CollectionsPage /></ProtectedRoute>} />
-        <Route path="/sector/education/analytics" element={<ProtectedRoute><AnalyticsPage /></ProtectedRoute>} />
-        <Route path="/sector/education/exports" element={<ProtectedRoute><ExportsPage /></ProtectedRoute>} />
+        <Route path="/sector/education" element={<ProtectedRoute allowedRoles={['sector_education']}><EducationDashboard /></ProtectedRoute>} />
+        <Route path="/sector/education/map" element={<ProtectedRoute allowedRoles={['sector_education']}><MapPage /></ProtectedRoute>} />
+        <Route path="/sector/education/indicators" element={<ProtectedRoute allowedRoles={['sector_education']}><IndicatorsPage /></ProtectedRoute>} />
+        <Route path="/sector/education/facilities" element={<ProtectedRoute allowedRoles={['sector_education']}><FacilitiesPage /></ProtectedRoute>} />
+        <Route path="/sector/education/collections" element={<ProtectedRoute allowedRoles={['sector_education']}><CollectionsPage /></ProtectedRoute>} />
+        <Route path="/sector/education/analytics" element={<ProtectedRoute allowedRoles={['sector_education']}><AnalyticsPage /></ProtectedRoute>} />
+        <Route path="/sector/education/exports" element={<ProtectedRoute allowedRoles={['sector_education']}><ExportsPage /></ProtectedRoute>} />
 
         {/* Admin Space */}
-        <Route path="/admin" element={<ProtectedRoute><AdminDashboard /></ProtectedRoute>} />
-        <Route path="/admin/users" element={<ProtectedRoute><UsersPage /></ProtectedRoute>} />
-        <Route path="/admin/data" element={<ProtectedRoute><DataPage /></ProtectedRoute>} />
-        <Route path="/admin/validations" element={<ProtectedRoute><WorkflowsPage /></ProtectedRoute>} />
-        <Route path="/admin/workflows" element={<ProtectedRoute><WorkflowsPage /></ProtectedRoute>} />
-        <Route path="/admin/audit" element={<ProtectedRoute><AuditPage /></ProtectedRoute>} />
-        <Route path="/admin/settings" element={<ProtectedRoute><SettingsPage /></ProtectedRoute>} />
+        <Route path="/admin" element={<ProtectedRoute allowedRoles={['admin']}><AdminDashboard /></ProtectedRoute>} />
+        <Route path="/admin/users" element={<ProtectedRoute allowedRoles={['admin']}><UsersPage /></ProtectedRoute>} />
+        <Route path="/admin/data" element={<ProtectedRoute allowedRoles={['admin']}><DataPage /></ProtectedRoute>} />
+        <Route path="/admin/validations" element={<ProtectedRoute allowedRoles={['admin']}><WorkflowsPage /></ProtectedRoute>} />
+        <Route path="/admin/workflows" element={<ProtectedRoute allowedRoles={['admin']}><WorkflowsPage /></ProtectedRoute>} />
+        <Route path="/admin/audit" element={<ProtectedRoute allowedRoles={['admin']}><AuditPage /></ProtectedRoute>} />
+        <Route path="/admin/settings" element={<ProtectedRoute allowedRoles={['admin']}><SettingsPage /></ProtectedRoute>} />
 
         {/* Contributor Space */}
-        <Route path="/contributor" element={<ProtectedRoute><ContributorDashboard /></ProtectedRoute>} />
-        <Route path="/contributor/collections" element={<ProtectedRoute><CollectionsPage /></ProtectedRoute>} />
-        {/* Forms and Notifications could reuse existing or need new ones, mapping to Collections for now to avoid 404 */}
-        <Route path="/contributor/forms" element={<ProtectedRoute><CollectionsPage /></ProtectedRoute>} />
-        <Route path="/contributor/notifications" element={<ProtectedRoute><AlertsPage /></ProtectedRoute>} />
+        <Route path="/contributor" element={<ProtectedRoute allowedRoles={['contributor', 'local_manager']}><ContributorDashboard /></ProtectedRoute>} />
+        <Route path="/contributor/collections" element={<ProtectedRoute allowedRoles={['contributor', 'local_manager']}><CollectionsPage /></ProtectedRoute>} />
+        <Route path="/contributor/forms" element={<ProtectedRoute allowedRoles={['contributor', 'local_manager']}><CollectionsPage /></ProtectedRoute>} />
+        <Route path="/contributor/notifications" element={<ProtectedRoute allowedRoles={['contributor', 'local_manager']}><AlertsPage /></ProtectedRoute>} />
 
         {/* Annonceur Space */}
-        <Route path="/annonceur" element={<ProtectedRoute><AnnonceurDashboard /></ProtectedRoute>} />
-        <Route path="/annonceur/campaigns" element={<ProtectedRoute><CampaignsPage /></ProtectedRoute>} />
-        <Route path="/annonceur/audiences" element={<ProtectedRoute><AudiencesPage /></ProtectedRoute>} />
-        <Route path="/annonceur/reports" element={<ProtectedRoute><AnnonceurReportsPage /></ProtectedRoute>} />
+        <Route path="/annonceur" element={<ProtectedRoute allowedRoles={['annonceur']}><AnnonceurDashboard /></ProtectedRoute>} />
+        <Route path="/annonceur/campaigns" element={<ProtectedRoute allowedRoles={['annonceur']}><CampaignsPage /></ProtectedRoute>} />
+        <Route path="/annonceur/audiences" element={<ProtectedRoute allowedRoles={['annonceur']}><AudiencesPage /></ProtectedRoute>} />
+        <Route path="/annonceur/reports" element={<ProtectedRoute allowedRoles={['annonceur']}><AnnonceurReportsPage /></ProtectedRoute>} />
 
         {/* Fallback */}
         <Route path="*" element={<Navigate to="/" replace />} />

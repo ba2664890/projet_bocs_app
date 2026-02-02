@@ -49,11 +49,14 @@ interface NavItem {
   roles?: string[];
 }
 
-const getNavigation = (space: string, locationPath: string): NavItem[] => {
+const getNavigation = (space: string, locationPath: string, userRole: string): NavItem[] => {
   const isSector = space === 'sector';
   const sectorMatch = locationPath.match(/\/sector\/(health|education)/);
   const currentSector = sectorMatch ? sectorMatch[1] : '';
   const basePath = isSector && currentSector ? `/sector/${currentSector}` : `/${space}`;
+
+  // Helper to check if user has access
+  const hasRole = (allowedRoles: string[]) => allowedRoles.includes(userRole) || userRole === 'admin';
 
   const baseNav: NavItem[] = [
     { label: 'Tableau de bord', path: basePath, icon: LayoutDashboard },
@@ -63,6 +66,7 @@ const getNavigation = (space: string, locationPath: string): NavItem[] => {
 
   switch (space) {
     case 'institution':
+      if (!hasRole(['institution'])) return [];
       return [
         ...baseNav,
         {
@@ -80,6 +84,9 @@ const getNavigation = (space: string, locationPath: string): NavItem[] => {
       ];
 
     case 'sector':
+      if (currentSector === 'health' && !hasRole(['sector_health'])) return [];
+      if (currentSector === 'education' && !hasRole(['sector_education'])) return [];
+
       const structuresLabel = currentSector === 'education' ? 'Établissements' : 'Structures';
       return [
         ...baseNav,
@@ -90,6 +97,7 @@ const getNavigation = (space: string, locationPath: string): NavItem[] => {
       ];
 
     case 'admin':
+      if (userRole !== 'admin') return [];
       return [
         { label: 'Tableau de bord', path: `${basePath}`, icon: LayoutDashboard },
         { label: 'Utilisateurs', path: `${basePath}/users`, icon: Users },
@@ -101,6 +109,7 @@ const getNavigation = (space: string, locationPath: string): NavItem[] => {
       ];
 
     case 'contributor':
+      if (!hasRole(['contributor', 'local_manager'])) return [];
       return [
         { label: 'Accueil', path: `${basePath}`, icon: LayoutDashboard },
         { label: 'Mes collectes', path: `${basePath}/collections`, icon: ClipboardList },
@@ -109,6 +118,7 @@ const getNavigation = (space: string, locationPath: string): NavItem[] => {
       ];
 
     case 'annonceur':
+      if (!hasRole(['annonceur'])) return [];
       return [
         { label: 'Tableau de bord', path: `${basePath}`, icon: LayoutDashboard },
         { label: 'Campagnes', path: `${basePath}/campaigns`, icon: Megaphone },
@@ -170,7 +180,7 @@ export const Sidebar = ({ space, collapsed, isMobile }: SidebarProps) => {
   const [expandedItems, setExpandedItems] = useState<string[]>([]);
   const user = useAuthStore((state) => state.user);
 
-  const navigation = getNavigation(space, location.pathname);
+  const navigation = getNavigation(space, location.pathname, user?.role || '');
   const spaceConfig = getSpaceConfig(space);
 
   const isAdmin = user?.role === 'admin';
