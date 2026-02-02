@@ -30,9 +30,25 @@ import {
   Edit,
   Trash2,
   Eye,
+  Download,
+  Calendar,
+  ArrowUpRight,
 } from 'lucide-react';
 import { useAlerts, useIndicatorValues, useUsers } from '@/hooks/useData';
 import type { ColumnDef } from '@tanstack/react-table';
+import { cn } from '@/lib/utils';
+import {
+  AreaChart,
+  Area,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  BarChart,
+  Bar,
+  Cell,
+} from 'recharts';
 
 // Types pour les tables
 interface UserRow {
@@ -54,6 +70,22 @@ interface ValidationRow {
   submittedAt: string;
   status: string;
 }
+
+const trendData = [
+  { name: 'Jan', validations: 45, submissions: 60 },
+  { name: 'Fév', validations: 52, submissions: 58 },
+  { name: 'Mar', validations: 48, submissions: 65 },
+  { name: 'Avr', validations: 70, submissions: 75 },
+  { name: 'Mai', validations: 85, submissions: 90 },
+  { name: 'Juin', validations: 78, submissions: 82 },
+];
+
+const sectorData = [
+  { name: 'Santé', value: 85, color: '#0d9488' },
+  { name: 'Éducation', value: 72, color: '#0891b2' },
+  { name: 'Admin', value: 95, color: '#7c3aed' },
+  { name: 'Local', value: 64, color: '#ea580c' },
+];
 
 export const AdminDashboard = () => {
   const navigate = useNavigate();
@@ -79,7 +111,7 @@ export const AdminDashboard = () => {
   }, []);
 
   // Données pour la table utilisateurs
-  const userData: UserRow[] = users.map((u) => ({
+  const userData: UserRow[] = users.slice(0, 5).map((u) => ({
     id: u.id,
     name: `${u.firstName} ${u.lastName}`,
     email: u.email,
@@ -101,7 +133,7 @@ export const AdminDashboard = () => {
           </div>
           <div>
             <p className="font-medium">{row.original.name}</p>
-            <p className="text-sm text-muted-foreground">{row.original.email}</p>
+            <p className="text-sm text-muted-foreground line-clamp-1">{row.original.email}</p>
           </div>
         </div>
       ),
@@ -110,19 +142,10 @@ export const AdminDashboard = () => {
       accessorKey: 'role',
       header: 'Rôle',
       cell: ({ row }) => (
-        <Badge variant="outline">
-          {row.original.role === 'admin' && 'Administrateur'}
-          {row.original.role === 'institution' && 'Institution'}
-          {row.original.role === 'sector_health' && 'Santé'}
-          {row.original.role === 'sector_education' && 'Éducation'}
-          {row.original.role === 'local_manager' && 'Responsable local'}
-          {row.original.role === 'contributor' && 'Contributeur'}
+        <Badge variant="outline" className="capitalize">
+          {row.original.role.replace('_', ' ')}
         </Badge>
       ),
-    },
-    {
-      accessorKey: 'organization',
-      header: 'Organisation',
     },
     {
       accessorKey: 'status',
@@ -130,28 +153,18 @@ export const AdminDashboard = () => {
       cell: ({ row }) => (
         <Badge
           variant={row.original.status === 'active' ? 'default' : 'secondary'}
-          className={row.original.status === 'active' ? 'bg-emerald-500' : ''}
+          className={cn(row.original.status === 'active' ? 'bg-emerald-500 hover:bg-emerald-600 border-none' : '')}
         >
           {row.original.status === 'active' ? 'Actif' : 'Inactif'}
         </Badge>
       ),
     },
     {
-      accessorKey: 'lastLogin',
-      header: 'Dernière connexion',
-    },
-    {
       id: 'actions',
       cell: () => (
         <div className="flex items-center gap-2">
           <Button variant="ghost" size="icon" className="h-8 w-8">
-            <Eye className="h-4 w-4" />
-          </Button>
-          <Button variant="ghost" size="icon" className="h-8 w-8">
             <Edit className="h-4 w-4" />
-          </Button>
-          <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive">
-            <Trash2 className="h-4 w-4" />
           </Button>
         </div>
       ),
@@ -159,59 +172,32 @@ export const AdminDashboard = () => {
   ];
 
   // Données pour la table validations
-  const validationData: ValidationRow[] = values.slice(0, 10).map((v) => ({
+  const validationData: ValidationRow[] = values.slice(0, 5).map((v) => ({
     id: v.id,
     indicator: v.indicatorName,
     region: v.geographicName,
     value: v.valueFormatted,
-    submittedBy: 'Moussa Sy',
+    submittedBy: 'Agent Terrain',
     submittedAt: new Date(v.createdAt).toLocaleDateString('fr-FR'),
     status: v.status,
   }));
 
-  // Colonnes pour la table validations
   const validationColumns: ColumnDef<ValidationRow>[] = [
     {
       accessorKey: 'indicator',
       header: 'Indicateur',
     },
     {
-      accessorKey: 'region',
-      header: 'Région',
-    },
-    {
       accessorKey: 'value',
       header: 'Valeur',
-      cell: ({ row }) => (
-        <span className="font-medium">{row.original.value}</span>
-      ),
-    },
-    {
-      accessorKey: 'submittedBy',
-      header: 'Soumis par',
-    },
-    {
-      accessorKey: 'submittedAt',
-      header: 'Date',
+      cell: ({ row }) => <span className="font-bold">{row.original.value}</span>,
     },
     {
       accessorKey: 'status',
       header: 'Statut',
       cell: ({ row }) => (
-        <Badge
-          variant="outline"
-          className={
-            row.original.status === 'validated'
-              ? 'border-emerald-500 text-emerald-600'
-              : row.original.status === 'pending'
-                ? 'border-amber-500 text-amber-600'
-                : 'border-red-500 text-red-600'
-          }
-        >
-          {row.original.status === 'validated' && <CheckCircle className="mr-1 h-3 w-3" />}
-          {row.original.status === 'pending' && <Clock className="mr-1 h-3 w-3" />}
-          {row.original.status === 'rejected' && <XCircle className="mr-1 h-3 w-3" />}
-          {row.original.status === 'validated' ? 'Validé' : row.original.status === 'pending' ? 'En attente' : 'Rejeté'}
+        <Badge variant="outline" className="border-amber-500 text-amber-600">
+          En attente
         </Badge>
       ),
     },
@@ -219,13 +205,8 @@ export const AdminDashboard = () => {
       id: 'actions',
       cell: () => (
         <div className="flex items-center gap-2">
-          <Button variant="ghost" size="sm" className="h-8 gap-1 text-emerald-600">
-            <CheckCircle className="h-4 w-4" />
+          <Button variant="ghost" size="sm" className="h-8 text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50">
             Valider
-          </Button>
-          <Button variant="ghost" size="sm" className="h-8 gap-1 text-red-600">
-            <XCircle className="h-4 w-4" />
-            Rejeter
           </Button>
         </div>
       ),
@@ -235,291 +216,274 @@ export const AdminDashboard = () => {
   return (
     <MainLayout space="admin">
       <div ref={containerRef} className="space-y-6">
-        {/* Header */}
+        {/* Top bar refined */}
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex items-center gap-3">
-            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-purple-600">
-              <Shield className="h-6 w-6 text-white" />
+          <div>
+            <div className="flex items-center gap-2 text-sm text-muted-foreground mb-1">
+              <Calendar className="h-3.5 w-3.5" />
+              <span>Dernière mise à jour : Aujourd'hui, 14:30</span>
             </div>
-            <div>
-              <h1 className="text-2xl font-bold tracking-tight">Administration</h1>
-              <p className="text-muted-foreground">
-                Gestion des utilisateurs, données et workflows
-              </p>
-            </div>
+            <h1 className="text-3xl font-extrabold tracking-tight">Console d'Administration</h1>
+            <p className="text-muted-foreground text-lg">Gouvernance et supervision de la plateforme FATI</p>
           </div>
-          <div className="flex items-center gap-2">
-            <Button variant="outline" className="gap-2">
-              <Activity className="h-4 w-4" />
-              Audit
+          <div className="flex items-center gap-3">
+            <Button variant="outline" className="shadow-sm border-2">
+              <Download className="mr-2 h-4 w-4" /> Export logs
             </Button>
-            <Button className="gap-2" onClick={() => navigate('/admin/settings')}>
-              <Settings className="h-4 w-4" />
-              Paramètres
+            <Button className="shadow-lg bg-purple-600 hover:bg-purple-700 text-white">
+              <Activity className="mr-2 h-4 w-4" /> Rapport d'audit
             </Button>
           </div>
         </div>
 
-        {/* KPIs Admin */}
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          <Card>
-            <CardContent className="p-5">
+        {/* High Premium KPIs Section */}
+        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+          <Card className="relative overflow-hidden border-none bg-gradient-to-br from-blue-600 to-blue-800 text-white shadow-xl">
+            <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-muted-foreground">Utilisateurs actifs</p>
-                  <p className="text-3xl font-bold">{users.filter((u) => u.status === 'active').length}</p>
+                  <p className="text-blue-100 text-sm font-medium">Utilisateurs Actifs</p>
+                  <h3 className="text-4xl font-black mt-1">
+                    {users.filter((u) => u.status === 'active').length}
+                  </h3>
                 </div>
-                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-blue-100 dark:bg-blue-900/30">
-                  <Users className="h-6 w-6 text-blue-600 dark:text-blue-400" />
-                </div>
+                <Users className="h-10 w-10 text-blue-200/50" />
               </div>
-              <div className="mt-4 flex items-center gap-2 text-sm">
-                <TrendingUp className="h-4 w-4 text-emerald-500" />
-                <span className="text-emerald-600">+12%</span>
-                <span className="text-muted-foreground">ce mois</span>
+              <div className="mt-4 flex items-center gap-2 text-xs">
+                <div className="bg-white/20 hover:bg-white/30 rounded-full px-2 py-0.5 flex items-center gap-1">
+                  +12% <TrendingUp className="h-3 w-3" />
+                </div>
+                <span className="text-blue-100 font-medium">vs mois dernier</span>
               </div>
             </CardContent>
+            <div className="absolute top-0 right-0 -mr-4 -mt-4 h-24 w-24 rounded-full bg-white/10 blur-2xl" />
           </Card>
 
-          <Card>
-            <CardContent className="p-5">
+          <Card className="relative overflow-hidden border-none bg-gradient-to-br from-amber-500 to-orange-600 text-white shadow-xl">
+            <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-muted-foreground">Données en attente</p>
-                  <p className="text-3xl font-bold">{values.length}</p>
+                  <p className="text-amber-100 text-sm font-medium">Validations en Attente</p>
+                  <h3 className="text-4xl font-black mt-1">{values.length}</h3>
                 </div>
-                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-amber-100 dark:bg-amber-900/30">
-                  <Clock className="h-6 w-6 text-amber-600 dark:text-amber-400" />
-                </div>
+                <Clock className="h-10 w-10 text-amber-200/50" />
               </div>
-              <div className="mt-4 flex items-center gap-2 text-sm">
-                <AlertTriangle className="h-4 w-4 text-amber-500" />
-                <span className="text-amber-600">3 critiques</span>
+              <div className="mt-4 flex items-center gap-2 text-xs">
+                <div className="bg-white/20 hover:bg-white/30 rounded-full px-2 py-0.5 flex items-center gap-1">
+                  Urgent <AlertTriangle className="h-3 w-3" />
+                </div>
+                <span className="text-amber-100 font-medium">3 alertes critiques</span>
               </div>
             </CardContent>
+            <div className="absolute top-0 right-0 -mr-4 -mt-4 h-24 w-24 rounded-full bg-white/10 blur-2xl" />
           </Card>
 
-          <Card>
-            <CardContent className="p-5">
+          <Card className="relative overflow-hidden border-none bg-gradient-to-br from-emerald-500 to-teal-700 text-white shadow-xl">
+            <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-muted-foreground">Données validées</p>
-                  <p className="text-3xl font-bold">
-                    {allValues.length > 0
-                      ? Math.round((allValues.filter((v) => v.status === 'validated').length / allValues.length) * 100)
-                      : 0}%
-                  </p>
+                  <p className="text-emerald-100 text-sm font-medium">Complétude Territoriale</p>
+                  <h3 className="text-4xl font-black mt-1">87.4%</h3>
                 </div>
-                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-emerald-100 dark:bg-emerald-900/30">
-                  <CheckCircle className="h-6 w-6 text-emerald-600 dark:text-emerald-400" />
-                </div>
+                <CheckCircle className="h-10 w-10 text-emerald-200/50" />
               </div>
               <div className="mt-4">
-                <Progress value={82} className="h-2" />
+                <Progress value={87.4} className="h-2 bg-white/20" />
+                <p className="text-[10px] mt-1 text-emerald-100 opacity-80 text-right font-medium">Objectif 95%</p>
+              </div>
+            </CardContent>
+            <div className="absolute top-0 right-0 -mr-4 -mt-4 h-24 w-24 rounded-full bg-white/10 blur-2xl" />
+          </Card>
+
+          <Card className="relative overflow-hidden border-none bg-gradient-to-br from-purple-500 to-indigo-700 text-white shadow-xl">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-purple-100 text-sm font-medium">Qualité Data</p>
+                  <h3 className="text-4xl font-black mt-1">94.2%</h3>
+                </div>
+                <Shield className="h-10 w-10 text-purple-200/50" />
+              </div>
+              <div className="mt-4 flex items-center gap-2 text-xs">
+                <div className="bg-white/20 hover:bg-white/30 rounded-full px-2 py-0.5 flex items-center gap-1">
+                  Stable <Activity className="h-3 w-3" />
+                </div>
+                <span className="text-purple-100 font-medium">+2.1% ce trimestre</span>
+              </div>
+            </CardContent>
+            <div className="absolute top-0 right-0 -mr-4 -mt-4 h-24 w-24 rounded-full bg-white/10 blur-2xl" />
+          </Card>
+        </div>
+
+        {/* Main Analytic Content */}
+        <div className="grid gap-6 lg:grid-cols-7">
+          {/* Trends Area Chart */}
+          <Card className="lg:col-span-4 border-2 shadow-sm">
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
+              <div>
+                <CardTitle className="text-xl">Flux de Données</CardTitle>
+                <CardDescription>Évolution des soumissions vs validations (6 mois)</CardDescription>
+              </div>
+              <Tabs defaultValue="vol" className="w-[180px]">
+                <TabsList className="grid w-full grid-cols-2">
+                  <TabsTrigger value="vol">Volume</TabsTrigger>
+                  <TabsTrigger value="per">Taux</TabsTrigger>
+                </TabsList>
+              </Tabs>
+            </CardHeader>
+            <CardContent className="pt-4">
+              <div className="h-[300px] w-full mt-4">
+                <ResponsiveContainer width="100%" height="100%">
+                  <AreaChart data={trendData}>
+                    <defs>
+                      <linearGradient id="colorValid" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="#7c3aed" stopOpacity={0.1} />
+                        <stop offset="95%" stopColor="#7c3aed" stopOpacity={0} />
+                      </linearGradient>
+                    </defs>
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f0f0f0" />
+                    <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 12 }} dy={10} />
+                    <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12 }} />
+                    <Tooltip
+                      contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }}
+                    />
+                    <Area
+                      type="monotone"
+                      dataKey="validations"
+                      stroke="#7c3aed"
+                      strokeWidth={4}
+                      fillOpacity={1}
+                      fill="url(#colorValid)"
+                    />
+                    <Area
+                      type="monotone"
+                      dataKey="submissions"
+                      stroke="#0ea5e9"
+                      strokeWidth={2}
+                      strokeDasharray="5 5"
+                      fillOpacity={0}
+                    />
+                  </AreaChart>
+                </ResponsiveContainer>
               </div>
             </CardContent>
           </Card>
 
-          <Card>
-            <CardContent className="p-5">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-muted-foreground">Alertes non lues</p>
-                  <p className="text-3xl font-bold">{unreadAlertsCount}</p>
-                </div>
-                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-red-100 dark:bg-red-900/30">
-                  <AlertTriangle className="h-6 w-6 text-red-600 dark:text-red-400" />
-                </div>
+          {/* Sector distribution Bar Chart */}
+          <Card className="lg:col-span-3 border-2 shadow-sm">
+            <CardHeader>
+              <CardTitle className="text-xl">Performance Sectorielle</CardTitle>
+              <CardDescription>Récupération des données par domaine</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="h-[300px] w-full mt-4">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={sectorData} layout="vertical" margin={{ left: 20 }}>
+                    <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#f0f0f0" />
+                    <XAxis type="number" hide />
+                    <YAxis dataKey="name" type="category" axisLine={false} tickLine={false} tick={{ fontSize: 12, fontWeight: 600 }} />
+                    <Tooltip cursor={{ fill: 'transparent' }} />
+                    <Bar dataKey="value" radius={[0, 4, 4, 0]} barSize={28}>
+                      {sectorData.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={entry.color} />
+                      ))}
+                    </Bar>
+                  </BarChart>
+                </ResponsiveContainer>
               </div>
-              <div className="mt-4 flex items-center gap-2 text-sm">
-                <TrendingDown className="h-4 w-4 text-emerald-500" />
-                <span className="text-emerald-600">-5</span>
-                <span className="text-muted-foreground">vs hier</span>
+              <div className="mt-6 grid grid-cols-2 gap-4">
+                {sectorData.map((s) => (
+                  <div key={s.name} className="flex items-center gap-2 p-2 rounded-lg bg-slate-50 border">
+                    <div className="h-3 w-3 rounded-full shrink-0" style={{ backgroundColor: s.color }} />
+                    <div className="min-w-0">
+                      <p className="text-[10px] text-muted-foreground font-bold uppercase truncate">{s.name}</p>
+                      <p className="text-sm font-extrabold">{s.value}%</p>
+                    </div>
+                  </div>
+                ))}
               </div>
             </CardContent>
           </Card>
         </div>
 
-        {/* Main Content */}
-        <Tabs defaultValue="validations" className="w-full">
-          <TabsList className="grid w-full max-w-xl grid-cols-4">
-            <TabsTrigger value="validations">Validations</TabsTrigger>
-            <TabsTrigger value="users">Utilisateurs</TabsTrigger>
-            <TabsTrigger value="data">Données</TabsTrigger>
-            <TabsTrigger value="audit">Audit</TabsTrigger>
-          </TabsList>
+        {/* Data & Users Tables Section */}
+        <div className="grid gap-6 lg:grid-cols-2">
+          {/* Pending Validations Table */}
+          <Card className="border-2 shadow-sm overflow-hidden">
+            <CardHeader className="flex flex-row items-center justify-between border-b bg-slate-50/50">
+              <div>
+                <CardTitle className="flex items-center gap-2 text-lg">
+                  <Shield className="h-5 w-5 text-amber-600" />
+                  Validations Prioritaires
+                </CardTitle>
+                <CardDescription>Flux de données critiques à vérifier</CardDescription>
+              </div>
+              <Button variant="ghost" size="sm" className="font-bold underline text-amber-600 hover:text-amber-700" onClick={() => navigate('/admin/workflows')}>
+                Explorer tout
+              </Button>
+            </CardHeader>
+            <CardContent className="p-0">
+              <DataTable columns={validationColumns} data={validationData} />
+            </CardContent>
+          </Card>
 
-          <TabsContent value="validations" className="mt-4">
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between">
-                <div>
-                  <CardTitle>Validations en attente</CardTitle>
-                  <CardDescription>
-                    {values.filter((v) => v.status === 'pending').length} données à valider
-                  </CardDescription>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Button variant="outline" size="sm" className="gap-2">
-                    <Filter className="h-4 w-4" />
-                    Filtrer
-                  </Button>
-                  <Button variant="outline" size="sm" className="gap-2">
-                    <CheckCircle className="h-4 w-4" />
-                    Tout valider
-                  </Button>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <DataTable columns={validationColumns} data={validationData} />
-              </CardContent>
-            </Card>
-          </TabsContent>
+          {/* New Users Table */}
+          <Card className="border-2 shadow-sm overflow-hidden">
+            <CardHeader className="flex flex-row items-center justify-between border-b bg-slate-50/50">
+              <div>
+                <CardTitle className="flex items-center gap-2 text-lg">
+                  <Users className="h-5 w-5 text-blue-600" />
+                  Gouvernance Utilisateurs
+                </CardTitle>
+                <CardDescription>Gestion des nouveaux comptes et privilèges</CardDescription>
+              </div>
+              <Button variant="ghost" size="sm" className="font-bold underline text-blue-600 hover:text-blue-700" onClick={() => navigate('/admin/users')}>
+                Gérer annuaire
+              </Button>
+            </CardHeader>
+            <CardContent className="p-0">
+              <DataTable columns={userColumns} data={userData} />
+            </CardContent>
+          </Card>
+        </div>
 
-          <TabsContent value="users" className="mt-4">
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between">
-                <div>
-                  <CardTitle>Gestion des utilisateurs</CardTitle>
-                  <CardDescription>{users.length} utilisateurs enregistrés</CardDescription>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Button variant="outline" size="sm" className="gap-2">
-                    <Search className="h-4 w-4" />
-                    Rechercher
-                  </Button>
-                  <Button size="sm" className="gap-2">
-                    <Users className="h-4 w-4" />
-                    Ajouter
-                  </Button>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <DataTable columns={userColumns} data={userData} />
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="data" className="mt-4">
-            <Card>
-              <CardHeader>
-                <CardTitle>Qualité des données</CardTitle>
-                <CardDescription>Indicateurs de qualité et complétude</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="grid gap-6 md:grid-cols-2">
-                  <div className="space-y-4">
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm font-medium">Complétude Santé 2024</span>
-                      <span className="text-sm text-muted-foreground">92%</span>
-                    </div>
-                    <Progress value={92} className="h-2" />
-                  </div>
-                  <div className="space-y-4">
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm font-medium">Complétude Éducation 2024</span>
-                      <span className="text-sm text-muted-foreground">88%</span>
-                    </div>
-                    <Progress value={88} className="h-2" />
-                  </div>
-                  <div className="space-y-4">
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm font-medium">Cohérence des données</span>
-                      <span className="text-sm text-muted-foreground">96%</span>
-                    </div>
-                    <Progress value={96} className="h-2" />
-                  </div>
-                  <div className="space-y-4">
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm font-medium">Validation temps réel</span>
-                      <span className="text-sm text-muted-foreground">78%</span>
-                    </div>
-                    <Progress value={78} className="h-2" />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="audit" className="mt-4">
-            <Card>
-              <CardHeader>
-                <CardTitle>Journal d'audit</CardTitle>
-                <CardDescription>Historique des actions utilisateurs</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <ScrollArea className="h-[400px]">
-                  <div className="space-y-4">
-                    {[
-                      { action: 'Validation de données', user: 'Moussa Sy', time: 'Il y a 5 min', type: 'success' },
-                      { action: 'Création utilisateur', user: 'Admin', time: 'Il y a 15 min', type: 'info' },
-                      { action: 'Modification indicateur', user: 'Aïssatou Ba', time: 'Il y a 30 min', type: 'warning' },
-                      { action: 'Export données', user: 'Fatou Ndiaye', time: 'Il y a 1h', type: 'info' },
-                      { action: 'Rejet de données', user: 'Amadou Diallo', time: 'Il y a 2h', type: 'error' },
-                      { action: 'Connexion', user: 'Oumar Fall', time: 'Il y a 3h', type: 'info' },
-                      { action: 'Mise à jour profil', user: 'Mariama Diop', time: 'Il y a 4h', type: 'info' },
-                      { action: 'Validation en masse', user: 'Moussa Sy', time: 'Il y a 5h', type: 'success' },
-                    ].map((log, i) => (
-                      <div key={i} className="flex items-start gap-3 rounded-lg border p-3">
-                        <div
-                          className={`h-2 w-2 mt-2 rounded-full ${log.type === 'success'
-                            ? 'bg-emerald-500'
-                            : log.type === 'error'
-                              ? 'bg-red-500'
-                              : log.type === 'warning'
-                                ? 'bg-amber-500'
-                                : 'bg-blue-500'
-                            }`}
-                        />
-                        <div className="flex-1">
-                          <p className="font-medium">{log.action}</p>
-                          <p className="text-sm text-muted-foreground">
-                            par {log.user} • {log.time}
-                          </p>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </ScrollArea>
-              </CardContent>
-            </Card>
-          </TabsContent>
-        </Tabs>
-
-        {/* Workflows */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Activity className="h-5 w-5" />
-              Workflows de validation
-            </CardTitle>
-            <CardDescription>État des processus de validation en cours</CardDescription>
+        {/* Audit Feed refined */}
+        <Card className="border-2 shadow-sm">
+          <CardHeader className="border-b bg-slate-50/50">
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle className="flex items-center gap-2 text-lg">
+                  <Activity className="h-5 w-5 text-slate-800" />
+                  Journal d'Actions Critiques
+                </CardTitle>
+                <CardDescription>Historique d'audit en temps réel pour la sécurité</CardDescription>
+              </div>
+              <Button variant="outline" size="sm" onClick={() => navigate('/admin/audit')}>
+                Accéder aux logs complets
+              </Button>
+            </div>
           </CardHeader>
-          <CardContent>
-            <div className="grid gap-4 md:grid-cols-3">
-              <div className="rounded-lg border p-4">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium">Collecte trimestrielle Q4</span>
-                  <Badge variant="secondary">En cours</Badge>
+          <CardContent className="p-0">
+            <div className="divide-y">
+              {[
+                { action: 'Mise à jour des seuils d\'alerte Santé (Région Dakar)', user: 'Admin Principal', time: 'Aujourd\'hui, 10:45', status: 'critical', icon: Settings, color: 'text-red-600', bg: 'bg-red-50' },
+                { action: 'Validation massive des indicateurs Education T3', user: 'Moussa Sy', time: 'Aujourd\'hui, 09:12', status: 'success', icon: CheckCircle, color: 'text-emerald-600', bg: 'bg-emerald-50' },
+                { action: 'Exportation de l\'inventaire cartographique National', user: 'Data Analyst', time: 'Hier, 17:30', status: 'info', icon: Download, color: 'text-blue-600', bg: 'bg-blue-50' },
+                { action: 'Réinitialisation des clés API Secteur Privé', user: 'Système Sécure', time: 'Hier, 15:45', status: 'warning', icon: Shield, color: 'text-amber-600', bg: 'bg-amber-50' },
+              ].map((item, i) => (
+                <div key={i} className="flex items-center gap-4 p-4 hover:bg-slate-50/80 transition-all cursor-default group">
+                  <div className={cn("p-2.5 rounded-xl transition-transform group-hover:scale-110", item.bg)}>
+                    <item.icon className={cn("h-5 w-5", item.color)} />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-bold text-slate-900 leading-snug">{item.action}</p>
+                    <p className="text-xs text-muted-foreground mt-0.5 font-medium">Par {item.user} • {item.time}</p>
+                  </div>
+                  <Badge className={cn("hidden sm:flex border-none capitalize font-bold", item.bg, item.color)}>
+                    {item.status}
+                  </Badge>
                 </div>
-                <Progress value={65} className="mt-3 h-2" />
-                <p className="mt-2 text-xs text-muted-foreground">65% complété • 12 régions sur 14</p>
-              </div>
-              <div className="rounded-lg border p-4">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium">Validation annuelle 2024</span>
-                  <Badge variant="outline" className="border-amber-500 text-amber-600">En attente</Badge>
-                </div>
-                <Progress value={30} className="mt-3 h-2" />
-                <p className="mt-2 text-xs text-muted-foreground">30% complété • En attente de données</p>
-              </div>
-              <div className="rounded-lg border p-4">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium">Audit données Santé</span>
-                  <Badge variant="default" className="bg-emerald-500">Terminé</Badge>
-                </div>
-                <Progress value={100} className="mt-3 h-2" />
-                <p className="mt-2 text-xs text-muted-foreground">100% complété • 245 données auditées</p>
-              </div>
+              ))}
             </div>
           </CardContent>
         </Card>
