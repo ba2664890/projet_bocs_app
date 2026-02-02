@@ -21,12 +21,9 @@ import {
   ChevronLeft,
   ChevronRight,
   LogOut,
-  X,
-  Database,
-  ClipboardList,
-  Shield,
   Smartphone,
   Megaphone,
+  ShieldCheck,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -48,11 +45,16 @@ interface NavItem {
   roles?: string[];
 }
 
-const getNavigation = (space: string): NavItem[] => {
+const getNavigation = (space: string, locationPath: string): NavItem[] => {
+  const isSector = space === 'sector';
+  const sectorMatch = locationPath.match(/\/sector\/(health|education)/);
+  const currentSector = sectorMatch ? sectorMatch[1] : '';
+  const basePath = isSector && currentSector ? `/sector/${currentSector}` : `/${space}`;
+
   const baseNav: NavItem[] = [
-    { label: 'Tableau de bord', path: `/${space}`, icon: LayoutDashboard },
-    { label: 'Cartographie', path: `/${space}/map`, icon: Map },
-    { label: 'Indicateurs', path: `/${space}/indicators`, icon: BarChart3 },
+    { label: 'Tableau de bord', path: basePath, icon: LayoutDashboard },
+    { label: 'Cartographie', path: `${basePath}/map`, icon: Map },
+    { label: 'Indicateurs', path: `${basePath}/indicators`, icon: BarChart3 },
   ];
 
   switch (space) {
@@ -61,52 +63,53 @@ const getNavigation = (space: string): NavItem[] => {
         ...baseNav,
         {
           label: 'Secteurs',
-          path: `/${space}/sectors`,
+          path: `${basePath}/sectors`,
           icon: Building2,
           children: [
-            { label: 'Santé', path: `/${space}/sectors/health`, icon: HeartPulse },
-            { label: 'Éducation', path: `/${space}/sectors/education`, icon: GraduationCap },
+            { label: 'Santé', path: `${basePath}/sectors/health`, icon: HeartPulse },
+            { label: 'Éducation', path: `${basePath}/sectors/education`, icon: GraduationCap },
           ],
         },
-        { label: 'Comparaisons', path: `/${space}/compare`, icon: BarChart3 },
-        { label: 'Rapports', path: `/${space}/reports`, icon: FileText },
-        { label: 'Alertes', path: `/${space}/alerts`, icon: Bell, badge: 0 },
+        { label: 'Comparaisons', path: `${basePath}/compare`, icon: BarChart3 },
+        { label: 'Rapports', path: `${basePath}/reports`, icon: FileText },
+        { label: 'Alertes', path: `${basePath}/alerts`, icon: Bell, badge: 0 },
       ];
 
     case 'sector':
+      const structuresLabel = currentSector === 'education' ? 'Établissements' : 'Structures';
       return [
         ...baseNav,
-        { label: 'Structures', path: `/${space}/facilities`, icon: Building2 },
-        { label: 'Collectes', path: `/${space}/collections`, icon: ClipboardList },
-        { label: 'Analyses', path: `/${space}/analytics`, icon: BarChart3 },
-        { label: 'Exports', path: `/${space}/exports`, icon: FileText },
+        { label: structuresLabel, path: `${basePath}/facilities`, icon: Building2 },
+        { label: 'Collectes', path: `${basePath}/collections`, icon: ClipboardList },
+        { label: 'Analyses', path: `${basePath}/analytics`, icon: BarChart3 },
+        { label: 'Exports', path: `${basePath}/exports`, icon: FileText },
       ];
 
     case 'admin':
       return [
-        { label: 'Tableau de bord', path: `/${space}`, icon: LayoutDashboard },
-        { label: 'Utilisateurs', path: `/${space}/users`, icon: Users },
-        { label: 'Données', path: `/${space}/data`, icon: Database },
-        { label: 'Validations', path: `/${space}/validations`, icon: Shield },
-        { label: 'Workfows', path: `/${space}/workflows`, icon: ClipboardList },
-        { label: 'Audit', path: `/${space}/audit`, icon: FileText },
-        { label: 'Paramètres', path: `/${space}/settings`, icon: Settings },
+        { label: 'Tableau de bord', path: `${basePath}`, icon: LayoutDashboard },
+        { label: 'Utilisateurs', path: `${basePath}/users`, icon: Users },
+        { label: 'Données', path: `${basePath}/data`, icon: Database },
+        { label: 'Validations', path: `${basePath}/validations`, icon: Shield },
+        { label: 'Workflows', path: `${basePath}/workflows`, icon: ClipboardList },
+        { label: 'Audit', path: `${basePath}/audit`, icon: FileText },
+        { label: 'Paramètres', path: `${basePath}/settings`, icon: Settings },
       ];
 
     case 'contributor':
       return [
-        { label: 'Accueil', path: `/${space}`, icon: LayoutDashboard },
-        { label: 'Mes collectes', path: `/${space}/collections`, icon: ClipboardList },
-        { label: 'Formulaires', path: `/${space}/forms`, icon: FileText },
-        { label: 'Notifications', path: `/${space}/notifications`, icon: Bell },
+        { label: 'Accueil', path: `${basePath}`, icon: LayoutDashboard },
+        { label: 'Mes collectes', path: `${basePath}/collections`, icon: ClipboardList },
+        { label: 'Formulaires', path: `${basePath}/forms`, icon: FileText },
+        { label: 'Notifications', path: `${basePath}/notifications`, icon: Bell },
       ];
 
     case 'annonceur':
       return [
-        { label: 'Tableau de bord', path: `/${space}`, icon: LayoutDashboard },
-        { label: 'Campagnes', path: `/${space}/campaigns`, icon: Megaphone },
-        { label: 'Audiences', path: `/${space}/audiences`, icon: Users },
-        { label: 'Rapports', path: `/${space}/reports`, icon: FileText },
+        { label: 'Tableau de bord', path: `${basePath}`, icon: LayoutDashboard },
+        { label: 'Campagnes', path: `${basePath}/campaigns`, icon: Megaphone },
+        { label: 'Audiences', path: `${basePath}/audiences`, icon: Users },
+        { label: 'Rapports', path: `${basePath}/reports`, icon: FileText },
       ];
 
     default:
@@ -161,10 +164,11 @@ export const Sidebar = ({ space, collapsed, isMobile }: SidebarProps) => {
   const { logout } = useAuth();
   const { unreadAlertsCount } = useAlerts();
   const [expandedItems, setExpandedItems] = useState<string[]>([]);
-  const user = useAuthStore((state) => state.user);
-
-  const navigation = getNavigation(space);
+  const navigation = getNavigation(space, location.pathname);
   const spaceConfig = getSpaceConfig(space);
+
+  const isAdmin = user?.role === 'admin';
+  const isNotAdminSpace = space !== 'admin';
 
   const toggleExpand = (path: string) => {
     setExpandedItems((prev) =>
@@ -175,7 +179,10 @@ export const Sidebar = ({ space, collapsed, isMobile }: SidebarProps) => {
   const isExpanded = (path: string) => expandedItems.includes(path);
 
   const renderNavItem = (item: NavItem, depth = 0) => {
-    const isActive = location.pathname === item.path || location.pathname.startsWith(item.path + '/');
+    const isDashboard = item.path === `/${space}` || item.path === `/sector/health` || item.path === `/sector/education` || item.path === `/annonceur` || item.path === `/contributor` || item.path === `/admin`;
+    const isActive = isDashboard
+      ? location.pathname === item.path
+      : location.pathname === item.path || location.pathname.startsWith(item.path + '/');
     const hasChildren = item.children && item.children.length > 0;
     const expanded = isExpanded(item.path);
 
@@ -272,7 +279,27 @@ export const Sidebar = ({ space, collapsed, isMobile }: SidebarProps) => {
 
       {/* Navigation */}
       <ScrollArea className="flex-1 px-3 py-4">
-        <nav className="space-y-1">{navigation.map((item) => renderNavItem(item))}</nav>
+        <nav className="space-y-1">
+          {navigation.map((item) => renderNavItem(item))}
+
+          {isAdmin && isNotAdminSpace && (
+            <div className="mt-6 pt-6 border-t border-border">
+              <p className="px-3 mb-2 text-[10px] font-bold uppercase tracking-wider text-muted-foreground/60">
+                Administration
+              </p>
+              <NavLink
+                to="/admin"
+                className={cn(
+                  'flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors text-purple-600 hover:bg-purple-50 hover:text-purple-700 dark:text-purple-400 dark:hover:bg-purple-900/20',
+                  collapsed && !isMobile && 'justify-center px-2'
+                )}
+              >
+                <ShieldCheck className="h-5 w-5 flex-shrink-0" />
+                {(!collapsed || isMobile) && <span className="flex-1">Gérer la plateforme</span>}
+              </NavLink>
+            </div>
+          )}
+        </nav>
       </ScrollArea>
 
       {/* Footer */}
