@@ -1,176 +1,267 @@
-import { useEffect, useRef } from 'react';
-import { gsap } from 'gsap';
+// ============================================
+// FATI - Analyses Détaillées
+// Analyses croisées et tendances
+// ============================================
+
+import { useState, useMemo } from 'react';
 import { MainLayout } from '@/components/layout/MainLayout';
-import { Card, CardContent } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { DatePickerWithRange } from '@/components/ui/date-range-picker';
 import { TrendChart } from '@/components/charts/TrendChart';
 import { ComparisonChart } from '@/components/charts/ComparisonChart';
-import { useAuthStore } from '@/store';
-import { useIndicatorValues, useIndicators } from '@/hooks/useData';
 import {
-    BarChart3,
-    TrendingUp,
-    MapPin,
     Download,
-    Calendar,
-    ArrowUpRight,
-    ArrowDownRight
+    Filter,
+    TrendingUp,
+    PieChart,
+    BarChart2,
+    Share2,
+    RefreshCw
 } from 'lucide-react';
+import { useIndicatorValues } from '@/hooks/useData';
+import { useAuthStore } from '@/store';
 
 export const AnalyticsPage = () => {
     const { user } = useAuthStore();
-    const containerRef = useRef<HTMLDivElement>(null);
-    const sector = user?.role === 'sector_education' ? 'education' : 'health';
+    const sector = user?.role?.includes('education') ? 'education' : 'health';
+    const { allValues } = useIndicatorValues({ sector });
+    const [period, setPeriod] = useState('year');
 
-    const { indicators } = useIndicators(sector);
-    const { isLoading } = useIndicatorValues({ sector });
+    // Aggregation des données pour les graphiques
+    const performanceData = useMemo(() => {
+        // Grouper par année pour la tendance (au lieu de mois si pas de données mensuelles)
+        // Ou utiliser une logique plus complexe si les données ont des périodes
+        const grouped = allValues.reduce((acc: any, curr) => {
+            const key = curr.year.toString(); // ou une autre clé de période
+            if (!acc[key]) {
+                acc[key] = { name: key, actual: 0, count: 0, target: 0 };
+            }
+            acc[key].actual += curr.value;
+            acc[key].target += curr.targetValue || 0;
+            acc[key].count += 1;
+            return acc;
+        }, {});
 
-    useEffect(() => {
-        if (!isLoading && containerRef.current) {
-            gsap.fromTo(
-                containerRef.current.children,
-                { opacity: 0, scale: 0.95 },
-                {
-                    opacity: 1,
-                    scale: 1,
-                    duration: 0.5,
-                    stagger: 0.1,
-                    ease: 'back.out(1.7)'
-                }
-            );
-        }
-    }, [isLoading]);
+        return Object.values(grouped).map((item: any) => ({
+            name: item.name,
+            actual: Math.round(item.actual / item.count), // Moyenne
+            target: Math.round(item.target / item.count),
+            previous: 0 // TODO: calculer previous
+        })).sort((a: any, b: any) => a.name.localeCompare(b.name));
+    }, [allValues]);
 
-    // Prepare data for trend chart (simulated based on real values)
-    const trendData = [
-        { name: '2020', value: 65 },
-        { name: '2021', value: 68 },
-        { name: '2022', value: 72 },
-        { name: '2023', value: 78 },
-        { name: '2024', value: 82 },
-    ];
+    const regionalData = useMemo(() => {
+        // Grouper par région (nécessite de mapper geographicId vers nom région)
+        // Pour l'instant on simule avec les ids si on n'a pas les noms facilement
+        const grouped = allValues.reduce((acc: any, curr) => {
+            const key = curr.geographicId || 'Unknown';
+            if (!acc[key]) {
+                acc[key] = { name: key, value: 0, count: 0, target: 0 };
+            }
+            acc[key].value += curr.value;
+            acc[key].target += curr.targetValue || 0;
+            acc[key].count += 1;
+            return acc;
+        }, {});
+
+        return Object.values(grouped).map((item: any) => ({
+            name: item.name,
+            value: Math.round(item.value / item.count),
+            target: Math.round(item.target / item.count)
+        })).slice(0, 5);
+    }, [allValues]);
 
     return (
         <MainLayout space="sector">
-            <div ref={containerRef} className="max-w-[1600px] mx-auto space-y-8 pb-10">
+            <div className="max-w-[1600px] mx-auto space-y-8 pb-12 animate-in fade-in duration-500">
+
                 {/* Header */}
-                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between bg-card p-6 rounded-xl border shadow-sm">
                     <div className="flex items-center gap-4">
-                        <div className="h-12 w-12 rounded-xl bg-indigo-600 flex items-center justify-center shadow-lg shadow-indigo-100 dark:shadow-none">
-                            <BarChart3 className="h-6 w-6 text-white" />
+                        <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400">
+                            <TrendingUp className="h-6 w-6" />
                         </div>
                         <div>
-                            <h1 className="text-3xl font-bold tracking-tight">Analyses de Performance</h1>
-                            <p className="text-muted-foreground mt-1">Exploration multi-dimensionnelle des données du secteur {sector}.</p>
+                            <h1 className="text-2xl font-bold tracking-tight text-foreground">Analyses & Tendances</h1>
+                            <p className="text-muted-foreground">
+                                Exploration approfondie des données du secteur {sector === 'health' ? 'Santé' : 'Éducation'}
+                            </p>
                         </div>
                     </div>
                     <div className="flex items-center gap-2">
                         <Button variant="outline" className="gap-2">
-                            <Calendar className="h-4 w-4" />
-                            Période
+                            <Share2 className="h-4 w-4" />
+                            Partager
                         </Button>
-                        <Button className="bg-indigo-600 hover:bg-indigo-700 text-white gap-2 shadow-lg">
+                        <Button className="gap-2 bg-purple-600 hover:bg-purple-700">
                             <Download className="h-4 w-4" />
                             Exporter le rapport
                         </Button>
                     </div>
                 </div>
 
-                {/* Quick Stats */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                    <Card className="border-none shadow-sm bg-white dark:bg-slate-900 overflow-hidden relative">
-                        <CardContent className="p-6">
-                            <p className="text-sm font-medium text-muted-foreground">Indicateurs suivis</p>
-                            <h3 className="text-3xl font-bold mt-2">{indicators.length}</h3>
-                            <div className="flex items-center gap-1 text-emerald-600 text-xs font-bold mt-2">
-                                <TrendingUp className="h-3 w-3" />
-                                <span>+2 nouveaux ce mois</span>
-                            </div>
-                            <div className="absolute right-0 top-0 bottom-0 w-1 bg-indigo-500" />
-                        </CardContent>
-                    </Card>
-                    <Card className="border-none shadow-sm bg-white dark:bg-slate-900 overflow-hidden relative">
-                        <CardContent className="p-6">
-                            <p className="text-sm font-medium text-muted-foreground">Moyenne de réalisation</p>
-                            <h3 className="text-3xl font-bold mt-2">78.4%</h3>
-                            <div className="flex items-center gap-1 text-emerald-600 text-xs font-bold mt-2">
-                                <ArrowUpRight className="h-3 w-3" />
-                                <span>+5.2% vs année préc.</span>
-                            </div>
-                            <div className="absolute right-0 top-0 bottom-0 w-1 bg-emerald-500" />
-                        </CardContent>
-                    </Card>
-                    <Card className="border-none shadow-sm bg-white dark:bg-slate-900 overflow-hidden relative">
-                        <CardContent className="p-6">
-                            <p className="text-sm font-medium text-muted-foreground">Alertes critiques</p>
-                            <h3 className="text-3xl font-bold mt-2">04</h3>
-                            <div className="flex items-center gap-1 text-rose-600 text-xs font-bold mt-2">
-                                <ArrowDownRight className="h-3 w-3" />
-                                <span>-2 vs mois préc.</span>
-                            </div>
-                            <div className="absolute right-0 top-0 bottom-0 w-1 bg-rose-500" />
-                        </CardContent>
-                    </Card>
-                    <Card className="border-none shadow-sm bg-white dark:bg-slate-900 overflow-hidden relative">
-                        <CardContent className="p-6">
-                            <p className="text-sm font-medium text-muted-foreground">Qualité des données</p>
-                            <h3 className="text-3xl font-bold mt-2">92%</h3>
-                            <div className="flex items-center gap-1 text-emerald-600 text-xs font-bold mt-2">
-                                <CheckCircle2 className="h-3 w-3" />
-                                <span>Validation complète</span>
-                            </div>
-                            <div className="absolute right-0 top-0 bottom-0 w-1 bg-amber-500" />
-                        </CardContent>
-                    </Card>
+                {/* Controls Toolbar */}
+                <div className="flex flex-col md:flex-row gap-4 items-center justify-between sticky top-0 z-10 bg-background/95 backdrop-blur p-4 border-b rounded-lg">
+                    <div className="flex items-center gap-2 w-full md:w-auto overflow-x-auto pb-2 md:pb-0">
+                        <Select defaultValue={period} onValueChange={setPeriod}>
+                            <SelectTrigger className="w-[140px]">
+                                <SelectValue placeholder="Période" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="month">Ce mois</SelectItem>
+                                <SelectItem value="quarter">Ce trimestre</SelectItem>
+                                <SelectItem value="year">Cette année</SelectItem>
+                                <SelectItem value="custom">Personnalisé</SelectItem>
+                            </SelectContent>
+                        </Select>
+                        <DatePickerWithRange className="w-[260px]" />
+                        <Button variant="outline" size="icon" title="Actualiser">
+                            <RefreshCw className="h-4 w-4" />
+                        </Button>
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                        <Button variant="ghost" size="sm" className="gap-2">
+                            <Filter className="h-4 w-4" />
+                            Filtres avancés
+                        </Button>
+                    </div>
                 </div>
 
-                {/* Detailed Analytics */}
-                <Tabs defaultValue="trends" className="w-full">
-                    <TabsList className="grid w-full max-w-lg grid-cols-2 p-1 bg-muted/40 rounded-xl">
-                        <TabsTrigger value="trends" className="rounded-lg gap-2">
-                            <TrendingUp className="h-4 w-4" />
-                            Tendances Temporelles
-                        </TabsTrigger>
-                        <TabsTrigger value="geo" className="rounded-lg gap-2">
-                            <MapPin className="h-4 w-4" />
-                            Comparaison Géographique
-                        </TabsTrigger>
+                {/* Analytics Content */}
+                <Tabs defaultValue="performance" className="space-y-6">
+                    <TabsList className="grid w-full grid-cols-3 max-w-md">
+                        <TabsTrigger value="performance">Performance</TabsTrigger>
+                        <TabsTrigger value="geographic">Géographique</TabsTrigger>
+                        <TabsTrigger value="quality">Qualité des données</TabsTrigger>
                     </TabsList>
 
-                    <TabsContent value="trends" className="mt-8 space-y-6">
-                        <TrendChart
-                            data={trendData}
-                            lines={[{ key: 'value', name: 'Performance Globale', color: '#4f46e5' }]}
-                            title="Évolution de la performance sectorielle"
-                            subtitle="Basé sur l'agrégation des indicateurs clés validés."
-                            height={450}
-                        />
+                    <TabsContent value="performance" className="space-y-6">
+                        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+                            <Card>
+                                <CardHeader className="flex flex-row items-center justify-between pb-2">
+                                    <CardTitle className="text-sm font-medium">Taux de réalisation</CardTitle>
+                                    <TrendingUp className="h-4 w-4 text-muted-foreground" />
+                                </CardHeader>
+                                <CardContent>
+                                    <div className="text-2xl font-bold">87.5%</div>
+                                    <p className="text-xs text-muted-foreground">+2.5% par rapport au mois dernier</p>
+                                </CardContent>
+                            </Card>
+                            <Card>
+                                <CardHeader className="flex flex-row items-center justify-between pb-2">
+                                    <CardTitle className="text-sm font-medium">Indicateurs en hausse</CardTitle>
+                                    <BarChart2 className="h-4 w-4 text-green-500" />
+                                </CardHeader>
+                                <CardContent>
+                                    <div className="text-2xl font-bold">12</div>
+                                    <p className="text-xs text-muted-foreground">Sur 18 indicateurs clés</p>
+                                </CardContent>
+                            </Card>
+                            <Card>
+                                <CardHeader className="flex flex-row items-center justify-between pb-2">
+                                    <CardTitle className="text-sm font-medium">Points d'attention</CardTitle>
+                                    <Filter className="h-4 w-4 text-orange-500" />
+                                </CardHeader>
+                                <CardContent>
+                                    <div className="text-2xl font-bold">3</div>
+                                    <p className="text-xs text-muted-foreground">Zones nécessitant une intervention</p>
+                                </CardContent>
+                            </Card>
+                        </div>
+
+                        <Card className="col-span-4">
+                            <CardHeader>
+                                <CardTitle>Évolution de la Performance</CardTitle>
+                                <CardDescription>Comparaison Réalisé vs Objectif vs Année N-1</CardDescription>
+                            </CardHeader>
+                            <CardContent className="pl-2">
+                                <TrendChart
+                                    data={performanceData}
+                                    lines={[
+                                        { key: 'actual', name: 'Réalisé 2024', color: '#8b5cf6', type: 'area' },
+                                        { key: 'target', name: 'Objectif', color: '#10b981', type: 'line' },
+                                        { key: 'previous', name: 'Réalisé 2023', color: '#94a3b8', type: 'line' }
+                                    ]}
+                                    height={400}
+                                />
+                            </CardContent>
+                        </Card>
                     </TabsContent>
 
-                    <TabsContent value="geo" className="mt-8">
-                        <ComparisonChart
-                            data={[
-                                { name: 'Dakar', performance: 85 },
-                                { name: 'Thiès', performance: 82 },
-                                { name: 'Saint-Louis', performance: 78 },
-                                { name: 'Ziguinchor', performance: 74 },
-                                { name: 'Kaolack', performance: 70 },
-                                { name: 'Diourbel', performance: 65 },
-                            ]}
-                            bars={[{ key: 'performance', name: 'Taux de réalisation (%)', color: '#4f46e5' }]}
-                            title="Performance par Région"
-                            subtitle="Comparaison territoriale du taux moyen de réalisation des objectifs."
-                            height={500}
-                        />
+                    <TabsContent value="geographic" className="space-y-6">
+                        <div className="grid gap-6 md:grid-cols-2">
+                            <Card>
+                                <CardHeader>
+                                    <CardTitle>Comparaison Régionale</CardTitle>
+                                    <CardDescription>Performance par région administrative</CardDescription>
+                                </CardHeader>
+                                <CardContent>
+                                    <ComparisonChart
+                                        data={regionalData}
+                                        bars={[
+                                            { key: 'value', name: 'Performance actuelle', color: '#8b5cf6' },
+                                            { key: 'target', name: 'Moyenne nationale', color: '#e2e8f0' }
+                                        ]}
+                                        height={400}
+                                        sortable
+                                    />
+                                </CardContent>
+                            </Card>
+                            <Card>
+                                <CardHeader>
+                                    <CardTitle>Répartition par Zone</CardTitle>
+                                    <CardDescription>Contribution par district</CardDescription>
+                                </CardHeader>
+                                <CardContent className="flex items-center justify-center">
+                                    {/* Placeholder for Pie Chart since Recharts Pie is a bit verbose to set up here without a component wrapping it */}
+                                    <div className="h-[400px] w-full flex items-center justify-center bg-slate-50 dark:bg-slate-900 rounded-lg border border-dashed">
+                                        <div className="text-center">
+                                            <PieChart className="h-10 w-10 mx-auto text-muted-foreground mb-2" />
+                                            <p className="text-muted-foreground">Visualisation en cours de développement</p>
+                                        </div>
+                                    </div>
+                                </CardContent>
+                            </Card>
+                        </div>
+                    </TabsContent>
+
+                    <TabsContent value="quality" className="space-y-6">
+                        <Card>
+                            <CardHeader>
+                                <CardTitle>Qualité des données</CardTitle>
+                                <CardDescription>Complétude et promptitude des reportings</CardDescription>
+                            </CardHeader>
+                            <CardContent>
+                                <div className="space-y-4">
+                                    <div className="space-y-2">
+                                        <div className="flex items-center justify-between text-sm">
+                                            <span className="font-medium">Complétude des rapports</span>
+                                            <span className="text-muted-foreground">92%</span>
+                                        </div>
+                                        <div className="h-2 w-full bg-secondary rounded-full overflow-hidden">
+                                            <div className="h-full bg-green-500 w-[92%]" />
+                                        </div>
+                                    </div>
+                                    <div className="space-y-2">
+                                        <div className="flex items-center justify-between text-sm">
+                                            <span className="font-medium">Promptitude (délais respectés)</span>
+                                            <span className="text-muted-foreground">78%</span>
+                                        </div>
+                                        <div className="h-2 w-full bg-secondary rounded-full overflow-hidden">
+                                            <div className="h-full bg-amber-500 w-[78%]" />
+                                        </div>
+                                    </div>
+                                </div>
+                            </CardContent>
+                        </Card>
                     </TabsContent>
                 </Tabs>
+
             </div>
         </MainLayout>
     );
 };
-
-// Internal missing component mock
-const CheckCircle2 = ({ className }: { className?: string }) => (
-    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z" /><path d="m9 12 2 2 4-4" /></svg>
-);

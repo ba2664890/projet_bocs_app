@@ -1,170 +1,204 @@
-import { useState, useEffect, useRef } from 'react';
-import { gsap } from 'gsap';
+// ============================================
+// FATI - Liste des Structures
+// Vue unifiée des infrastructures (Santé & Éducation)
+// ============================================
+
+import { useState, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { MainLayout } from '@/components/layout/MainLayout';
-import { Card, CardContent } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Input } from '@/components/ui/input';
-import { useAuthStore } from '@/store';
-import { useHealthFacilities, useEducationFacilities } from '@/hooks/useData';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import {
-    Building2,
     Search,
     Filter,
-    Plus,
+    Building2,
     MapPin,
-    Hospital,
-    GraduationCap,
-    Loader2,
-    Building,
+    ArrowRight,
     School,
-    ChevronRight
+    HeartPulse,
+    Plus,
+    Loader2
 } from 'lucide-react';
+import { useAuthStore } from '@/store';
+import { useEducationFacilities, useHealthFacilities } from '@/hooks/useData';
 
 export const FacilitiesPage = () => {
+    const navigate = useNavigate();
     const { user } = useAuthStore();
-    const [searchTerm, setSearchTerm] = useState('');
-    const containerRef = useRef<HTMLDivElement>(null);
+    const [searchQuery, setSearchQuery] = useState('');
+    const [statusFilter, setStatusFilter] = useState('all');
+    const [typeFilter, setTypeFilter] = useState('all');
 
-    // Determine sector from user role
-    const isEducationSector = user?.role === 'sector_education';
+    // Récupération des données selon le rôle ou le contexte
+    const { facilities: healthFacilities, isLoading: loadingHealth } = useHealthFacilities();
+    const { facilities: educationFacilities, isLoading: loadingEducation } = useEducationFacilities();
 
-    const health = useHealthFacilities();
-    const education = useEducationFacilities();
-
-    // Use relevant data based on sector
-    const facilities = isEducationSector ? education.facilities : health.facilities;
-    const isLoading = isEducationSector ? education.isLoading : health.isLoading;
-
-    useEffect(() => {
-        if (!isLoading && containerRef.current) {
-            gsap.fromTo(
-                containerRef.current.children,
-                { opacity: 0, y: 20 },
-                {
-                    opacity: 1,
-                    y: 0,
-                    duration: 0.5,
-                    stagger: 0.05,
-                    ease: 'power2.out'
-                }
-            );
+    // Détermination des structures à afficher
+    const allFacilities = useMemo(() => {
+        if (user?.role === 'admin') {
+            return [...healthFacilities, ...educationFacilities];
         }
-    }, [isLoading]);
+        if (user?.role === 'sector_health') return healthFacilities;
+        if (user?.role === 'sector_education') return educationFacilities;
+        return [];
+    }, [user, healthFacilities, educationFacilities]);
 
-    const filteredFacilities = facilities.filter(f =>
-        f.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        f.communeName.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    const loading = loadingHealth || loadingEducation;
 
-    const getSectorIcon = () => {
-        if (isEducationSector) return <GraduationCap className="h-6 w-6 text-white" />;
-        return <Hospital className="h-6 w-6 text-white" />;
-    };
+    // Filtrage
+    const filteredFacilities = useMemo(() => {
+        return allFacilities.filter(facility => {
+            const matchesSearch = facility.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                facility.communeName.toLowerCase().includes(searchQuery.toLowerCase());
+            const computedStatus = facility.isActive ? 'operational' : 'maintenance';
+            const matchesStatus = statusFilter === 'all' || computedStatus === statusFilter;
+            const matchesType = typeFilter === 'all' || facility.type === typeFilter;
 
-    const getSectorColor = () => {
-        if (isEducationSector) return 'bg-teal-500';
-        return 'bg-red-500';
-    };
+            return matchesSearch && matchesStatus && matchesType;
+        });
+    }, [allFacilities, searchQuery, statusFilter, typeFilter]);
+
+    if (loading) {
+        return (
+            <MainLayout space="sector">
+                <div className="flex items-center justify-center h-[calc(100vh-200px)]">
+                    <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                </div>
+            </MainLayout>
+        );
+    }
 
     return (
         <MainLayout space="sector">
-            <div ref={containerRef} className="max-w-[1600px] mx-auto space-y-8 pb-10">
+            <div className="max-w-[1600px] mx-auto space-y-8 pb-12 animate-in fade-in duration-500">
+
                 {/* Header */}
-                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between bg-card p-6 rounded-xl border shadow-sm">
                     <div className="flex items-center gap-4">
-                        <div className={`h-12 w-12 rounded-xl ${getSectorColor()} flex items-center justify-center shadow-lg shadow-red-100 dark:shadow-none`}>
-                            {getSectorIcon()}
+                        <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400">
+                            <Building2 className="h-7 w-7" />
                         </div>
                         <div>
-                            <h1 className="text-3xl font-bold tracking-tight">Structures & Établissements</h1>
-                            <p className="text-muted-foreground mt-1">Gestion et cartographie des infrastructures du secteur.</p>
+                            <h1 className="text-3xl font-bold tracking-tight text-foreground">Infrastructures</h1>
+                            <p className="text-muted-foreground text-lg">
+                                Gestion et cartographie des établissements et structures
+                            </p>
                         </div>
                     </div>
-                    <Button className={`${getSectorColor()} hover:opacity-90 text-white gap-2 shadow-lg`}>
+                    <Button className="gap-2 bg-primary hover:bg-primary/90 shadow-sm">
                         <Plus className="h-4 w-4" />
-                        Nouvelle Structure
+                        Nouvelle structure
                     </Button>
                 </div>
 
-                {/* Filters */}
-                <Card className="border-none shadow-sm bg-white/50 dark:bg-slate-900/50 backdrop-blur-sm">
-                    <CardContent className="p-4 flex flex-col md:flex-row gap-4">
-                        <div className="relative flex-1">
-                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                            <Input
-                                placeholder="Rechercher par nom ou localisation..."
-                                className="pl-10 bg-white dark:bg-slate-950"
-                                value={searchTerm}
-                                onChange={(e) => setSearchTerm(e.target.value)}
-                            />
-                        </div>
-                        <Button variant="outline" className="gap-2 bg-white dark:bg-slate-950">
-                            <Filter className="h-4 w-4" />
-                            Filtrer par type
-                        </Button>
-                    </CardContent>
-                </Card>
+                {/* Filters & Controls */}
+                <div className="flex flex-col gap-4 md:flex-row md:items-center justify-between sticky top-0 z-10 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 py-4 border-b">
+                    <div className="relative flex-1 max-w-sm">
+                        <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+                        <Input
+                            placeholder="Rechercher une structure..."
+                            className="pl-9 bg-background"
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                        />
+                    </div>
+                    <div className="flex gap-2 overflow-x-auto pb-2 md:pb-0">
+                        <Select value={statusFilter} onValueChange={setStatusFilter}>
+                            <SelectTrigger className="w-[160px]">
+                                <SelectValue placeholder="État" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="all">Tous les états</SelectItem>
+                                <SelectItem value="operational">Opérationnel</SelectItem>
+                                <SelectItem value="maintenance">Maintenance</SelectItem>
+                                <SelectItem value="construction">En construction</SelectItem>
+                            </SelectContent>
+                        </Select>
 
-                {/* List */}
-                {isLoading ? (
-                    <div className="flex flex-col items-center justify-center py-20 gap-4">
-                        <Loader2 className="h-10 w-10 animate-spin text-red-500" />
-                        <p className="text-muted-foreground animate-pulse">Chargement des établissements...</p>
+                        <Select value={typeFilter} onValueChange={setTypeFilter}>
+                            <SelectTrigger className="w-[180px]">
+                                <SelectValue placeholder="Type de structure" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="all">Tous les types</SelectItem>
+                                <SelectItem value="hospital">Hôpital</SelectItem>
+                                <SelectItem value="health_center">Centre de santé</SelectItem>
+                                <SelectItem value="primary">École primaire</SelectItem>
+                                <SelectItem value="high_school">Lycée / Collège</SelectItem>
+                            </SelectContent>
+                        </Select>
+
+                        <Button variant="outline" size="icon">
+                            <MapPin className="h-4 w-4" />
+                        </Button>
                     </div>
-                ) : (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        {filteredFacilities.map((facility) => (
-                            <Card key={facility.id} className="border-none shadow-md hover:shadow-xl transition-all group overflow-hidden bg-white dark:bg-slate-900">
-                                <CardContent className="p-0">
-                                    <div className="p-6 space-y-4">
-                                        <div className="flex items-start justify-between">
-                                            <div className="h-12 w-12 rounded-lg bg-slate-50 dark:bg-slate-800 flex items-center justify-center text-slate-600 dark:text-slate-400 group-hover:bg-red-50 dark:group-hover:bg-red-900/20 group-hover:text-red-500 transition-colors">
-                                                {isEducationSector ? <School className="h-6 w-6" /> : <Building className="h-6 w-6" />}
-                                            </div>
-                                            <Badge variant="secondary" className="capitalize">
-                                                {facility.type.replace('_', ' ')}
-                                            </Badge>
-                                        </div>
-                                        <div>
-                                            <h3 className="font-bold text-lg leading-tight group-hover:text-red-600 transition-colors">{facility.name}</h3>
-                                            <div className="flex items-center gap-1.5 text-muted-foreground text-sm mt-1">
-                                                <MapPin className="h-3.5 w-3.5" />
-                                                <span>{facility.communeName}, {facility.regionName}</span>
-                                            </div>
-                                        </div>
-                                        <div className="pt-4 border-t flex items-center justify-between text-sm">
-                                            <div className="flex items-center gap-4">
-                                                <div className="flex flex-col">
-                                                    <span className="text-[10px] uppercase font-bold text-muted-foreground tracking-wider">Capacité</span>
-                                                    <span className="font-bold">{(facility as any).bedCapacity || (facility as any).studentCapacity || '--'}</span>
-                                                </div>
-                                                <div className="flex flex-col border-l pl-4">
-                                                    <span className="text-[10px] uppercase font-bold text-muted-foreground tracking-wider">Status</span>
-                                                    <span className="flex items-center gap-1.5 font-medium text-emerald-600">
-                                                        <div className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
-                                                        Actif
-                                                    </span>
-                                                </div>
-                                            </div>
-                                            <Button variant="ghost" size="sm" className="h-8 w-8 p-0 rounded-full group-hover:bg-red-500 group-hover:text-white transition-all">
-                                                <ChevronRight className="h-4 w-4" />
-                                            </Button>
-                                        </div>
+                </div>
+
+                {/* Results Grid */}
+                <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                    {filteredFacilities.map((facility) => (
+                        <Card key={facility.id} className="group hover:shadow-md transition-all duration-300 border-muted-foreground/10 hover:border-primary/50 cursor-pointer" onClick={() => navigate(`/sector/facilities/${facility.id}`)}>
+                            <CardHeader className="pb-3">
+                                <div className="flex items-start justify-between">
+                                    <div className={`p-2 rounded-lg ${facility.sector === 'health'
+                                        ? 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400'
+                                        : 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400'
+                                        }`}>
+                                        {facility.sector === 'health' ? <HeartPulse className="h-5 w-5" /> : <School className="h-5 w-5" />}
                                     </div>
-                                    <div className={`h-1 w-0 group-hover:w-full transition-all duration-500 ${getSectorColor()}`} />
-                                </CardContent>
-                            </Card>
-                        ))}
-                        {filteredFacilities.length === 0 && (
-                            <div className="col-span-full py-20 text-center">
-                                <Building2 className="h-12 w-12 mx-auto text-slate-200 mb-4" />
-                                <h3 className="text-xl font-semibold text-slate-400">Aucun établissement trouvé</h3>
-                                <p className="text-muted-foreground">Essayez d'ajuster vos filtres ou votre recherche.</p>
+                                    <Badge variant={facility.isActive ? 'default' : 'outline'} className={
+                                        facility.isActive ? 'bg-green-100 text-green-700 hover:bg-green-100 border-none' : ''
+                                    }>
+                                        {facility.isActive ? 'Opérationnel' : 'Maintenance'}
+                                    </Badge>
+                                </div>
+                                <CardTitle className="mt-4 text-lg font-semibold truncate group-hover:text-primary transition-colors">
+                                    {facility.name}
+                                </CardTitle>
+                                <CardDescription className="flex items-center gap-1.5 text-xs">
+                                    <MapPin className="h-3.5 w-3.5" />
+                                    {facility.communeName}
+                                </CardDescription>
+                            </CardHeader>
+                            <CardContent className="pt-0">
+                                <div className="grid grid-cols-2 gap-2 text-sm mt-2">
+                                    <div className="bg-slate-50 dark:bg-slate-800/50 p-2 rounded border border-slate-100 dark:border-slate-800">
+                                        <p className="text-xs text-muted-foreground">Type</p>
+                                        <p className="font-medium truncate capitalize">{facility.type.replace('_', ' ')}</p>
+                                    </div>
+                                    <div className="bg-slate-50 dark:bg-slate-800/50 p-2 rounded border border-slate-100 dark:border-slate-800">
+                                        <p className="text-xs text-muted-foreground">Capacité</p>
+                                        <p className="font-medium">
+                                            {facility.sector === 'health' && facility.bedCapacity ? `${facility.bedCapacity} lits` :
+                                                facility.sector === 'education' && facility.studentCapacity ? `${facility.studentCapacity} étu.` :
+                                                    'N/A'}
+                                        </p>
+                                    </div>
+                                </div>
+                            </CardContent>
+                        </Card>
+                    ))}
+
+                    {filteredFacilities.length === 0 && (
+                        <div className="col-span-full flex flex-col items-center justify-center py-12 text-center">
+                            <div className="bg-muted/30 p-4 rounded-full mb-4">
+                                <Filter className="h-8 w-8 text-muted-foreground" />
                             </div>
-                        )}
-                    </div>
-                )}
+                            <h3 className="text-lg font-semibold">Aucun résultat trouvé</h3>
+                            <p className="text-muted-foreground max-w-sm mt-2">
+                                Essayez de modifier vos filtres ou votre recherche pour trouver ce que vous cherchez.
+                            </p>
+                            <Button variant="outline" className="mt-6" onClick={() => { setSearchQuery(''); setStatusFilter('all'); setTypeFilter('all'); }}>
+                                Réinitialiser les filtres
+                            </Button>
+                        </div>
+                    )}
+                </div>
+
             </div>
         </MainLayout>
     );

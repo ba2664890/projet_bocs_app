@@ -6,47 +6,50 @@
 import { useEffect, useRef } from 'react';
 import { gsap } from 'gsap';
 import { useNavigate } from 'react-router-dom';
-import { MainLayout } from '@/components/layout/MainLayout';
-import { KPICard } from '@/components/cards/KPICard';
-import { AlertCard } from '@/components/cards/AlertCard';
-import { TrendChart } from '@/components/charts/TrendChart';
-import { ComparisonChart } from '@/components/charts/ComparisonChart';
-import { MapContainer } from '@/components/map/MapContainer';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import {
   ArrowRight,
   Download,
   FileText,
-  Map,
-  TrendingUp,
+  Map as MapIcon,
   AlertTriangle,
   Calendar,
   Filter,
+  TrendingUp,
+  Activity,
+  Zap,
+  MoreHorizontal
 } from 'lucide-react';
 import { useAlerts, useIndicatorValues } from '@/hooks/useData';
 import type { KPIData } from '@/types';
+import { MapContainer } from '@/components/map/MapContainer';
+import { KPICard } from '@/components/cards/KPICard';
+import { AlertCard } from '@/components/cards/AlertCard';
+import { TrendChart } from '@/components/charts/TrendChart';
+import { ComparisonChart } from '@/components/charts/ComparisonChart';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Separator } from '@/components/ui/separator';
 
 export const InstitutionDashboard = () => {
   const navigate = useNavigate();
   const { alerts, unreadAlertsCount, markAsRead } = useAlerts();
-  const { allValues } = useIndicatorValues({ sector: 'health' });
+  const { allValues } = useIndicatorValues();
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (containerRef.current) {
       gsap.fromTo(
         containerRef.current.children,
-        { opacity: 0, y: 30 },
+        { opacity: 0, y: 20 },
         {
           opacity: 1,
           y: 0,
-          duration: 0.5,
+          duration: 0.6,
           stagger: 0.1,
-          ease: 'power2.out',
+          ease: 'power3.out',
         }
       );
     }
@@ -56,36 +59,35 @@ export const InstitutionDashboard = () => {
     alert(`Export ${format.toUpperCase()} en cours de génération...`);
   };
 
-  // Calculer les KPIs à partir des données réelles
   const calculateKPIs = (): KPIData[] => {
     const healthValues = allValues.filter(v => (v.indicatorName || '').toLowerCase().includes('santé') || (v.indicatorName || '').toLowerCase().includes('vaccination'));
     const educationValues = allValues.filter(v => (v.indicatorName || '').toLowerCase().includes('éducation') || (v.indicatorName || '').toLowerCase().includes('scolarisation'));
 
-    const avgHealth = healthValues.length > 0 ? healthValues.reduce((acc, v) => acc + v.value, 0) / healthValues.length : 85.5;
-    const avgEdu = educationValues.length > 0 ? educationValues.reduce((acc, v) => acc + v.value, 0) / educationValues.length : 78.2;
+    const avgHealth = healthValues.length > 0 ? healthValues.reduce((acc, v) => acc + v.value, 0) / healthValues.length : 0;
+    const avgEdu = educationValues.length > 0 ? educationValues.reduce((acc, v) => acc + v.value, 0) / educationValues.length : 0;
 
     return [
       {
         id: 'kpi-health',
         title: 'Performance Santé',
         value: avgHealth,
-        formattedValue: `${avgHealth.toFixed(1)}%`,
+        formattedValue: avgHealth > 0 ? `${avgHealth.toFixed(1)}%` : 'N/A',
         unit: '%',
         color: 'blue',
-        variation: 2.4,
+        variation: 2.5,
         variationType: 'positive',
-        trend: [82, 83, 84, avgHealth]
+        trend: [65, 68, 70, 72, 75, avgHealth]
       },
       {
         id: 'kpi-education',
         title: 'Performance Éducation',
         value: avgEdu,
-        formattedValue: `${avgEdu.toFixed(1)}%`,
+        formattedValue: avgEdu > 0 ? `${avgEdu.toFixed(1)}%` : 'N/A',
         unit: '%',
         color: 'green',
-        variation: -1.2,
-        variationType: 'negative',
-        trend: [80, 79, 78, avgEdu]
+        variation: 1.2,
+        variationType: 'positive',
+        trend: [60, 62, 65, 66, 68, avgEdu]
       },
       {
         id: 'kpi-completeness',
@@ -94,8 +96,9 @@ export const InstitutionDashboard = () => {
         formattedValue: '94.2%',
         unit: '%',
         color: 'teal',
-        variation: 5.1,
-        variationType: 'positive'
+        variation: 0.5,
+        variationType: 'positive',
+        trend: [90, 91, 92, 93, 94, 94.2]
       },
       {
         id: 'kpi-alerts',
@@ -103,109 +106,157 @@ export const InstitutionDashboard = () => {
         value: alerts.filter(a => a.severity === 'critical').length,
         formattedValue: String(alerts.filter(a => a.severity === 'critical').length),
         color: 'red',
-        variation: -2,
-        variationType: 'positive'
+        variation: -1,
+        variationType: 'positive', // Less alerts is good
+        trend: []
       }
     ];
   };
 
   const kpis = calculateKPIs();
 
-  // Transformer les données pour le graphique
-  const years = [2020, 2021, 2022, 2023, 2024, 2025];
+  // Extract unique years from data or default to recent years
+  const availableYears = Array.from(new Set(allValues.map(v => v.year))).sort();
+  const years = availableYears.length > 0 ? availableYears : [new Date().getFullYear()];
+
   const trendData = years.map(year => {
     const yearValues = allValues.filter(v => v.year === year);
-    const health = yearValues.filter(v => v.indicatorName.toLowerCase().includes('santé') || v.indicatorName.toLowerCase().includes('vaccination'));
-    const edu = yearValues.filter(v => v.indicatorName.toLowerCase().includes('éducation') || v.indicatorName.toLowerCase().includes('scolarisation'));
+    const health = yearValues.filter(v => (v.indicatorName || '').toLowerCase().includes('santé') || (v.indicatorName || '').toLowerCase().includes('vaccination'));
+    const edu = yearValues.filter(v => (v.indicatorName || '').toLowerCase().includes('éducation') || (v.indicatorName || '').toLowerCase().includes('scolarisation'));
 
     return {
       name: String(year),
       health: health.length > 0 ? health.reduce((acc, v) => acc + v.value, 0) / health.length : 0,
       education: edu.length > 0 ? edu.reduce((acc, v) => acc + v.value, 0) / edu.length : 0,
     };
-  }).filter(d => d.health > 0 || d.education > 0);
+  });
 
   return (
-    <MainLayout space="institution">
-      <div ref={containerRef} className="max-w-[1600px] mx-auto space-y-10 pb-12">
-        {/* Header */}
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <h1 className="text-2xl font-bold tracking-tight">Tableau de bord stratégique</h1>
-            <p className="text-muted-foreground">
-              Vue d'ensemble nationale des indicateurs Santé-Éducation
-            </p>
-          </div>
+    <div ref={containerRef} className="space-y-8 animate-in fade-in duration-700">
+      {/* Header Section */}
+      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between bg-card p-6 rounded-xl border shadow-sm">
+        <div className="space-y-1">
           <div className="flex items-center gap-2">
-            <Button variant="outline" className="gap-2" onClick={() => handleExport('pdf')}>
-              <FileText className="h-4 w-4" />
-              PDF
-            </Button>
-            <Button variant="outline" className="gap-2" onClick={() => handleExport('excel')}>
-              <Download className="h-4 w-4" />
-              Excel
-            </Button>
-            <Button className="gap-2" onClick={() => navigate('/institution/reports')}>
-              <TrendingUp className="h-4 w-4" />
-              Rapports
-            </Button>
+            <h1 className="text-3xl font-bold tracking-tight bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+              Tableau de bord stratégique
+            </h1>
+            <Badge variant="outline" className="ml-2 border-blue-200 text-blue-700 bg-blue-50">National</Badge>
           </div>
+          <p className="text-muted-foreground text-lg">
+            Vue d'ensemble et pilotage des indicateurs de performance
+          </p>
+        </div>
+        <div className="flex items-center gap-3">
+          <Button variant="outline" size="sm" className="hidden sm:flex gap-2" onClick={() => handleExport('pdf')}>
+            <FileText className="h-4 w-4" />
+            Rapport PDF
+          </Button>
+          <Button size="sm" className="gap-2 bg-blue-600 hover:bg-blue-700" onClick={() => handleExport('excel')}>
+            <Download className="h-4 w-4" />
+            Exporter
+          </Button>
+        </div>
+      </div>
+
+      {/* KPI Grid */}
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+        {kpis.map((kpi) => (
+          <KPICard key={kpi.id} data={kpi} className="shadow-sm hover:shadow-md transition-all duration-300" />
+        ))}
+      </div>
+
+      <div className="grid gap-6 lg:grid-cols-3">
+        {/* Main Charts Area */}
+        <div className="lg:col-span-2 space-y-6">
+          <Card className="shadow-sm border-none bg-background/60 backdrop-blur-sm">
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-xl flex items-center gap-2">
+                  <TrendingUp className="h-5 w-5 text-blue-500" />
+                  Analyse des Tendances
+                </CardTitle>
+                <Tabs defaultValue="trends" className="w-[300px]">
+                  <TabsList className="grid w-full grid-cols-2">
+                    <TabsTrigger value="trends">Evolution</TabsTrigger>
+                    <TabsTrigger value="comparison">Comparaison</TabsTrigger>
+                  </TabsList>
+                </Tabs>
+              </div>
+              <CardDescription>Visualisation comparative des secteurs Santé et Education sur 5 ans</CardDescription>
+            </CardHeader>
+            <CardContent className="pt-2">
+              <TrendChart
+                data={trendData}
+                lines={[
+                  { key: 'health', name: 'Santé', color: '#3b82f6' },
+                  { key: 'education', name: 'Éducation', color: '#10b981' },
+                ]}
+                height={350}
+                referenceLine={80}
+              />
+            </CardContent>
+          </Card>
+
+          {/* Map Section */}
+          <Card className="overflow-hidden shadow-sm">
+            <CardHeader className="pb-0">
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-xl flex items-center gap-2">
+                  <MapIcon className="h-5 w-5 text-indigo-500" />
+                  Répartition Géographique
+                </CardTitle>
+                <Button variant="ghost" size="sm" onClick={() => navigate('/institution/compare')}>
+                  Vue détaillée <ArrowRight className="ml-2 h-4 w-4" />
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent className="p-0">
+              <MapContainer height="400px" showControls />
+            </CardContent>
+          </Card>
         </div>
 
-        {/* Filtres rapides */}
-        <Card className="bg-muted/50">
-          <CardContent className="flex flex-wrap items-center gap-4 py-4">
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              <Calendar className="h-4 w-4" />
-              <span>Année: <strong>2024</strong></span>
-            </div>
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              <Map className="h-4 w-4" />
-              <span>Niveau: <strong>National</strong></span>
-            </div>
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              <Filter className="h-4 w-4" />
-              <span>Secteurs: <strong>Santé + Éducation</strong></span>
-            </div>
-            <Button variant="ghost" size="sm" className="ml-auto gap-2">
-              Modifier les filtres
-              <ArrowRight className="h-4 w-4" />
-            </Button>
-          </CardContent>
-        </Card>
+        {/* Sidebar: Alerts & Insights */}
+        <div className="space-y-6">
+          {/* AI Insights / Highlights */}
+          <Card className="bg-gradient-to-br from-indigo-50 to-white dark:from-slate-900 dark:to-slate-950 border-indigo-100 dark:border-slate-800">
+            <CardHeader>
+              <CardTitle className="text-lg flex items-center gap-2 text-indigo-700 dark:text-indigo-400">
+                <Zap className="h-5 w-5 fill-indigo-100" />
+                Points Clés (IA)
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex gap-3 items-start p-3 bg-white dark:bg-slate-900 rounded-lg border border-indigo-50 dark:border-slate-800 shadow-sm">
+                <div className="mt-1 h-2 w-2 rounded-full bg-green-500 flex-shrink-0" />
+                <div>
+                  <p className="text-sm font-medium text-foreground">Progression notable</p>
+                  <p className="text-xs text-muted-foreground mt-1">Le taux de vaccination a augmenté de 12% dans la région Nord par rapport à 2023.</p>
+                </div>
+              </div>
+              <div className="flex gap-3 items-start p-3 bg-white dark:bg-slate-900 rounded-lg border border-indigo-50 dark:border-slate-800 shadow-sm">
+                <div className="mt-1 h-2 w-2 rounded-full bg-amber-500 flex-shrink-0" />
+                <div>
+                  <p className="text-sm font-medium text-foreground">Attention requise</p>
+                  <p className="text-xs text-muted-foreground mt-1">Léger recul de la scolarisation primaire observé dans 3 districts du Sud.</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
 
-        {/* KPIs */}
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {kpis.map((kpi) => (
-            <KPICard key={kpi.id} data={kpi} />
-          ))}
-        </div>
-
-        {/* Main Content */}
-        <div className="grid gap-6 lg:grid-cols-3">
-          {/* Carte */}
-          <div className="lg:col-span-2">
-            <MapContainer height="400px" showControls />
-          </div>
-
-          {/* Alertes */}
-          <Card className="flex flex-col">
+          {/* Alerts Widget */}
+          <Card className="flex flex-col shadow-sm">
             <CardHeader className="flex flex-row items-center justify-between pb-2">
               <div>
                 <CardTitle className="text-lg flex items-center gap-2">
                   <AlertTriangle className="h-5 w-5 text-amber-500" />
-                  Alertes
+                  Alertes Récentes
                 </CardTitle>
-                {unreadAlertsCount > 0 && (
-                  <p className="text-sm text-muted-foreground">
-                    {unreadAlertsCount} non lue{unreadAlertsCount > 1 ? 's' : ''}
-                  </p>
-                )}
               </div>
-              <Badge variant="secondary">{alerts.length} total</Badge>
+              <Badge variant="secondary" className="bg-amber-50 text-amber-700 border-amber-200">{unreadAlertsCount} nouvelles</Badge>
             </CardHeader>
             <CardContent className="flex-1">
-              <ScrollArea className="h-[320px]">
+              <ScrollArea className="h-[400px] pr-4">
                 <div className="space-y-3">
                   {alerts.slice(0, 5).map((alert) => (
                     <AlertCard
@@ -216,115 +267,24 @@ export const InstitutionDashboard = () => {
                       onClick={() => navigate('/institution/alerts')}
                     />
                   ))}
+                  {alerts.length === 0 && (
+                    <div className="text-center py-8">
+                      <div className="h-12 w-12 bg-muted rounded-full flex items-center justify-center mx-auto mb-3">
+                        <Activity className="h-6 w-6 text-muted-foreground" />
+                      </div>
+                      <p className="text-muted-foreground">Tout est calme. Aucune alerte.</p>
+                    </div>
+                  )}
                 </div>
               </ScrollArea>
+              <Separator className="my-4" />
+              <Button variant="ghost" className="w-full text-muted-foreground hover:text-foreground" onClick={() => navigate('/institution/alerts')}>
+                Voir toutes les alertes <ArrowRight className="ml-2 h-4 w-4" />
+              </Button>
             </CardContent>
           </Card>
         </div>
-
-        {/* Graphiques */}
-        <Tabs defaultValue="trends" className="w-full">
-          <TabsList className="grid w-full max-w-md grid-cols-3">
-            <TabsTrigger value="trends">Tendances</TabsTrigger>
-            <TabsTrigger value="comparison">Comparaisons</TabsTrigger>
-            <TabsTrigger value="distribution">Distribution</TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="trends" className="mt-4">
-            <TrendChart
-              data={trendData}
-              lines={[
-                { key: 'health', name: 'Santé', color: '#3b82f6', type: 'area' },
-                { key: 'education', name: 'Éducation', color: '#10b981', type: 'area' },
-              ]}
-              title="Évolution des performances (2019-2024)"
-              subtitle="Indicateurs agrégés Santé et Éducation"
-              height={350}
-              referenceLine={85}
-            />
-          </TabsContent>
-
-          <TabsContent value="comparison" className="mt-4">
-            <ComparisonChart
-              data={[]}
-              bars={[
-                { key: 'health', name: 'Santé', color: '#3b82f6' },
-                { key: 'education', name: 'Éducation', color: '#10b981' },
-              ]}
-              title="Performance par région"
-              subtitle="Comparaison des indicateurs Santé-Éducation"
-              height={400}
-              referenceLine={80}
-              sortable
-              onExport={() => handleExport('excel')}
-            />
-          </TabsContent>
-
-          <TabsContent value="distribution" className="mt-4">
-            <Card>
-              <CardHeader>
-                <CardTitle>Répartition des performances</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
-                  {[].map((item: any) => (
-                    <div
-                      key={item.name}
-                      className="flex flex-col items-center gap-2 rounded-lg border p-4 text-center"
-                    >
-                      <div
-                        className="h-16 w-16 rounded-full"
-                        style={{ backgroundColor: item.color }}
-                      />
-                      <div>
-                        <p className="font-medium">{item.name}</p>
-                        <p className="text-2xl font-bold" style={{ color: item.color }}>
-                          {item.value}%
-                        </p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-        </Tabs>
-
-        {/* Tableau récapitulatif */}
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between">
-            <div>
-              <CardTitle>Top régions par performance</CardTitle>
-              <p className="text-sm text-muted-foreground">
-                Classement basé sur la moyenne des indicateurs
-              </p>
-            </div>
-            <Button variant="outline" className="gap-2" onClick={() => navigate('/institution/compare')}>
-              Voir tout
-              <ArrowRight className="h-4 w-4" />
-            </Button>
-          </CardHeader>
-          <CardContent>
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead>
-                  <tr className="border-b">
-                    <th className="pb-3 text-left font-medium">Rang</th>
-                    <th className="pb-3 text-left font-medium">Région</th>
-                    <th className="pb-3 text-right font-medium">Santé</th>
-                    <th className="pb-3 text-right font-medium">Éducation</th>
-                    <th className="pb-3 text-right font-medium">Moyenne</th>
-                    <th className="pb-3 text-center font-medium">Tendance</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y">
-                  {[]}
-                </tbody>
-              </table>
-            </div>
-          </CardContent>
-        </Card>
       </div>
-    </MainLayout>
+    </div>
   );
 };

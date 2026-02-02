@@ -390,7 +390,8 @@ export const useHealthFacilities = () => {
     try {
       setLoading('isLoadingHealthFacilities', true);
       const response = await facilitiesService.getHealthFacilities({ page_size: 1000 }, signal);
-      setHealthFacilities(response.results);
+      const mappedResults = response.results.map((f: any) => ({ ...f, sector: 'health' }));
+      setHealthFacilities(mappedResults);
     } catch (e) {
       if (axios.isCancel(e)) return;
       console.error("Failed to load health facilities", e);
@@ -438,7 +439,8 @@ export const useEducationFacilities = () => {
     try {
       setLoading('isLoadingEducationFacilities', true);
       const response = await facilitiesService.getEducationFacilities({ page_size: 1000 }, signal);
-      setEducationFacilities(response.results);
+      const mappedResults = response.results.map((f: any) => ({ ...f, sector: 'education' }));
+      setEducationFacilities(mappedResults);
     } catch (e) {
       if (axios.isCancel(e)) return;
       console.error("Failed to load education facilities", e);
@@ -566,6 +568,7 @@ export const useAuditLogs = (filters?: {
   module?: string;
   type?: string;
   userId?: string;
+  action?: string;
 }) => {
   const [logs, setLogs] = useState<AuditLog[]>([]);
   const [isLoading, setIsLoading] = useState(false);

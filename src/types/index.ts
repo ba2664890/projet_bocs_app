@@ -147,6 +147,7 @@ export interface HealthFacility {
   id: string;
   code: string;
   name: string;
+  sector: 'health';
   type: 'hospital' | 'health_center' | 'health_post' | 'clinic' | 'other';
   category?: 'reference' | 'district' | 'regional' | 'university';
   communeId: string;
@@ -199,6 +200,7 @@ export interface EducationFacility {
   id: string;
   code: string;
   name: string;
+  sector: 'education';
   type: 'primary' | 'secondary' | 'high_school' | 'university' | 'vocational' | 'preschool';
   level: 'basic' | 'secondary' | 'superior';
   communeId: string;

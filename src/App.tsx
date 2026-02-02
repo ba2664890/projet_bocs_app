@@ -20,6 +20,7 @@ import { MapPage } from '@/pages/common/MapPage';
 import { IndicatorsPage } from '@/pages/common/IndicatorsPage';
 
 // Institution Pages
+import { InstitutionLayout } from '@/components/layout/InstitutionLayout';
 import { SectorsPage } from '@/pages/institution/SectorsPage';
 import { ComparePage } from '@/pages/institution/ComparePage';
 import { ReportsPage } from '@/pages/institution/ReportsPage';
@@ -91,13 +92,15 @@ function App() {
         <Route path="/" element={<DefaultRoute />} />
 
         {/* Institution Space */}
-        <Route path="/institution" element={<ProtectedRoute><InstitutionDashboard /></ProtectedRoute>} />
-        <Route path="/institution/map" element={<ProtectedRoute><MapPage /></ProtectedRoute>} />
-        <Route path="/institution/indicators" element={<ProtectedRoute><IndicatorsPage /></ProtectedRoute>} />
-        <Route path="/institution/sectors/*" element={<ProtectedRoute><SectorsPage /></ProtectedRoute>} />
-        <Route path="/institution/compare" element={<ProtectedRoute><ComparePage /></ProtectedRoute>} />
-        <Route path="/institution/reports" element={<ProtectedRoute><ReportsPage /></ProtectedRoute>} />
-        <Route path="/institution/alerts" element={<ProtectedRoute><AlertsPage /></ProtectedRoute>} />
+        <Route path="/institution" element={<ProtectedRoute><InstitutionLayout /></ProtectedRoute>}>
+          <Route index element={<InstitutionDashboard />} />
+          <Route path="map" element={<MapPage />} />
+          <Route path="indicators" element={<IndicatorsPage />} />
+          <Route path="sectors/*" element={<SectorsPage />} />
+          <Route path="compare" element={<ComparePage />} />
+          <Route path="reports" element={<ReportsPage />} />
+          <Route path="alerts" element={<AlertsPage />} />
+        </Route>
 
         {/* Sector Space - Health */}
         <Route path="/sector/health" element={<ProtectedRoute><HealthDashboard /></ProtectedRoute>} />
