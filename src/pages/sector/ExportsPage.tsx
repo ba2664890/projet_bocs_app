@@ -28,7 +28,7 @@ import { useAuditLogs } from '@/hooks/useData';
 import { useAuthStore } from '@/store';
 
 export const ExportsPage = () => {
-    const { user } = useAuthStore();
+    const user = useAuthStore((state) => state.user);
     const sector = user?.role?.includes('education') ? 'Éducation' : 'Santé';
     const [isGenerating, setIsGenerating] = useState<string | null>(null);
 

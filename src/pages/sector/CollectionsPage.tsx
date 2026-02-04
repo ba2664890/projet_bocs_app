@@ -38,7 +38,7 @@ import { useDataCollections } from '@/hooks/useData';
 import { useAuthStore } from '@/store';
 
 export const CollectionsPage = () => {
-    const { user } = useAuthStore();
+    const user = useAuthStore((state) => state.user);
     const sector = user?.role?.includes('education') ? 'education' : 'health';
     const { collections } = useDataCollections({ sector });
     const [searchQuery, setSearchQuery] = useState('');

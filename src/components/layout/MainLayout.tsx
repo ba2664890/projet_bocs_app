@@ -15,7 +15,9 @@ interface MainLayoutProps {
 }
 
 export const MainLayout = ({ children, space = 'institution', title }: MainLayoutProps) => {
-  const { sidebarCollapsed, sidebarMobileOpen, theme } = useUIStore();
+  const sidebarCollapsed = useUIStore((state) => state.sidebarCollapsed);
+  const sidebarMobileOpen = useUIStore((state) => state.sidebarMobileOpen);
+  const theme = useUIStore((state) => state.theme);
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {

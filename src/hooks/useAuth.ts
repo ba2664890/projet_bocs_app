@@ -3,11 +3,22 @@
 // ============================================
 
 import { useCallback } from 'react';
+import { useShallow } from 'zustand/react/shallow';
 import { useAuthStore } from '@/store';
 import authService from '@/services/auth';
 
 export const useAuth = () => {
-  const { user, isAuthenticated, isLoading, login: storeLogin, logout: storeLogout, updateUser, setLoading } = useAuthStore();
+  const { user, isAuthenticated, isLoading, login: storeLogin, logout: storeLogout, updateUser, setLoading } = useAuthStore(
+    useShallow((state) => ({
+      user: state.user,
+      isAuthenticated: state.isAuthenticated,
+      isLoading: state.isLoading,
+      login: state.login,
+      logout: state.logout,
+      updateUser: state.updateUser,
+      setLoading: state.setLoading,
+    }))
+  );
 
   const login = useCallback(async (email: string, password: string): Promise<{ success: boolean; error?: string }> => {
     setLoading(true);

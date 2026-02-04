@@ -46,16 +46,17 @@ interface ProtectedRouteProps {
 }
 
 const ProtectedRoute = ({ children, allowedRoles }: ProtectedRouteProps) => {
-  const { isAuthenticated, user } = useAuthStore((state) => ({
-    isAuthenticated: state.isAuthenticated,
-    user: state.user
-  }));
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+  const user = useAuthStore((state) => state.user);
 
   if (!isAuthenticated) {
     return <Navigate to="/login" replace />;
   }
 
   if (allowedRoles && user && !allowedRoles.includes(user.role) && user.role !== 'admin') {
+    // If user is authenticated but not authorized for this route, 
+    // redirect to '/' which will then redirect to their proper dashboard.
+    // This breaks potential loops and ensures they land on a page they can see.
     return <Navigate to="/" replace />;
   }
 
@@ -77,6 +78,7 @@ const DefaultRoute = () => {
     case 'admin':
       return <Navigate to="/admin" replace />;
     case 'institution':
+    case 'viewer':
       return <Navigate to="/institution" replace />;
     case 'sector_health':
       return <Navigate to="/sector/health" replace />;
@@ -88,6 +90,7 @@ const DefaultRoute = () => {
     case 'annonceur':
       return <Navigate to="/annonceur" replace />;
     default:
+      // Fallback safe for any other unexpected role
       return <Navigate to="/institution" replace />;
   }
 };

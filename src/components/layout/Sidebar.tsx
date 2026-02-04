@@ -66,7 +66,7 @@ const getNavigation = (space: string, locationPath: string, userRole: string): N
 
   switch (space) {
     case 'institution':
-      if (!hasRole(['institution'])) return [];
+      if (!hasRole(['institution', 'viewer'])) return [];
       return [
         ...baseNav,
         {
@@ -174,7 +174,8 @@ const getSpaceConfig = (space: string) => {
 
 export const Sidebar = ({ space, collapsed, isMobile }: SidebarProps) => {
   const location = useLocation();
-  const { toggleSidebar, setSidebarMobileOpen } = useUIStore();
+  const toggleSidebar = useUIStore((state) => state.toggleSidebar);
+  const setSidebarMobileOpen = useUIStore((state) => state.setSidebarMobileOpen);
   const { logout } = useAuth();
   const { unreadAlertsCount } = useAlerts();
   const [expandedItems, setExpandedItems] = useState<string[]>([]);

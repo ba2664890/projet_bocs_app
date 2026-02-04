@@ -25,7 +25,7 @@ import { useIndicatorValues } from '@/hooks/useData';
 import { useAuthStore } from '@/store';
 
 export const AnalyticsPage = () => {
-    const { user } = useAuthStore();
+    const user = useAuthStore((state) => state.user);
     const sector = user?.role?.includes('education') ? 'education' : 'health';
     const { allValues } = useIndicatorValues({ sector });
     const [period, setPeriod] = useState('year');

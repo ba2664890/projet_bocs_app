@@ -66,8 +66,10 @@ const getSpaceTitle = (space: string) => {
 
 export const Header = ({ space }: HeaderProps) => {
   const navigate = useNavigate();
-  const { setSidebarMobileOpen, theme, setTheme } = useUIStore();
-  const { user } = useAuthStore();
+  const setTheme = useUIStore((state) => state.setTheme);
+  const theme = useUIStore((state) => state.theme);
+  const setSidebarMobileOpen = useUIStore((state) => state.setSidebarMobileOpen);
+  const user = useAuthStore((state) => state.user);
   const { logout } = useAuth();
   const { unreadAlertsCount } = useAlerts();
   const { searchAll } = useSearch();

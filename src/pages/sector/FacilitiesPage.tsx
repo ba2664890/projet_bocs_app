@@ -27,7 +27,7 @@ import { useEducationFacilities, useHealthFacilities } from '@/hooks/useData';
 
 export const FacilitiesPage = () => {
     const navigate = useNavigate();
-    const { user } = useAuthStore();
+    const user = useAuthStore((state) => state.user);
     const [searchQuery, setSearchQuery] = useState('');
     const [statusFilter, setStatusFilter] = useState('all');
     const [typeFilter, setTypeFilter] = useState('all');
