@@ -135,9 +135,10 @@ export const FacilitiesPage = () => {
                                         await facilitiesService.createEducationFacility(payload as any);
                                     }
                                     window.location.reload();
-                                } catch (err) {
+                                } catch (err: any) {
                                     console.error('Failed to create facility', err);
-                                    alert('Échec de création');
+                                    const errorMsg = err?.response?.data?.detail || err?.message || 'Échec de création';
+                                    alert(`Erreur: ${errorMsg}`);
                                 }
                             }}>
                                 <div className="grid gap-2">

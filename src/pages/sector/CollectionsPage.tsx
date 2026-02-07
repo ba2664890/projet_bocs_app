@@ -195,8 +195,9 @@ export const CollectionsPage = () => {
                                                     status: 'planned',
                                                     indicators: [],
                                                     geographicScope: 'commune',
-                                                    geographicIds: [],
+                                                    regions: [],
                                                     responseRate: 0,
+                                                    createdBy: user?.id,
                                                 };
 
                                                 try {
@@ -204,10 +205,11 @@ export const CollectionsPage = () => {
                                                     await dataCollectionService.createCollection(payload as any);
                                                     setIsCreateOpen(false);
                                                     // Refresh collections after create
-                                                    // useDataCollections does not expose setter, so trigger full refresh by reloading window
                                                     window.location.reload();
-                                                } catch (err) {
+                                                } catch (err: any) {
                                                     console.error('Failed to create collection', err);
+                                                    const errorMsg = err?.response?.data?.detail || err?.message || 'Échec de création';
+                                                    alert(`Erreur: ${errorMsg}`);
                                                 } finally {
                                                     setCreating(false);
                                                 }

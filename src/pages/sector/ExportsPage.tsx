@@ -36,19 +36,26 @@ export const ExportsPage = () => {
     const handleGenerate = async (type: string) => {
         setIsGenerating(type);
         try {
-            // choose a simple template payload; backend will decide
-            const payload = { format: type.toLowerCase() };
+            // Call custom /generate endpoint with required fields
+            // For now use template_id=1 (first template) - ideally user would select
+            const payload = {
+                template_id: 1,
+                name: `Rapport ${type} - ${new Date().toLocaleDateString('fr-FR')}`,
+                format: type.toLowerCase()
+            };
             const report = await dashboardsService.generateReport(payload);
             setIsGenerating(null);
-            if (report?.fileUrl) {
-                window.open(report.fileUrl, '_blank');
+            if (report?.file) {
+                // If file URL is returned, open it; otherwise show success
+                window.open(report.file, '_blank');
             } else {
                 alert(`Rapport ${type} généré avec succès !`);
             }
-        } catch (err) {
+        } catch (err: any) {
             console.error('Failed to generate report', err);
+            const errorMsg = err?.response?.data?.detail || err?.message || 'Échec de génération';
+            alert(`Erreur: ${errorMsg}`);
             setIsGenerating(null);
-            alert('Échec de génération du rapport');
         }
     };
 
