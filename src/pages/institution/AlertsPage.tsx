@@ -16,7 +16,7 @@ export const AlertsPage = () => {
     // Filter alerts based on search and severity
     const filteredAlerts = alerts.filter(alert => {
         const matchesSearch = alert.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                            alert.description.toLowerCase().includes(searchTerm.toLowerCase());
+                            alert.message.toLowerCase().includes(searchTerm.toLowerCase());
         const matchesSeverity = !filterSeverity || alert.severity === filterSeverity;
         return matchesSearch && matchesSeverity;
     });
