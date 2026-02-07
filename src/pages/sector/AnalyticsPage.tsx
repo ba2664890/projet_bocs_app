@@ -16,7 +16,6 @@ import {
     Download,
     Filter,
     TrendingUp,
-    PieChart,
     BarChart2,
     Share2,
     RefreshCw
@@ -240,7 +239,7 @@ export const AnalyticsPage = () => {
                                             <ResponsiveContainer width="100%" height="100%">
                                                 <RechartsPieChart>
                                                     <Pie
-                                                        data={indicatorMetrics.slice(0, 4).map((m, idx) => ({
+                                                        data={regionalData.slice(0, 4).map((m: any) => ({
                                                             name: m.name,
                                                             value: m.value,
                                                         }))}
