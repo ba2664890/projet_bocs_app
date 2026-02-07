@@ -23,6 +23,7 @@ import {
 } from 'lucide-react';
 import { useIndicatorValues } from '@/hooks/useData';
 import { useAuthStore } from '@/store';
+import { ResponsiveContainer, PieChart as RechartsPieChart, Pie, Cell, Tooltip, Legend } from 'recharts';
 
 export const AnalyticsPage = () => {
     const user = useAuthStore((state) => state.user);
@@ -232,12 +233,33 @@ export const AnalyticsPage = () => {
                                     <CardTitle>Répartition par Zone</CardTitle>
                                     <CardDescription>Contribution par district</CardDescription>
                                 </CardHeader>
-                                <CardContent className="flex items-center justify-center">
-                                    {/* Placeholder for Pie Chart since Recharts Pie is a bit verbose to set up here without a component wrapping it */}
-                                    <div className="h-[400px] w-full flex items-center justify-center bg-slate-50 dark:bg-slate-900 rounded-lg border border-dashed">
-                                        <div className="text-center">
-                                            <PieChart className="h-10 w-10 mx-auto text-muted-foreground mb-2" />
-                                            <p className="text-muted-foreground">Visualisation en cours de développement</p>
+                                <CardContent>
+                                    {/* Display a pie chart distribution - using data from indicators */}
+                                    <div className="h-[400px] w-full flex items-center justify-center">
+                                        <div className="w-full h-full">
+                                            <ResponsiveContainer width="100%" height="100%">
+                                                <RechartsPieChart>
+                                                    <Pie
+                                                        data={indicatorMetrics.slice(0, 4).map((m, idx) => ({
+                                                            name: m.name,
+                                                            value: m.value,
+                                                        }))}
+                                                        cx="50%"
+                                                        cy="50%"
+                                                        labelLine={false}
+                                                        label={({ name, value }) => `${name}: ${value}%`}
+                                                        outerRadius={120}
+                                                        fill="#8884d8"
+                                                        dataKey="value"
+                                                    >
+                                                        {['#3b82f6', '#10b981', '#f59e0b', '#ef4444'].map((color, index) => (
+                                                            <Cell key={`cell-${index}`} fill={color} />
+                                                        ))}
+                                                    </Pie>
+                                                    <Tooltip />
+                                                    <Legend />
+                                                </RechartsPieChart>
+                                            </ResponsiveContainer>
                                         </div>
                                     </div>
                                 </CardContent>
