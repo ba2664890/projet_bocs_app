@@ -1,83 +1,112 @@
 @import 'leaflet/dist/leaflet.css';
 
+/* Google Fonts - Premium Typography */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Outfit:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
   :root {
-    /* FATI - Thème Clair Institutionnel */
-    --background: 210 20% 98%;
-    --foreground: 220 20% 15%;
+    /* FATI - Vibrant Modern Theme */
+    --background: 240 15% 97%;
+    --foreground: 240 10% 10%;
     --card: 0 0% 100%;
-    --card-foreground: 220 20% 15%;
+    --card-foreground: 240 10% 10%;
     --popover: 0 0% 100%;
-    --popover-foreground: 220 20% 15%;
-    --primary: 210 100% 35%;
+    --popover-foreground: 240 10% 10%;
+    --primary: 262 83% 58%;
     --primary-foreground: 0 0% 100%;
-    --secondary: 210 25% 95%;
-    --secondary-foreground: 220 20% 15%;
-    --muted: 210 20% 96%;
-    --muted-foreground: 220 10% 45%;
-    --accent: 174 72% 35%;
+    --secondary: 240 5% 96%;
+    --secondary-foreground: 240 10% 10%;
+    --muted: 240 5% 96%;
+    --muted-foreground: 240 4% 46%;
+    --accent: 199 89% 48%;
     --accent-foreground: 0 0% 100%;
-    --destructive: 0 72% 51%;
+    --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
-    --border: 210 20% 90%;
-    --input: 210 20% 90%;
-    --ring: 210 100% 35%;
-    --radius: 0.625rem;
+    --border: 240 6% 90%;
+    --input: 240 6% 90%;
+    --ring: 262 83% 58%;
+    --radius: 0.75rem;
     
-    /* Couleurs FATI spécifiques */
-    --fati-blue: 210 100% 35%;
-    --fati-teal: 174 72% 35%;
-    --fati-gold: 43 96% 45%;
-    --fati-red: 0 72% 51%;
-    --fati-green: 142 71% 35%;
-    --fati-purple: 262 56% 45%;
+    /* Vibrant Color Palette */
+    --electric-purple: 262 83% 58%;
+    --electric-blue: 217 91% 60%;
+    --cyber-teal: 174 72% 56%;
+    --neon-pink: 330 81% 60%;
+    --vivid-orange: 25 95% 53%;
+    --lime-green: 142 76% 36%;
+    --sunset-orange: 14 91% 58%;
+    --ocean-blue: 199 89% 48%;
+    
+    /* Gradient Definitions */
+    --gradient-purple: linear-gradient(135deg, hsl(262 83% 58%) 0%, hsl(217 91% 60%) 100%);
+    --gradient-sunset: linear-gradient(135deg, hsl(330 81% 60%) 0%, hsl(25 95% 53%) 100%);
+    --gradient-ocean: linear-gradient(135deg, hsl(199 89% 48%) 0%, hsl(174 72% 56%) 100%);
+    --gradient-cyber: linear-gradient(135deg, hsl(262 83% 58%) 0%, hsl(330 81% 60%) 100%);
+    --gradient-emerald: linear-gradient(135deg, hsl(142 76% 36%) 0%, hsl(174 72% 56%) 100%);
+    
+    /* Shadow System with Colors */
+    --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+    --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+    --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+    --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1);
+    --shadow-2xl: 0 25px 50px -12px rgb(0 0 0 / 0.25);
+    --shadow-purple: 0 10px 40px -10px hsl(262 83% 58% / 0.4);
+    --shadow-blue: 0 10px 40px -10px hsl(217 91% 60% / 0.4);
+    --shadow-teal: 0 10px 40px -10px hsl(174 72% 56% / 0.4);
+    --shadow-pink: 0 10px 40px -10px hsl(330 81% 60% / 0.4);
     
     /* Sidebar */
     --sidebar-background: 0 0% 100%;
-    --sidebar-foreground: 220 20% 15%;
-    --sidebar-primary: 210 100% 35%;
+    --sidebar-foreground: 240 10% 10%;
+    --sidebar-primary: 262 83% 58%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 210 25% 95%;
-    --sidebar-accent-foreground: 220 20% 15%;
-    --sidebar-border: 210 20% 90%;
-    --sidebar-ring: 210 100% 35%;
+    --sidebar-accent: 240 5% 96%;
+    --sidebar-accent-foreground: 240 10% 10%;
+    --sidebar-border: 240 6% 90%;
+    --sidebar-ring: 262 83% 58%;
   }
 
   .dark {
-    /* FATI - Thème Sombre Institutionnel */
-    --background: 220 20% 8%;
-    --foreground: 210 20% 95%;
-    --card: 220 18% 12%;
-    --card-foreground: 210 20% 95%;
-    --popover: 220 18% 12%;
-    --popover-foreground: 210 20% 95%;
-    --primary: 210 100% 55%;
+    /* FATI - Vibrant Dark Theme */
+    --background: 240 10% 6%;
+    --foreground: 240 5% 96%;
+    --card: 240 10% 10%;
+    --card-foreground: 240 5% 96%;
+    --popover: 240 10% 10%;
+    --popover-foreground: 240 5% 96%;
+    --primary: 262 83% 65%;
     --primary-foreground: 0 0% 100%;
-    --secondary: 220 15% 18%;
-    --secondary-foreground: 210 20% 95%;
-    --muted: 220 15% 18%;
-    --muted-foreground: 210 15% 60%;
-    --accent: 174 72% 45%;
+    --secondary: 240 4% 16%;
+    --secondary-foreground: 240 5% 96%;
+    --muted: 240 4% 16%;
+    --muted-foreground: 240 5% 65%;
+    --accent: 199 89% 55%;
     --accent-foreground: 0 0% 100%;
-    --destructive: 0 72% 51%;
+    --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
-    --border: 220 15% 20%;
-    --input: 220 15% 20%;
-    --ring: 210 100% 55%;
+    --border: 240 4% 16%;
+    --input: 240 4% 16%;
+    --ring: 262 83% 65%;
+    
+    /* Dark Mode Shadows */
+    --shadow-purple: 0 10px 40px -10px hsl(262 83% 58% / 0.6);
+    --shadow-blue: 0 10px 40px -10px hsl(217 91% 60% / 0.6);
+    --shadow-teal: 0 10px 40px -10px hsl(174 72% 56% / 0.6);
+    --shadow-pink: 0 10px 40px -10px hsl(330 81% 60% / 0.6);
     
     /* Sidebar dark */
-    --sidebar-background: 220 18% 10%;
-    --sidebar-foreground: 210 20% 95%;
-    --sidebar-primary: 210 100% 55%;
+    --sidebar-background: 240 10% 8%;
+    --sidebar-foreground: 240 5% 96%;
+    --sidebar-primary: 262 83% 65%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 220 15% 18%;
-    --sidebar-accent-foreground: 210 20% 95%;
-    --sidebar-border: 220 15% 20%;
-    --sidebar-ring: 210 100% 55%;
+    --sidebar-accent: 240 4% 16%;
+    --sidebar-accent-foreground: 240 5% 96%;
+    --sidebar-border: 240 4% 16%;
+    --sidebar-ring: 262 83% 65%;
   }
 }
 
@@ -92,12 +121,25 @@
   
   body {
     @apply bg-background text-foreground antialiased;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
     font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  }
+  
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Outfit', sans-serif;
+    font-weight: 700;
+  }
+  
+  code, pre {
+    font-family: 'JetBrains Mono', monospace;
   }
 }
 
 @layer components {
-  /* Glassmorphism */
+  /* ============================================ */
+  /* GLASSMORPHISM EFFECTS */
+  /* ============================================ */
+  
   .glass {
     @apply bg-white/80 dark:bg-black/40 backdrop-blur-xl border border-white/20 dark:border-white/10;
   }
@@ -106,89 +148,322 @@
     @apply bg-white/70 dark:bg-slate-900/70 backdrop-blur-lg border border-slate-200/50 dark:border-slate-700/50 shadow-lg;
   }
   
-  /* Cards FATI */
-  .fati-card {
-    @apply bg-card rounded-xl border border-border shadow-sm hover:shadow-md transition-shadow duration-200;
+  .glass-premium {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(255, 255, 255, 0.7) 100%);
+    backdrop-filter: blur(20px) saturate(180%);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
   }
   
-  /* Badges de statut */
+  .dark .glass-premium {
+    background: linear-gradient(135deg, rgba(30, 30, 50, 0.9) 0%, rgba(20, 20, 40, 0.8) 100%);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4);
+  }
+  
+  /* ============================================ */
+  /* PREMIUM CARDS */
+  /* ============================================ */
+  
+  .card-premium {
+    @apply relative overflow-hidden rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xl transition-all duration-500;
+  }
+  
+  .card-premium:hover {
+    @apply shadow-2xl -translate-y-1;
+  }
+  
+  .card-gradient-purple {
+    background: linear-gradient(135deg, hsl(262 83% 58%) 0%, hsl(217 91% 60%) 100%);
+    box-shadow: var(--shadow-purple);
+  }
+  
+  .card-gradient-ocean {
+    background: linear-gradient(135deg, hsl(199 89% 48%) 0%, hsl(174 72% 56%) 100%);
+    box-shadow: var(--shadow-blue);
+  }
+  
+  .card-gradient-sunset {
+    background: linear-gradient(135deg, hsl(330 81% 60%) 0%, hsl(25 95% 53%) 100%);
+    box-shadow: var(--shadow-pink);
+  }
+  
+  .card-gradient-emerald {
+    background: linear-gradient(135deg, hsl(142 76% 36%) 0%, hsl(174 72% 56%) 100%);
+    box-shadow: var(--shadow-teal);
+  }
+  
+  /* ============================================ */
+  /* HOVER EFFECTS */
+  /* ============================================ */
+  
+  .hover-lift {
+    @apply transition-all duration-300 ease-out;
+  }
+  
+  .hover-lift:hover {
+    @apply -translate-y-2 shadow-2xl;
+  }
+  
+  .hover-glow {
+    @apply transition-all duration-300;
+  }
+  
+  .hover-glow:hover {
+    filter: drop-shadow(0 0 20px currentColor);
+  }
+  
+  .hover-tilt {
+    @apply transition-transform duration-300;
+    transform-style: preserve-3d;
+  }
+  
+  .hover-tilt:hover {
+    transform: perspective(1000px) rotateX(2deg) rotateY(-2deg) scale(1.02);
+  }
+  
+  .hover-scale {
+    @apply transition-transform duration-300 ease-out;
+  }
+  
+  .hover-scale:hover {
+    @apply scale-105;
+  }
+  
+  /* ============================================ */
+  /* GRADIENT UTILITIES */
+  /* ============================================ */
+  
+  .gradient-text {
+    @apply bg-clip-text text-transparent;
+    background-image: linear-gradient(135deg, hsl(262 83% 58%) 0%, hsl(217 91% 60%) 100%);
+  }
+  
+  .gradient-text-animated {
+    @apply bg-clip-text text-transparent;
+    background-image: linear-gradient(90deg, hsl(262 83% 58%), hsl(217 91% 60%), hsl(174 72% 56%), hsl(262 83% 58%));
+    background-size: 200% auto;
+    animation: gradientShift 3s linear infinite;
+  }
+  
+  .border-gradient {
+    position: relative;
+    background: linear-gradient(var(--background), var(--background)) padding-box,
+                linear-gradient(135deg, hsl(262 83% 58%), hsl(217 91% 60%)) border-box;
+    border: 2px solid transparent;
+  }
+  
+  .border-gradient-animated {
+    position: relative;
+    background: linear-gradient(var(--background), var(--background)) padding-box,
+                linear-gradient(90deg, hsl(262 83% 58%), hsl(217 91% 60%), hsl(174 72% 56%), hsl(262 83% 58%)) border-box;
+    border: 2px solid transparent;
+    background-size: 200% auto;
+    animation: gradientShift 3s linear infinite;
+  }
+  
+  /* ============================================ */
+  /* SHIMMER & SHINE EFFECTS */
+  /* ============================================ */
+  
+  .shimmer {
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .shimmer::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+    animation: shimmer 2s infinite;
+  }
+  
+  .shine {
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .shine::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.3) 0%, transparent 70%);
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+  
+  .shine:hover::before {
+    opacity: 1;
+    animation: shine 0.6s ease-out;
+  }
+  
+  /* ============================================ */
+  /* PREMIUM BUTTONS */
+  /* ============================================ */
+  
+  .btn-premium {
+    @apply relative overflow-hidden font-semibold rounded-xl px-6 py-3 transition-all duration-300;
+    background: linear-gradient(135deg, hsl(262 83% 58%) 0%, hsl(217 91% 60%) 100%);
+    box-shadow: 0 4px 15px 0 rgba(116, 79, 168, 0.4);
+  }
+  
+  .btn-premium:hover {
+    box-shadow: 0 8px 25px 0 rgba(116, 79, 168, 0.6);
+    transform: translateY(-2px);
+  }
+  
+  .btn-premium::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+    transition: left 0.5s;
+  }
+  
+  .btn-premium:hover::before {
+    left: 100%;
+  }
+  
+  /* ============================================ */
+  /* BADGES */
+  /* ============================================ */
+  
   .badge-validated {
-    @apply inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400;
+    @apply inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800;
   }
   
   .badge-pending {
-    @apply inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400;
+    @apply inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 border border-amber-200 dark:border-amber-800;
   }
   
   .badge-rejected {
-    @apply inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400;
+    @apply inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400 border border-red-200 dark:border-red-800;
   }
   
   .badge-draft {
-    @apply inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-400;
+    @apply inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-400 border border-slate-200 dark:border-slate-700;
   }
   
-  /* Indicateurs de priorité */
-  .priority-high {
-    @apply text-red-600 dark:text-red-400;
+  .badge-gradient {
+    @apply inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold text-white;
+    background: linear-gradient(135deg, hsl(262 83% 58%) 0%, hsl(217 91% 60%) 100%);
+    box-shadow: 0 4px 12px rgba(116, 79, 168, 0.3);
   }
   
-  .priority-medium {
-    @apply text-amber-600 dark:text-amber-400;
-  }
+  /* ============================================ */
+  /* SCROLLBAR */
+  /* ============================================ */
   
-  .priority-low {
-    @apply text-emerald-600 dark:text-emerald-400;
-  }
-  
-  /* Animations */
-  .animate-fade-in {
-    animation: fadeIn 0.3s ease-out;
-  }
-  
-  .animate-slide-up {
-    animation: slideUp 0.4s ease-out;
-  }
-  
-  .animate-scale-in {
-    animation: scaleIn 0.2s ease-out;
-  }
-  
-  /* Skeleton loading */
-  .skeleton {
-    @apply animate-pulse bg-slate-200 dark:bg-slate-700 rounded;
-  }
-  
-  /* Scrollbar personnalisée */
   .custom-scrollbar::-webkit-scrollbar {
-    width: 6px;
-    height: 6px;
+    width: 8px;
+    height: 8px;
   }
   
   .custom-scrollbar::-webkit-scrollbar-track {
-    @apply bg-transparent;
+    @apply bg-slate-100 dark:bg-slate-800 rounded-full;
   }
   
   .custom-scrollbar::-webkit-scrollbar-thumb {
-    @apply bg-slate-300 dark:bg-slate-600 rounded-full;
+    @apply bg-gradient-to-b from-purple-500 to-blue-500 rounded-full;
   }
   
   .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-    @apply bg-slate-400 dark:bg-slate-500;
+    @apply from-purple-600 to-blue-600;
+  }
+  
+  /* ============================================ */
+  /* SKELETON LOADING */
+  /* ============================================ */
+  
+  .skeleton {
+    @apply relative overflow-hidden bg-slate-200 dark:bg-slate-700 rounded;
+  }
+  
+  .skeleton::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+    animation: shimmer 1.5s infinite;
+  }
+  
+  /* ============================================ */
+  /* FLOATING ELEMENTS */
+  /* ============================================ */
+  
+  .float {
+    animation: float 3s ease-in-out infinite;
+  }
+  
+  .float-delayed {
+    animation: float 3s ease-in-out 0.5s infinite;
+  }
+  
+  /* ============================================ */
+  /* BACKGROUND PATTERNS */
+  /* ============================================ */
+  
+  .bg-grid-pattern {
+    background-image: 
+      linear-gradient(to right, hsl(240 6% 90% / 0.1) 1px, transparent 1px),
+      linear-gradient(to bottom, hsl(240 6% 90% / 0.1) 1px, transparent 1px);
+    background-size: 40px 40px;
+  }
+  
+  .dark .bg-grid-pattern {
+    background-image: 
+      linear-gradient(to right, hsl(240 4% 16% / 0.3) 1px, transparent 1px),
+      linear-gradient(to bottom, hsl(240 4% 16% / 0.3) 1px, transparent 1px);
+  }
+  
+  .bg-gradient-mesh {
+    background: 
+      radial-gradient(at 0% 0%, hsl(262 83% 58% / 0.1) 0px, transparent 50%),
+      radial-gradient(at 100% 0%, hsl(217 91% 60% / 0.1) 0px, transparent 50%),
+      radial-gradient(at 100% 100%, hsl(174 72% 56% / 0.1) 0px, transparent 50%),
+      radial-gradient(at 0% 100%, hsl(330 81% 60% / 0.1) 0px, transparent 50%);
   }
 }
 
 @layer utilities {
-  /* Text gradient */
-  .text-gradient {
-    @apply bg-clip-text text-transparent bg-gradient-to-r from-primary to-accent;
-  }
-  
   /* Focus visible */
   .focus-ring {
     @apply focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2;
   }
+  
+  /* Pulse animations */
+  .pulse-slow {
+    animation: pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+  
+  /* Reduce motion for accessibility */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
 }
+
+/* ============================================ */
+/* KEYFRAME ANIMATIONS */
+/* ============================================ */
 
 @keyframes fadeIn {
   from {
@@ -196,6 +471,17 @@
   }
   to {
     opacity: 1;
+  }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }
 
@@ -210,6 +496,17 @@
   }
 }
 
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
 @keyframes scaleIn {
   from {
     opacity: 0;
@@ -221,21 +518,117 @@
   }
 }
 
-/* Leaflet custom styles */
+@keyframes rotateIn {
+  from {
+    opacity: 0;
+    transform: rotate(-10deg) scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: rotate(0) scale(1);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    left: -100%;
+  }
+  100% {
+    left: 100%;
+  }
+}
+
+@keyframes shine {
+  0% {
+    transform: translate(-50%, -50%) scale(0);
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 0;
+  }
+}
+
+@keyframes gradientShift {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-20px);
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+@keyframes spin-slow {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes bounce-subtle {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-5px);
+  }
+}
+
+/* ============================================ */
+/* LEAFLET CUSTOM STYLES */
+/* ============================================ */
+
 .leaflet-container {
-  @apply rounded-lg;
-  font-family: inherit;
+  @apply rounded-xl;
+  font-family: 'Inter', sans-serif;
 }
 
 .leaflet-popup-content-wrapper {
-  @apply rounded-lg shadow-lg;
+  @apply rounded-xl shadow-2xl;
+  backdrop-filter: blur(10px);
 }
 
 .leaflet-popup-content {
   @apply m-0 p-4;
 }
 
-/* Chart tooltip custom */
+/* ============================================ */
+/* CHART CUSTOM STYLES */
+/* ============================================ */
+
 .recharts-tooltip-wrapper {
   @apply z-50;
+}
+
+.recharts-default-tooltip {
+  @apply rounded-xl shadow-xl backdrop-blur-lg !important;
+  background: rgba(255, 255, 255, 0.95) !important;
+  border: 1px solid rgba(0, 0, 0, 0.1) !important;
+}
+
+.dark .recharts-default-tooltip {
+  background: rgba(30, 30, 50, 0.95) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
 }
