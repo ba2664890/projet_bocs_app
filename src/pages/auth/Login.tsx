@@ -20,8 +20,7 @@ import {
   Lock,
   Mail,
   Building2,
-  HeartPulse,
-  GraduationCap,
+  Users,
   Smartphone,
   ArrowRight,
   AlertCircle,
@@ -35,11 +34,11 @@ interface LoginFormData {
 
 const spaceOptions = [
   {
-    id: 'institution',
-    label: 'Institutionnel',
+    id: 'government',
+    label: 'Gouvernement',
     icon: Building2,
     color: 'blue',
-    description: 'Pilotage et gouvernance',
+    description: 'Accès aux indicateurs de santé et éducation',
     bg: 'bg-blue-600',
     hoverBg: 'hover:bg-blue-700',
     text: 'text-blue-600',
@@ -53,47 +52,29 @@ const spaceOptions = [
     shadow: 'shadow-blue-600/20'
   },
   {
-    id: 'health',
-    label: 'Santé',
-    icon: HeartPulse,
-    color: 'red',
-    description: 'Indicateurs de santé',
-    bg: 'bg-red-600',
-    hoverBg: 'hover:bg-red-700',
-    text: 'text-red-600',
-    darkText: 'dark:text-red-400',
-    activeBg: 'group-data-[state=active]:bg-red-50',
-    activeDarkBg: 'dark:group-data-[state=active]:bg-red-900/30',
-    border: 'border-red-200/50',
-    darkBorder: 'dark:border-red-800/50',
-    lightBg: 'bg-red-50/30',
-    darkLightBg: 'dark:bg-red-900/10',
-    shadow: 'shadow-red-600/20'
-  },
-  {
-    id: 'education',
-    label: 'Éducation',
-    icon: GraduationCap,
-    color: 'teal',
-    description: 'Indicateurs éducation',
-    bg: 'bg-teal-600',
-    hoverBg: 'hover:bg-teal-700',
-    text: 'text-teal-600',
-    darkText: 'dark:text-teal-400',
-    activeBg: 'group-data-[state=active]:bg-teal-50',
-    activeDarkBg: 'dark:group-data-[state=active]:bg-teal-900/30',
-    border: 'border-teal-200/50',
-    darkBorder: 'dark:border-teal-800/50',
-    lightBg: 'bg-teal-50/30',
-    darkLightBg: 'dark:bg-teal-900/10',
-    shadow: 'shadow-teal-600/20'
+    id: 'representatives',
+    label: 'Acteurs',
+    icon: Users,
+    color: 'indigo',
+    description: 'Personnes habilitées - Supervision et validation',
+    bg: 'bg-indigo-600',
+    hoverBg: 'hover:bg-indigo-700',
+    text: 'text-indigo-600',
+    darkText: 'dark:text-indigo-400',
+    activeBg: 'group-data-[state=active]:bg-indigo-50',
+    activeDarkBg: 'dark:group-data-[state=active]:bg-indigo-900/30',
+    border: 'border-indigo-200/50',
+    darkBorder: 'dark:border-indigo-800/50',
+    lightBg: 'bg-indigo-50/30',
+    darkLightBg: 'dark:bg-indigo-900/10',
+    shadow: 'shadow-indigo-600/20'
   },
   {
     id: 'annonceur',
-    label: 'Annonceurs',
+    label: 'Population',
     icon: Smartphone,
     color: 'purple',
-    description: 'Espace communication',
+    description: 'Accès à la collecte et participation',
     bg: 'bg-purple-600',
     hoverBg: 'hover:bg-purple-700',
     text: 'text-purple-600',
@@ -122,7 +103,7 @@ export const Login = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState(false);
-  const [selectedSpace, setSelectedSpace] = useState('institution');
+  const [selectedSpace, setSelectedSpace] = useState('government');
   const [formData, setFormData] = useState<LoginFormData>({
     email: '',
     password: '',
@@ -186,14 +167,11 @@ export const Login = () => {
 
         let isAuthorized = false;
         switch (selectedSpace) {
-          case 'institution':
+          case 'government':
             isAuthorized = role === 'admin' || role === 'institution';
             break;
-          case 'health':
-            isAuthorized = role === 'admin' || role === 'sector_health';
-            break;
-          case 'education':
-            isAuthorized = role === 'admin' || role === 'sector_education';
+          case 'representatives':
+            isAuthorized = role === 'admin' || role === 'local_manager' || role === 'contributor';
             break;
           case 'annonceur':
             isAuthorized = role === 'admin' || role === 'annonceur';
@@ -274,7 +252,7 @@ export const Login = () => {
             )}
 
             <Tabs value={selectedSpace} onValueChange={setSelectedSpace} className="w-full">
-              <TabsList className="grid w-full grid-cols-2 gap-2 p-1.5 h-auto bg-slate-100/50 dark:bg-slate-800/50 rounded-2xl backdrop-blur-sm">
+              <TabsList className="grid w-full grid-cols-3 gap-2 p-1.5 h-auto bg-slate-100/50 dark:bg-slate-800/50 rounded-2xl backdrop-blur-sm">
                 {spaceOptions.map((space) => (
                   <TabsTrigger
                     key={space.id}

@@ -25,7 +25,8 @@ import {
   TrendingUp,
   MapPin,
   Filter,
-  Activity
+  Activity,
+  FileText
 } from 'lucide-react';
 import { useHealthFacilities, useIndicatorValues } from '@/hooks/useData';
 import type { KPIData } from '@/types';
@@ -156,15 +157,19 @@ export const HealthDashboard = () => {
               <Download className="h-4 w-4" />
               Rapport
             </Button>
-            <Button className="gap-2 bg-blue-600 hover:bg-blue-700 shadow-sm" onClick={() => navigate('/sector/collections')}>
+            <Button className="gap-2 bg-blue-600 hover:bg-blue-700 shadow-sm" onClick={() => navigate('/sector/health/forms')}>
               <Plus className="h-4 w-4" />
-              Nouvelle collecte
+              Collecte de données
             </Button>
           </div>
         </div>
 
         {/* Navigation secondaire */}
         <div className="flex flex-wrap gap-2">
+          <Button variant="secondary" className="gap-2 shadow-sm rounded-full px-4 bg-blue-50 hover:bg-blue-100 text-blue-700 dark:bg-blue-950/30 dark:text-blue-400 dark:hover:bg-blue-950/50 border border-blue-200 dark:border-blue-800" onClick={() => navigate('/sector/health/forms')}>
+            <FileText className="h-4 w-4" />
+            Collecte de données
+          </Button>
           <Button variant="secondary" className="gap-2 shadow-sm rounded-full px-4" onClick={() => navigate('/sector/facilities')}>
             <Building2 className="h-4 w-4" />
             Structures

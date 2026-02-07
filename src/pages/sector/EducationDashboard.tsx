@@ -29,7 +29,8 @@ import {
   Filter,
   School,
   UserCheck,
-  Activity
+  Activity,
+  FileText
 } from 'lucide-react';
 import { useEducationFacilities, useIndicatorValues } from '@/hooks/useData';
 import type { KPIData } from '@/types';
@@ -160,15 +161,19 @@ export const EducationDashboard = () => {
               <Download className="h-4 w-4" />
               Rapport
             </Button>
-            <Button className="gap-2 bg-teal-600 hover:bg-teal-700 shadow-sm" onClick={() => navigate('/sector/collections')}>
+            <Button className="gap-2 bg-teal-600 hover:bg-teal-700 shadow-sm" onClick={() => navigate('/sector/education/forms')}>
               <Plus className="h-4 w-4" />
-              Nouvelle collecte
+              Collecte de données
             </Button>
           </div>
         </div>
 
         {/* Navigation secondaire */}
         <div className="flex flex-wrap gap-2">
+          <Button variant="secondary" className="gap-2 shadow-sm rounded-full px-4 bg-teal-50 hover:bg-teal-100 text-teal-700 dark:bg-teal-950/30 dark:text-teal-400 dark:hover:bg-teal-950/50 border border-teal-200 dark:border-teal-800" onClick={() => navigate('/sector/education/forms')}>
+            <FileText className="h-4 w-4" />
+            Collecte de données
+          </Button>
           <Button variant="secondary" className="gap-2 shadow-sm rounded-full px-4" onClick={() => navigate('/sector/facilities')}>
             <Building2 className="h-4 w-4" />
             Établissements

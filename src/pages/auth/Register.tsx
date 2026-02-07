@@ -43,7 +43,7 @@ export const Register = () => {
         email: '',
         password: '',
         confirmPassword: '',
-        role: 'contributor',
+        role: 'institution',
         organization: '',
         phone: '',
     });
@@ -210,10 +210,9 @@ export const Register = () => {
                                             <SelectValue placeholder="Sélectionner un rôle" />
                                         </SelectTrigger>
                                         <SelectContent>
-                                            <SelectItem value="contributor">Contributeur</SelectItem>
-                                            <SelectItem value="institution">Institutionnel</SelectItem>
-                                            <SelectItem value="sector_health">Secteur Santé</SelectItem>
-                                            <SelectItem value="sector_education">Secteur Éducation</SelectItem>
+                                            <SelectItem value="institution">Gouvernement</SelectItem>
+                                            <SelectItem value="local_manager">Acteurs - Personnes habilitées</SelectItem>
+                                            <SelectItem value="annonceur">Population - Annonceurs</SelectItem>
                                         </SelectContent>
                                     </Select>
                                 </div>
