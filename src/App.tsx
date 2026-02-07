@@ -29,6 +29,7 @@ import { AlertsPage } from '@/pages/institution/AlertsPage';
 // Sector Pages
 import { FacilitiesPage } from '@/pages/sector/FacilitiesPage';
 import { CollectionsPage } from '@/pages/sector/CollectionsPage';
+import { FormSubmissionPage } from '@/pages/sector/FormSubmissionPage';
 import { AnalyticsPage } from '@/pages/sector/AnalyticsPage';
 import { ExportsPage } from '@/pages/sector/ExportsPage';
 
@@ -123,6 +124,8 @@ function App() {
         <Route path="/sector/health/indicators" element={<ProtectedRoute allowedRoles={['sector_health']}><IndicatorsPage /></ProtectedRoute>} />
         <Route path="/sector/health/facilities" element={<ProtectedRoute allowedRoles={['sector_health']}><FacilitiesPage /></ProtectedRoute>} />
         <Route path="/sector/health/collections" element={<ProtectedRoute allowedRoles={['sector_health']}><CollectionsPage /></ProtectedRoute>} />
+        <Route path="/sector/health/forms" element={<ProtectedRoute allowedRoles={['sector_health']}><CollectionsPage /></ProtectedRoute>} />
+        <Route path="/sector/health/forms/:formId" element={<ProtectedRoute allowedRoles={['sector_health']}><FormSubmissionPage /></ProtectedRoute>} />
         <Route path="/sector/health/analytics" element={<ProtectedRoute allowedRoles={['sector_health']}><AnalyticsPage /></ProtectedRoute>} />
         <Route path="/sector/health/exports" element={<ProtectedRoute allowedRoles={['sector_health']}><ExportsPage /></ProtectedRoute>} />
 
@@ -132,6 +135,8 @@ function App() {
         <Route path="/sector/education/indicators" element={<ProtectedRoute allowedRoles={['sector_education']}><IndicatorsPage /></ProtectedRoute>} />
         <Route path="/sector/education/facilities" element={<ProtectedRoute allowedRoles={['sector_education']}><FacilitiesPage /></ProtectedRoute>} />
         <Route path="/sector/education/collections" element={<ProtectedRoute allowedRoles={['sector_education']}><CollectionsPage /></ProtectedRoute>} />
+        <Route path="/sector/education/forms" element={<ProtectedRoute allowedRoles={['sector_education']}><CollectionsPage /></ProtectedRoute>} />
+        <Route path="/sector/education/forms/:formId" element={<ProtectedRoute allowedRoles={['sector_education']}><FormSubmissionPage /></ProtectedRoute>} />
         <Route path="/sector/education/analytics" element={<ProtectedRoute allowedRoles={['sector_education']}><AnalyticsPage /></ProtectedRoute>} />
         <Route path="/sector/education/exports" element={<ProtectedRoute allowedRoles={['sector_education']}><ExportsPage /></ProtectedRoute>} />
 
@@ -148,6 +153,8 @@ function App() {
         <Route path="/contributor" element={<ProtectedRoute allowedRoles={['contributor', 'local_manager']}><ContributorDashboard /></ProtectedRoute>} />
         <Route path="/contributor/collections" element={<ProtectedRoute allowedRoles={['contributor', 'local_manager']}><CollectionsPage /></ProtectedRoute>} />
         <Route path="/contributor/forms" element={<ProtectedRoute allowedRoles={['contributor', 'local_manager']}><CollectionsPage /></ProtectedRoute>} />
+        <Route path="/contributor/forms/:formId" element={<ProtectedRoute allowedRoles={['contributor', 'local_manager']}><FormSubmissionPage /></ProtectedRoute>} />
+        <Route path="/sector/forms/:formId" element={<ProtectedRoute allowedRoles={['sector_health', 'sector_education']}><FormSubmissionPage /></ProtectedRoute>} />
         <Route path="/contributor/notifications" element={<ProtectedRoute allowedRoles={['contributor', 'local_manager']}><AlertsPage /></ProtectedRoute>} />
 
         {/* Annonceur Space */}

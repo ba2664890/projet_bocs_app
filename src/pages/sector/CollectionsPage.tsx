@@ -1,327 +1,216 @@
 // ============================================
-// FATI - Collectes de Données
-// Gestion des campagnes de collecte
+// FATI - Formulaires de Collecte
+// Remplissage des formulaires de collecte
 // ============================================
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { MainLayout } from '@/components/layout/MainLayout';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { Progress } from '@/components/ui/progress';
 import {
-    Table,
-    TableBody,
-    TableCell,
-    TableHead,
-    TableHeader,
-    TableRow,
-} from '@/components/ui/table';
-import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import {
-    Clock,
-    BarChart2,
     Search,
-    Plus,
-    MoreVertical,
-    Calendar,
-    FileText
+    Loader2,
+    Hospital,
+    School,
+    FileText,
+    ChevronRight
 } from 'lucide-react';
-import {
-    Dialog,
-    DialogTrigger,
-    DialogContent,
-    DialogHeader,
-    DialogTitle,
-    DialogDescription,
-    DialogFooter,
-    DialogClose,
-} from '@/components/ui/dialog';
 
 import { dataCollectionService } from '@/services/dataCollection';
-
-import { useDataCollections } from '@/hooks/useData';
-import { useAuthStore } from '@/store';
+import { useNavigate } from 'react-router-dom';
 
 export const CollectionsPage = () => {
-    const user = useAuthStore((state) => state.user);
-    const sector = user?.role?.includes('education') ? 'education' : 'health';
-    const { collections } = useDataCollections({ sector });
+    const [forms, setForms] = useState<any[]>([]);
+    const [isLoading, setIsLoading] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
-    const [isCreateOpen, setIsCreateOpen] = useState(false);
-    const [creating, setCreating] = useState(false);
+    const navigate = useNavigate();
 
-    // Derived KPIs
-    const totalCampaigns = collections.length;
-    const activeCampaigns = collections.filter(c => c.status === 'ongoing').length;
-    const avgResponseRate = collections.length > 0 ? Math.round(collections.reduce((s, c) => s + (c.responseRate || 0), 0) / collections.length) : 0;
-    const totalPoints = collections.reduce((s, c) => s + (c.geographicIds ? c.geographicIds.length : 0), 0);
+    useEffect(() => {
+        const fetchForms = async () => {
+            try {
+                setIsLoading(true);
+                const response = await dataCollectionService.getForms();
+                setForms(response.results || response || []);
+            } catch (err) {
+                console.error('Failed to load forms', err);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+        fetchForms();
+    }, []);
 
+    const filteredForms = forms.filter(f =>
+        f.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        f.description?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        f.sector?.toLowerCase().includes(searchQuery.toLowerCase())
+    );
 
-
-    const getStatusBadge = (status: string) => {
-        switch (status) {
-            case 'ongoing':
-                return <Badge className="bg-blue-100 text-blue-700 hover:bg-blue-100 dark:bg-blue-900/30 dark:text-blue-400 border-none">En cours</Badge>;
-            case 'completed':
-                return <Badge className="bg-green-100 text-green-700 hover:bg-green-100 dark:bg-green-900/30 dark:text-green-400 border-none">Terminé</Badge>;
-            case 'planned':
-                return <Badge className="bg-slate-100 text-slate-700 hover:bg-slate-100 dark:bg-slate-800 dark:text-slate-400 border-none">À venir</Badge>;
-            case 'closed':
-                return <Badge className="bg-red-100 text-red-700 hover:bg-red-100 dark:bg-red-900/30 dark:text-red-400 border-none">Clôturée</Badge>;
-            default:
-                return <Badge variant="outline">{status}</Badge>;
+    const getSectorIcon = (sector: string) => {
+        if (sector?.includes('santé') || sector?.includes('health')) {
+            return <Hospital className="h-5 w-5 text-red-500" />;
         }
+        if (sector?.includes('éducation') || sector?.includes('education')) {
+            return <School className="h-5 w-5 text-blue-500" />;
+        }
+        return <FileText className="h-5 w-5" />;
     };
 
+    const getSectorColor = (sector: string) => {
+        if (sector?.includes('santé') || sector?.includes('health')) {
+            return 'bg-red-100 text-red-800 dark:bg-red-900/20';
+        }
+        if (sector?.includes('éducation') || sector?.includes('education')) {
+            return 'bg-blue-100 text-blue-800 dark:bg-blue-900/20';
+        }
+        return 'bg-gray-100 text-gray-800';
+    };
 
-
-    const filteredCollections = collections.filter(c =>
-        c.name.toLowerCase().includes(searchQuery.toLowerCase())
-    );
+    const handleFormClick = (formId: string) => {
+        navigate(`/sector/forms/${formId}`);
+    };
 
     return (
         <MainLayout space="sector">
-            <div className="max-w-[1600px] mx-auto space-y-8 pb-12 animate-in fade-in duration-500">
+            <div className="max-w-[1200px] mx-auto space-y-8 pb-12 animate-in fade-in duration-500">
 
                 {/* Header */}
-                <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between bg-card p-6 rounded-xl border shadow-sm">
+                <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-950/30 dark:to-purple-950/30 p-8 rounded-xl border border-indigo-200/50 dark:border-indigo-800/50 shadow-sm">
                     <div className="flex items-center gap-4">
-                        <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400">
-                            <FileText className="h-6 w-6" />
+                        <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400">
+                            <FileText className="h-7 w-7" />
                         </div>
                         <div>
-                            <h1 className="text-2xl font-bold tracking-tight text-foreground">Campagnes de Collecte</h1>
-                            <p className="text-muted-foreground">
-                                Gestion et suivi des remontées d'informations terrain
+                            <h1 className="text-3xl font-bold tracking-tight text-foreground">Formulaires de Collecte</h1>
+                            <p className="text-muted-foreground mt-1">
+                                Sélectionnez un formulaire pour commencer la collecte de données
                             </p>
                         </div>
                     </div>
-                    <Button className="gap-2 bg-indigo-600 hover:bg-indigo-700 shadow-sm">
-                        <Plus className="h-4 w-4" />
-                        Nouvelle campagne
-                    </Button>
                 </div>
 
-                {/* Stats Summary */}
-                <div className="grid gap-4 md:grid-cols-3">
-                    <Card>
-                        <CardHeader className="flex flex-row items-center justify-between pb-2">
-                            <CardTitle className="text-sm font-medium">Campagnes Actives</CardTitle>
-                            <Clock className="h-4 w-4 text-blue-500" />
-                        </CardHeader>
-                        <CardContent>
-                            <div className="text-2xl font-bold">{activeCampaigns}</div>
-                            <p className="text-xs text-muted-foreground">Sur {totalCampaigns} campagnes</p>
-                        </CardContent>
-                    </Card>
-                    <Card>
-                        <CardHeader className="flex flex-row items-center justify-between pb-2">
-                            <CardTitle className="text-sm font-medium">Taux de Réponse Moyen</CardTitle>
-                            <BarChart2 className="h-4 w-4 text-green-500" />
-                        </CardHeader>
-                        <CardContent>
-                            <div className="text-2xl font-bold">{avgResponseRate}%</div>
-                            <p className="text-xs text-muted-foreground">Moyenne sur les campagnes</p>
-                        </CardContent>
-                    </Card>
-                    <Card>
-                        <CardHeader className="flex flex-row items-center justify-between pb-2">
-                            <CardTitle className="text-sm font-medium">Points de Collecte</CardTitle>
-                            <FileText className="h-4 w-4 text-purple-500" />
-                        </CardHeader>
-                        <CardContent>
-                            <div className="text-2xl font-bold">{totalPoints.toLocaleString('fr-FR')}</div>
-                            <p className="text-xs text-muted-foreground">Points géographiques ciblés</p>
-                        </CardContent>
-                    </Card>
+                {/* Search */}
+                <div className="flex gap-2">
+                    <div className="relative flex-1 max-w-xl">
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                        <Input
+                            placeholder="Rechercher un formulaire par nom ou secteur..."
+                            className="pl-10 h-11 bg-background"
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                        />
+                    </div>
                 </div>
 
-                {/* Main Content */}
-                <Card className="shadow-sm border-none bg-card">
-                    <CardHeader className="border-b bg-muted/30">
-                        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                            <div>
-                                <CardTitle>Historique des campagnes</CardTitle>
-                                <CardDescription>Liste de toutes les campagnes de collecte passées et en cours</CardDescription>
-                            </div>
-                            <div className="relative w-full md:w-72">
-                                <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
-                                <Input
-                                    placeholder="Rechercher une campagne..."
-                                    className="pl-9 bg-background"
-                                    value={searchQuery}
-                                    onChange={(e) => setSearchQuery(e.target.value)}
-                                />
-                            </div>
-                            <div className="flex items-center gap-2">
-                                <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
-                                    <DialogTrigger asChild>
-                                        <Button className="gap-2 bg-indigo-600 hover:bg-indigo-700 shadow-sm">
-                                            <Plus className="h-4 w-4" />
-                                            Nouvelle campagne
-                                        </Button>
-                                    </DialogTrigger>
-                                    <DialogContent>
-                                        <DialogHeader>
-                                            <DialogTitle>Nouvelle campagne de collecte</DialogTitle>
-                                            <DialogDescription>Créez une nouvelle campagne et définissez la période</DialogDescription>
-                                        </DialogHeader>
+                {/* Forms Grid */}
+                {isLoading ? (
+                    <div className="flex flex-col items-center justify-center py-16 gap-4">
+                        <Loader2 className="h-8 w-8 animate-spin text-indigo-600" />
+                        <p className="text-muted-foreground">Chargement des formulaires...</p>
+                    </div>
+                ) : filteredForms.length === 0 ? (
+                    <Card className="border-dashed">
+                        <CardContent className="p-12 text-center">
+                            <FileText className="h-12 w-12 text-muted-foreground/50 mx-auto mb-4" />
+                            <p className="text-muted-foreground mb-4">
+                                {searchQuery ? 'Aucun formulaire ne correspond à votre recherche' : 'Aucun formulaire disponible'}
+                            </p>
+                            {searchQuery && (
+                                <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => setSearchQuery('')}
+                                >
+                                    Réinitialiser la recherche
+                                </Button>
+                            )}
+                        </CardContent>
+                    </Card>
+                ) : (
+                    <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                        {filteredForms.map((form) => (
+                            <Card
+                                key={form.id}
+                                className="group hover:shadow-lg hover:border-indigo-300 dark:hover:border-indigo-700 transition-all cursor-pointer overflow-hidden h-full flex flex-col"
+                                onClick={() => handleFormClick(form.id)}
+                            >
+                                <CardHeader className="pb-3 bg-gradient-to-br from-slate-50 to-slate-100/50 dark:from-slate-900/20 dark:to-slate-900/10">
+                                    <div className="flex items-start justify-between mb-3">
+                                        <div className="flex-1">
+                                            <CardTitle className="text-lg group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors line-clamp-2">
+                                                {form.name || 'Formulaire sans titre'}
+                                            </CardTitle>
+                                        </div>
+                                        <div className="ml-2 flex-shrink-0">
+                                            {getSectorIcon(form.sector)}
+                                        </div>
+                                    </div>
+                                    <CardDescription className="line-clamp-2">
+                                        {form.description || 'Formulaire de collecte de données'}
+                                    </CardDescription>
+                                </CardHeader>
 
-                                        <form
-                                            onSubmit={async (e) => {
-                                                e.preventDefault();
-                                                const form = e.target as HTMLFormElement & {
-                                                    name: { value: string };
-                                                    year: { value: string };
-                                                    period: { value: string };
-                                                    startDate: { value: string };
-                                                    endDate: { value: string };
-                                                };
+                                <CardContent className="flex-1 py-4 space-y-4">
+                                    {/* Sector Badge */}
+                                    <div className="flex flex-wrap gap-2">
+                                        <Badge className={getSectorColor(form.sector)}>
+                                            {form.sector || 'Général'}
+                                        </Badge>
+                                    </div>
 
-                                                const payload = {
-                                                    name: form.name.value,
-                                                    sector: sector as any,
-                                                    year: Number(form.year.value) || new Date().getFullYear(),
-                                                    period: form.period.value || 'annuel',
-                                                    startDate: form.startDate.value || new Date().toISOString(),
-                                                    endDate: form.endDate.value || new Date().toISOString(),
-                                                    status: 'planned',
-                                                    indicators: [],
-                                                    geographicScope: 'commune',
-                                                    regions: [],
-                                                    responseRate: 0,
-                                                    createdBy: user?.id,
-                                                };
+                                    {/* Form Metadata */}
+                                    <div className="space-y-2 text-sm text-muted-foreground">
+                                        {form.updated_at && (
+                                            <div className="flex items-center justify-between">
+                                                <span>Dernière mise à jour:</span>
+                                                <span className="font-medium text-foreground">
+                                                    {new Date(form.updated_at).toLocaleDateString('fr-FR', {
+                                                        year: 'numeric',
+                                                        month: 'short',
+                                                        day: 'numeric'
+                                                    })}
+                                                </span>
+                                            </div>
+                                        )}
+                                        {form.created_at && (
+                                            <div className="flex items-center justify-between">
+                                                <span>Créé:</span>
+                                                <span className="font-medium text-foreground">
+                                                    {new Date(form.created_at).toLocaleDateString('fr-FR', {
+                                                        year: 'numeric',
+                                                        month: 'short'
+                                                    })}
+                                                </span>
+                                            </div>
+                                        )}
+                                    </div>
+                                </CardContent>
 
-                                                try {
-                                                    setCreating(true);
-                                                    await dataCollectionService.createCollection(payload as any);
-                                                    setIsCreateOpen(false);
-                                                    // Refresh collections after create
-                                                    window.location.reload();
-                                                } catch (err: any) {
-                                                    console.error('Failed to create collection', err);
-                                                    const errorMsg = err?.response?.data?.detail || err?.message || 'Échec de création';
-                                                    alert(`Erreur: ${errorMsg}`);
-                                                } finally {
-                                                    setCreating(false);
-                                                }
-                                            }}
-                                        >
-                                            <div className="grid gap-2">
-                                                <div className="grid grid-cols-1 gap-1">
-                                                    <label className="text-sm">Nom</label>
-                                                    <Input name="name" required />
-                                                </div>
-                                                <div className="grid grid-cols-2 gap-2">
-                                                    <div>
-                                                        <label className="text-sm">Année</label>
-                                                        <Input name="year" defaultValue={new Date().getFullYear()} />
-                                                    </div>
-                                                    <div>
-                                                        <label className="text-sm">Période</label>
-                                                        <Input name="period" defaultValue="annuel" />
-                                                    </div>
-                                                </div>
-                                                <div className="grid grid-cols-2 gap-2">
-                                                    <div>
-                                                        <label className="text-sm">Début</label>
-                                                        <Input name="startDate" type="date" />
-                                                    </div>
-                                                    <div>
-                                                        <label className="text-sm">Fin</label>
-                                                        <Input name="endDate" type="date" />
-                                                    </div>
-                                                </div>
-                                                <DialogFooter>
-                                                    <DialogClose asChild>
-                                                        <Button variant="ghost">Annuler</Button>
-                                                    </DialogClose>
-                                                    <Button type="submit" disabled={creating}>{creating ? 'Création...' : 'Créer'}</Button>
-                                                </DialogFooter>
-                                            </div>
-                                        </form>
-                                    </DialogContent>
-                                </Dialog>
-                            </div>
-                        </div>
-                    </CardHeader>
-                    <CardContent className="p-0">
-                        <Table>
-                            <TableHeader>
-                                <TableRow className="hover:bg-transparent">
-                                    <TableHead>Campagne</TableHead>
-                                    <TableHead>Période / Échéance</TableHead>
-                                    <TableHead>Statut</TableHead>
-                                    <TableHead className="w-[200px]">Progression</TableHead>
-                                    <TableHead className="text-right">Actions</TableHead>
-                                </TableRow>
-                            </TableHeader>
-                            <TableBody>
-                                {filteredCollections.map((collection) => (
-                                    <TableRow key={collection.id} className="hover:bg-muted/50 transition-colors cursor-pointer">
-                                        <TableCell>
-                                            <div className="flex flex-col">
-                                                <span className="font-medium text-foreground">{collection.name}</span>
-                                                <div className="flex items-center gap-2 mt-1">
-                                                    <span className="text-xs text-muted-foreground px-1.5 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800">
-                                                        {collection.period}
-                                                    </span>
-                                                    <span className="text-xs text-muted-foreground">
-                                                        • {collection.sector}
-                                                    </span>
-                                                </div>
-                                            </div>
-                                        </TableCell>
-                                        <TableCell>
-                                            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                                                <Calendar className="h-3.5 w-3.5" />
-                                                {new Date(collection.endDate).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })}
-                                            </div>
-                                        </TableCell>
-                                        <TableCell>
-                                            <div className="flex items-center gap-2">
-                                                {getStatusBadge(collection.status)}
-                                            </div>
-                                        </TableCell>
-                                        <TableCell>
-                                            <div className="space-y-1.5">
-                                                <div className="flex items-center justify-between text-xs">
-                                                    <span className="text-muted-foreground">Taux de réponse</span>
-                                                    <span className="font-medium">{collection.responseRate}%</span>
-                                                </div>
-                                                <Progress value={collection.responseRate} className="h-2" />
-                                            </div>
-                                        </TableCell>
-                                        <TableCell className="text-right">
-                                            <DropdownMenu>
-                                                <DropdownMenuTrigger asChild>
-                                                    <Button variant="ghost" size="icon" className="h-8 w-8">
-                                                        <MoreVertical className="h-3.5 w-3.5" />
-                                                        <span className="sr-only">Menu</span>
-                                                    </Button>
-                                                </DropdownMenuTrigger>
-                                                <DropdownMenuContent align="end">
-                                                    <DropdownMenuItem>Voir les détails</DropdownMenuItem>
-                                                    <DropdownMenuItem>Modifier</DropdownMenuItem>
-                                                    <DropdownMenuItem>Exporter les données</DropdownMenuItem>
-                                                    <DropdownMenuItem className="text-red-600">Clôturer</DropdownMenuItem>
-                                                </DropdownMenuContent>
-                                            </DropdownMenu>
-                                        </TableCell>
-                                    </TableRow>
-                                ))}
-                            </TableBody>
-                        </Table>
-                    </CardContent>
-                </Card>
+                                {/* Action Button */}
+                                <div className="px-6 py-4 border-t bg-slate-50/50 dark:bg-slate-900/20">
+                                    <Button
+                                        className="w-full bg-indigo-600 hover:bg-indigo-700 text-white group-hover:shadow-md transition-all"
+                                    >
+                                        Remplir le formulaire
+                                        <ChevronRight className="h-4 w-4 ml-2 group-hover:translate-x-1 transition-transform" />
+                                    </Button>
+                                </div>
+                            </Card>
+                        ))}
+                    </div>
+                )}
+
+                {/* Summary Footer */}
+                {filteredForms.length > 0 && (
+                    <div className="text-center pt-4 border-t">
+                        <p className="text-sm text-muted-foreground">
+                            {filteredForms.length} formulaire{filteredForms.length > 1 ? 's' : ''} disponible{filteredForms.length > 1 ? 's' : ''}
+                            {searchQuery && ` (sur ${forms.length} au total)`}
+                        </p>
+                    </div>
+                )}
 
             </div>
         </MainLayout>
