@@ -130,9 +130,9 @@ export const FacilitiesPage = () => {
 
                                 try {
                                     if (payload.sector === 'health') {
-                                        await facilitiesService.createHealthFacility(payload);
+                                        await facilitiesService.createHealthFacility(payload as any);
                                     } else {
-                                        await facilitiesService.createEducationFacility(payload);
+                                        await facilitiesService.createEducationFacility(payload as any);
                                     }
                                     window.location.reload();
                                 } catch (err) {
