@@ -311,16 +311,18 @@ export const useAlerts = () => {
     }
   }, [markAlertAsRead]);
 
-  const markAllAsRead = useCallback(() => {
-    // This API call might not exist in bulk, so we iterate or need a new endpoint
-    alerts.forEach(async (a) => {
-      if (!a.isRead) {
-        try {
-          await workflowsService.markAlertAsRead(a.id);
-          markAlertAsRead(a.id);
-        } catch (e) { }
-      }
-    });
+  const markAllAsRead = useCallback(async () => {
+    // Mark all unread alerts as read using Promise.all to wait for all requests
+    const unreadAlerts = alerts.filter(a => !a.isRead);
+    try {
+      await Promise.all(
+        unreadAlerts.map(a => workflowsService.markAlertAsRead(a.id))
+      );
+      // Update local state for all unread alerts
+      unreadAlerts.forEach(a => markAlertAsRead(a.id));
+    } catch (e) {
+      console.error('Failed to mark all alerts as read', e);
+    }
   }, [alerts, markAlertAsRead]);
 
   return {

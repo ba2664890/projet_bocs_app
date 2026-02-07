@@ -52,7 +52,18 @@ export const InstitutionDashboard = () => {
   }, []);
 
   const handleExport = (format: 'pdf' | 'excel') => {
-    alert(`Export ${format.toUpperCase()} en cours de génération...`);
+    // Create a simple export file (mock implementation)
+    const content = format === 'pdf' 
+      ? 'Rapport PDF - Tableau de bord stratégique\n\nCe fichier serait un PDF contenant tous les indicateurs et alertes.'
+      : 'Tableau,Performance Santé,Performance Éducation,Complétude\nValeurs,' + allValues.filter(v => (v.indicatorName || '').toLowerCase().includes('santé')).length + ',' + allValues.filter(v => (v.indicatorName || '').toLowerCase().includes('éducation')).length + ',94.2';
+    
+    const element = document.createElement('a');
+    const file = new Blob([content], { type: format === 'pdf' ? 'application/pdf' : 'text/csv' });
+    element.href = URL.createObjectURL(file);
+    element.download = `tableau-de-bord.${format === 'pdf' ? 'pdf' : 'xlsx'}`;
+    document.body.appendChild(element);
+    element.click();
+    document.body.removeChild(element);
   };
 
   const calculateKPIs = (): KPIData[] => {

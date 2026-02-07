@@ -182,7 +182,19 @@ export const ComparePage = () => {
                                 <p className="text-sm text-muted-foreground italic">Aucune synthèse disponible.</p>
                             )}
 
-                            <Button className="w-full" variant="outline">
+                            <Button 
+                                className="w-full" 
+                                variant="outline"
+                                onClick={() => {
+                                    const element = document.createElement('a');
+                                    const file = new Blob([`Rapport Comparatif\n\nRégion A: ${regionAName}\nRégion B: ${regionBName}\n\nComparaison des indicateurs clés`], { type: 'text/plain' });
+                                    element.href = URL.createObjectURL(file);
+                                    element.download = `comparaison_${regionAName}_${regionBName}_${Date.now()}.txt`;
+                                    document.body.appendChild(element);
+                                    element.click();
+                                    document.body.removeChild(element);
+                                }}
+                            >
                                 <FileText className="mr-2 h-4 w-4" />
                                 Télécharger le rapport comparatif
                             </Button>

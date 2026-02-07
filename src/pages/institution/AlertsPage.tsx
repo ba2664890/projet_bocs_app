@@ -1,3 +1,4 @@
+import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useAlerts } from '@/hooks/useData';
 import { Button } from '@/components/ui/button';
@@ -9,10 +10,20 @@ import { AlertCard } from '@/components/cards/AlertCard';
 
 export const AlertsPage = () => {
     const { alerts, markAsRead, markAllAsRead } = useAlerts();
+    const [searchTerm, setSearchTerm] = React.useState('');
+    const [filterSeverity, setFilterSeverity] = React.useState<string | null>(null);
 
-    const criticalAlerts = alerts.filter(a => a.severity === 'critical');
-    const warningAlerts = alerts.filter(a => a.severity === 'high');
-    const infoAlerts = alerts.filter(a => a.severity === 'info');
+    // Filter alerts based on search and severity
+    const filteredAlerts = alerts.filter(alert => {
+        const matchesSearch = alert.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                            alert.description.toLowerCase().includes(searchTerm.toLowerCase());
+        const matchesSeverity = !filterSeverity || alert.severity === filterSeverity;
+        return matchesSearch && matchesSeverity;
+    });
+
+    const criticalAlerts = filteredAlerts.filter(a => a.severity === 'critical');
+    const warningAlerts = filteredAlerts.filter(a => a.severity === 'high');
+    const infoAlerts = filteredAlerts.filter(a => a.severity === 'info');
 
     return (
         <div className="space-y-8 animate-in fade-in duration-500">
@@ -72,9 +83,19 @@ export const AlertsPage = () => {
                         <div className="flex gap-2 w-full md:w-auto">
                             <div className="relative w-full md:w-64">
                                 <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-                                <Input placeholder="Rechercher..." className="pl-8" />
+                                <Input 
+                                    placeholder="Rechercher..." 
+                                    className="pl-8"
+                                    value={searchTerm}
+                                    onChange={(e) => setSearchTerm(e.target.value)}
+                                />
                             </div>
-                            <Button variant="ghost" size="icon">
+                            <Button 
+                                variant="ghost" 
+                                size="icon"
+                                onClick={() => setFilterSeverity(filterSeverity ? null : 'critical')}
+                                className={filterSeverity ? 'text-red-600' : ''}
+                            >
                                 <Filter className="h-4 w-4" />
                             </Button>
                         </div>
@@ -83,18 +104,18 @@ export const AlertsPage = () => {
                 <CardContent>
                     <Tabs defaultValue="all" className="w-full">
                         <TabsList className="grid w-full grid-cols-4 mb-4">
-                            <TabsTrigger value="all">Toutes ({alerts.length})</TabsTrigger>
-                            <TabsTrigger value="critical" className="text-red-600 data-[state=active]:text-red-700">Critiques</TabsTrigger>
-                            <TabsTrigger value="warning" className="text-amber-600 data-[state=active]:text-amber-700">Avertissements</TabsTrigger>
-                            <TabsTrigger value="info" className="text-blue-600 data-[state=active]:text-blue-700">Infos</TabsTrigger>
+                            <TabsTrigger value="all">Toutes ({filteredAlerts.length})</TabsTrigger>
+                            <TabsTrigger value="critical" className="text-red-600 data-[state=active]:text-red-700">Critiques ({criticalAlerts.length})</TabsTrigger>
+                            <TabsTrigger value="warning" className="text-amber-600 data-[state=active]:text-amber-700">Avertissements ({warningAlerts.length})</TabsTrigger>
+                            <TabsTrigger value="info" className="text-blue-600 data-[state=active]:text-blue-700">Infos ({infoAlerts.length})</TabsTrigger>
                         </TabsList>
 
                         <ScrollArea className="h-[600px] pr-4">
                             <TabsContent value="all" className="space-y-4 mt-0">
-                                {alerts.map(alert => (
+                                {filteredAlerts.map(alert => (
                                     <AlertCard key={alert.id} alert={alert} onMarkAsRead={markAsRead} />
                                 ))}
-                                {alerts.length === 0 && <p className="text-center text-muted-foreground py-8">Aucune alerte</p>}
+                                {filteredAlerts.length === 0 && <p className="text-center text-muted-foreground py-8">Aucune alerte trouvée</p>}
                             </TabsContent>
                             <TabsContent value="critical" className="space-y-4 mt-0">
                                 {criticalAlerts.map(alert => (

@@ -40,11 +40,22 @@ export const ReportsPage = () => {
 
     const handleGenerateReport = () => {
         setIsLoading(true);
-        // Simulate API call
+        // Simulate API call to generate a new report
         setTimeout(() => {
             setIsLoading(false);
             alert('Nouveau rapport généré avec succès !');
         }, 2000);
+    };
+
+    const handleDownloadReport = (reportId: number, reportName: string) => {
+        // Simulate downloading a report
+        const element = document.createElement('a');
+        const file = new Blob(['Rapport: ' + reportName], { type: 'text/plain' });
+        element.href = URL.createObjectURL(file);
+        element.download = `rapport_${reportId}_${Date.now()}.txt`;
+        document.body.appendChild(element);
+        element.click();
+        document.body.removeChild(element);
     };
 
     return (
@@ -131,7 +142,12 @@ export const ReportsPage = () => {
                                         </TableCell>
                                         <TableCell>{report.type}</TableCell>
                                         <TableCell className="text-right">
-                                            <Button variant="ghost" size="sm" className="hover:text-blue-600">
+                                            <Button 
+                                                variant="ghost" 
+                                                size="sm" 
+                                                className="hover:text-blue-600"
+                                                onClick={() => handleDownloadReport(report.id, report.name)}
+                                            >
                                                 <Download className="h-4 w-4 mr-2" />
                                                 Télécharger
                                             </Button>
