@@ -23,6 +23,7 @@ import {
 } from 'lucide-react';
 import { Filter } from 'lucide-react';
 import { useAuditLogs } from '@/hooks/useData';
+import { dashboardsService } from '@/services/dashboards';
 
 
 import { useAuthStore } from '@/store';
@@ -32,13 +33,23 @@ export const ExportsPage = () => {
     const sector = user?.role?.includes('education') ? 'Éducation' : 'Santé';
     const [isGenerating, setIsGenerating] = useState<string | null>(null);
 
-    const handleGenerate = (type: string) => {
+    const handleGenerate = async (type: string) => {
         setIsGenerating(type);
-        // Simulation du délai de génération
-        setTimeout(() => {
+        try {
+            // choose a simple template payload; backend will decide
+            const payload = { format: type.toLowerCase() };
+            const report = await dashboardsService.generateReport(payload);
             setIsGenerating(null);
-            alert(`Rapport ${type} généré avec succès !`);
-        }, 2000);
+            if (report?.fileUrl) {
+                window.open(report.fileUrl, '_blank');
+            } else {
+                alert(`Rapport ${type} généré avec succès !`);
+            }
+        } catch (err) {
+            console.error('Failed to generate report', err);
+            setIsGenerating(null);
+            alert('Échec de génération du rapport');
+        }
     };
 
     const { logs: recentExports, isLoading } = useAuditLogs({ action: 'export' });

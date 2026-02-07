@@ -33,6 +33,18 @@ import {
     Calendar,
     FileText
 } from 'lucide-react';
+import {
+    Dialog,
+    DialogTrigger,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+    DialogDescription,
+    DialogFooter,
+    DialogClose,
+} from '@/components/ui/dialog';
+
+import { dataCollectionService } from '@/services/dataCollection';
 
 import { useDataCollections } from '@/hooks/useData';
 import { useAuthStore } from '@/store';
@@ -42,19 +54,27 @@ export const CollectionsPage = () => {
     const sector = user?.role?.includes('education') ? 'education' : 'health';
     const { collections } = useDataCollections({ sector });
     const [searchQuery, setSearchQuery] = useState('');
+    const [isCreateOpen, setIsCreateOpen] = useState(false);
+    const [creating, setCreating] = useState(false);
+
+    // Derived KPIs
+    const totalCampaigns = collections.length;
+    const activeCampaigns = collections.filter(c => c.status === 'ongoing').length;
+    const avgResponseRate = collections.length > 0 ? Math.round(collections.reduce((s, c) => s + (c.responseRate || 0), 0) / collections.length) : 0;
+    const totalPoints = collections.reduce((s, c) => s + (c.geographicIds ? c.geographicIds.length : 0), 0);
 
 
 
     const getStatusBadge = (status: string) => {
         switch (status) {
-            case 'active':
+            case 'ongoing':
                 return <Badge className="bg-blue-100 text-blue-700 hover:bg-blue-100 dark:bg-blue-900/30 dark:text-blue-400 border-none">En cours</Badge>;
             case 'completed':
                 return <Badge className="bg-green-100 text-green-700 hover:bg-green-100 dark:bg-green-900/30 dark:text-green-400 border-none">Terminé</Badge>;
-            case 'pending':
+            case 'planned':
                 return <Badge className="bg-slate-100 text-slate-700 hover:bg-slate-100 dark:bg-slate-800 dark:text-slate-400 border-none">À venir</Badge>;
-            case 'delayed':
-                return <Badge className="bg-red-100 text-red-700 hover:bg-red-100 dark:bg-red-900/30 dark:text-red-400 border-none">En retard</Badge>;
+            case 'closed':
+                return <Badge className="bg-red-100 text-red-700 hover:bg-red-100 dark:bg-red-900/30 dark:text-red-400 border-none">Clôturée</Badge>;
             default:
                 return <Badge variant="outline">{status}</Badge>;
         }
@@ -97,8 +117,8 @@ export const CollectionsPage = () => {
                             <Clock className="h-4 w-4 text-blue-500" />
                         </CardHeader>
                         <CardContent>
-                            <div className="text-2xl font-bold">3</div>
-                            <p className="text-xs text-muted-foreground">Dont 1 se termine bientôt</p>
+                            <div className="text-2xl font-bold">{activeCampaigns}</div>
+                            <p className="text-xs text-muted-foreground">Sur {totalCampaigns} campagnes</p>
                         </CardContent>
                     </Card>
                     <Card>
@@ -107,8 +127,8 @@ export const CollectionsPage = () => {
                             <BarChart2 className="h-4 w-4 text-green-500" />
                         </CardHeader>
                         <CardContent>
-                            <div className="text-2xl font-bold">76%</div>
-                            <p className="text-xs text-muted-foreground">+4% vs période précédente</p>
+                            <div className="text-2xl font-bold">{avgResponseRate}%</div>
+                            <p className="text-xs text-muted-foreground">Moyenne sur les campagnes</p>
                         </CardContent>
                     </Card>
                     <Card>
@@ -117,8 +137,8 @@ export const CollectionsPage = () => {
                             <FileText className="h-4 w-4 text-purple-500" />
                         </CardHeader>
                         <CardContent>
-                            <div className="text-2xl font-bold">1,245</div>
-                            <p className="text-xs text-muted-foreground">Structures connectées</p>
+                            <div className="text-2xl font-bold">{totalPoints.toLocaleString('fr-FR')}</div>
+                            <p className="text-xs text-muted-foreground">Points géographiques ciblés</p>
                         </CardContent>
                     </Card>
                 </div>
@@ -139,6 +159,95 @@ export const CollectionsPage = () => {
                                     value={searchQuery}
                                     onChange={(e) => setSearchQuery(e.target.value)}
                                 />
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
+                                    <DialogTrigger asChild>
+                                        <Button className="gap-2 bg-indigo-600 hover:bg-indigo-700 shadow-sm">
+                                            <Plus className="h-4 w-4" />
+                                            Nouvelle campagne
+                                        </Button>
+                                    </DialogTrigger>
+                                    <DialogContent>
+                                        <DialogHeader>
+                                            <DialogTitle>Nouvelle campagne de collecte</DialogTitle>
+                                            <DialogDescription>Créez une nouvelle campagne et définissez la période</DialogDescription>
+                                        </DialogHeader>
+
+                                        <form
+                                            onSubmit={async (e) => {
+                                                e.preventDefault();
+                                                const form = e.target as HTMLFormElement & {
+                                                    name: { value: string };
+                                                    year: { value: string };
+                                                    period: { value: string };
+                                                    startDate: { value: string };
+                                                    endDate: { value: string };
+                                                };
+
+                                                const payload = {
+                                                    name: form.name.value,
+                                                    sector: sector as any,
+                                                    year: Number(form.year.value) || new Date().getFullYear(),
+                                                    period: form.period.value || 'annuel',
+                                                    startDate: form.startDate.value || new Date().toISOString(),
+                                                    endDate: form.endDate.value || new Date().toISOString(),
+                                                    status: 'planned',
+                                                    indicators: [],
+                                                    geographicScope: 'commune',
+                                                    geographicIds: [],
+                                                    responseRate: 0,
+                                                };
+
+                                                try {
+                                                    setCreating(true);
+                                                    await dataCollectionService.createCollection(payload as any);
+                                                    setIsCreateOpen(false);
+                                                    // Refresh collections after create
+                                                    // useDataCollections does not expose setter, so trigger full refresh by reloading window
+                                                    window.location.reload();
+                                                } catch (err) {
+                                                    console.error('Failed to create collection', err);
+                                                } finally {
+                                                    setCreating(false);
+                                                }
+                                            }}
+                                        >
+                                            <div className="grid gap-2">
+                                                <div className="grid grid-cols-1 gap-1">
+                                                    <label className="text-sm">Nom</label>
+                                                    <Input name="name" required />
+                                                </div>
+                                                <div className="grid grid-cols-2 gap-2">
+                                                    <div>
+                                                        <label className="text-sm">Année</label>
+                                                        <Input name="year" defaultValue={new Date().getFullYear()} />
+                                                    </div>
+                                                    <div>
+                                                        <label className="text-sm">Période</label>
+                                                        <Input name="period" defaultValue="annuel" />
+                                                    </div>
+                                                </div>
+                                                <div className="grid grid-cols-2 gap-2">
+                                                    <div>
+                                                        <label className="text-sm">Début</label>
+                                                        <Input name="startDate" type="date" />
+                                                    </div>
+                                                    <div>
+                                                        <label className="text-sm">Fin</label>
+                                                        <Input name="endDate" type="date" />
+                                                    </div>
+                                                </div>
+                                                <DialogFooter>
+                                                    <DialogClose asChild>
+                                                        <Button variant="ghost">Annuler</Button>
+                                                    </DialogClose>
+                                                    <Button type="submit" disabled={creating}>{creating ? 'Création...' : 'Créer'}</Button>
+                                                </DialogFooter>
+                                            </div>
+                                        </form>
+                                    </DialogContent>
+                                </Dialog>
                             </div>
                         </div>
                     </CardHeader>

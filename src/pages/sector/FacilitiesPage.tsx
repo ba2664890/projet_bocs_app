@@ -22,6 +22,17 @@ import {
     Plus,
     Loader2
 } from 'lucide-react';
+import {
+    Dialog,
+    DialogTrigger,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+    DialogDescription,
+    DialogFooter,
+    DialogClose,
+} from '@/components/ui/dialog';
+import { facilitiesService } from '@/services/facilities';
 import { useAuthStore } from '@/store';
 import { useEducationFacilities, useHealthFacilities } from '@/hooks/useData';
 
@@ -88,10 +99,82 @@ export const FacilitiesPage = () => {
                             </p>
                         </div>
                     </div>
-                    <Button className="gap-2 bg-primary hover:bg-primary/90 shadow-sm">
-                        <Plus className="h-4 w-4" />
-                        Nouvelle structure
-                    </Button>
+                    <Dialog>
+                        <DialogTrigger asChild>
+                            <Button className="gap-2 bg-primary hover:bg-primary/90 shadow-sm">
+                                <Plus className="h-4 w-4" />
+                                Nouvelle structure
+                            </Button>
+                        </DialogTrigger>
+                        <DialogContent>
+                            <DialogHeader>
+                                <DialogTitle>Nouvelle structure</DialogTitle>
+                                <DialogDescription>Ajouter un établissement de santé ou éducatif</DialogDescription>
+                            </DialogHeader>
+                            <form onSubmit={async (e) => {
+                                e.preventDefault();
+                                const form = e.target as HTMLFormElement & {
+                                    name: { value: string };
+                                    sector: { value: string };
+                                    type: { value: string };
+                                    communeName: { value: string };
+                                };
+
+                                const payload = {
+                                    name: form.name.value,
+                                    sector: form.sector.value as any,
+                                    type: form.type.value,
+                                    communeName: form.communeName.value,
+                                    isActive: true,
+                                };
+
+                                try {
+                                    if (payload.sector === 'health') {
+                                        await facilitiesService.createHealthFacility(payload);
+                                    } else {
+                                        await facilitiesService.createEducationFacility(payload);
+                                    }
+                                    window.location.reload();
+                                } catch (err) {
+                                    console.error('Failed to create facility', err);
+                                    alert('Échec de création');
+                                }
+                            }}>
+                                <div className="grid gap-2">
+                                    <div>
+                                        <label className="text-sm">Nom</label>
+                                        <Input name="name" required />
+                                    </div>
+                                    <div>
+                                        <label className="text-sm">Secteur</label>
+                                        <Select defaultValue="health" name="sector">
+                                            <SelectTrigger className="w-full">
+                                                <SelectValue />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                <SelectItem value="health">Santé</SelectItem>
+                                                <SelectItem value="education">Éducation</SelectItem>
+                                            </SelectContent>
+                                        </Select>
+                                    </div>
+                                    <div>
+                                        <label className="text-sm">Type</label>
+                                        <Input name="type" />
+                                    </div>
+                                    <div>
+                                        <label className="text-sm">Commune</label>
+                                        <Input name="communeName" />
+                                    </div>
+                                    <DialogFooter>
+                                        <DialogClose asChild>
+                                            <Button variant="ghost">Annuler</Button>
+                                        </DialogClose>
+                                        <Button type="submit">Créer</Button>
+                                    </DialogFooter>
+                                </div>
+                            </form>
+                        </DialogContent>
+                    </Dialog>
                 </div>
 
                 {/* Filters & Controls */}

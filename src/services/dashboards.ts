@@ -59,6 +59,11 @@ export const dashboardsService = {
         return response.data;
     },
 
+    async generateReport(data: any, signal?: AbortSignal): Promise<GeneratedReport> {
+        const response = await apiClient.post<GeneratedReport>('/dashboards/reports/', data, { signal });
+        return response.data;
+    },
+
     // Dashboard Data Aggregation
     async getDashboardData(params?: any): Promise<any> {
         const response = await apiClient.get('/dashboards/data/', { params });
