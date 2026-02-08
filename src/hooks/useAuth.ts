@@ -147,9 +147,6 @@ export const useAuth = () => {
     return user?.role === 'local_manager';
   }, [user]);
 
-  const isContributor = useCallback((): boolean => {
-    return user?.role === 'contributor';
-  }, [user]);
 
   const getUserSector = useCallback((): 'health' | 'education' | null => {
     if (user?.role === 'sector_health') return 'health';
@@ -171,7 +168,6 @@ export const useAuth = () => {
     isInstitution,
     isSectorUser,
     isLocalManager,
-    isContributor,
     getUserSector,
   };
 };

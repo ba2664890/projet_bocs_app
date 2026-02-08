@@ -25,7 +25,6 @@ import {
   ClipboardList,
   Shield,
   X,
-  Smartphone,
   Megaphone,
   ShieldCheck,
 } from 'lucide-react';
@@ -35,7 +34,7 @@ import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 
 interface SidebarProps {
-  space: 'institution' | 'sector' | 'admin' | 'contributor' | 'annonceur';
+  space: 'institution' | 'sector' | 'admin' | 'annonceur';
   collapsed: boolean;
   isMobile?: boolean;
 }
@@ -108,14 +107,6 @@ const getNavigation = (space: string, locationPath: string, userRole: string): N
         { label: 'Paramètres', path: `${basePath}/settings`, icon: Settings },
       ];
 
-    case 'contributor':
-      if (!hasRole(['contributor', 'local_manager'])) return [];
-      return [
-        { label: 'Accueil', path: `${basePath}`, icon: LayoutDashboard },
-        { label: 'Mes collectes', path: `${basePath}/collections`, icon: ClipboardList },
-        { label: 'Formulaires', path: `${basePath}/forms`, icon: FileText },
-        { label: 'Notifications', path: `${basePath}/notifications`, icon: Bell },
-      ];
 
     case 'annonceur':
       if (!hasRole(['annonceur'])) return [];
@@ -151,12 +142,7 @@ const getSpaceConfig = (space: string) => {
         color: 'bg-purple-600',
         icon: Shield,
       };
-    case 'contributor':
-      return {
-        name: 'Contributeur',
-        color: 'bg-amber-600',
-        icon: Smartphone,
-      };
+
     case 'annonceur':
       return {
         name: 'Annonceurs',
@@ -196,7 +182,7 @@ export const Sidebar = ({ space, collapsed, isMobile }: SidebarProps) => {
   const isExpanded = (path: string) => expandedItems.includes(path);
 
   const renderNavItem = (item: NavItem, depth = 0) => {
-    const isDashboard = item.path === `/${space}` || item.path === `/sector/health` || item.path === `/sector/education` || item.path === `/annonceur` || item.path === `/contributor` || item.path === `/admin`;
+    const isDashboard = item.path === `/${space}` || item.path === `/sector/health` || item.path === `/sector/education` || item.path === `/annonceur` || item.path === `/admin`;
     const isActive = isDashboard
       ? location.pathname === item.path
       : location.pathname === item.path || location.pathname.startsWith(item.path + '/');

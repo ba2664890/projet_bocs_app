@@ -44,7 +44,7 @@ import {
 import { useSearch } from '@/hooks/useData';
 
 interface HeaderProps {
-  space: 'institution' | 'sector' | 'admin' | 'contributor' | 'annonceur';
+  space: 'institution' | 'sector' | 'admin' | 'annonceur';
 }
 
 const getSpaceTitle = (space: string) => {
@@ -55,8 +55,7 @@ const getSpaceTitle = (space: string) => {
       return 'Espace Secteurs';
     case 'admin':
       return 'Espace Administration';
-    case 'contributor':
-      return 'Espace Contributeur';
+
     case 'annonceur':
       return 'Espace Annonceur';
     default:

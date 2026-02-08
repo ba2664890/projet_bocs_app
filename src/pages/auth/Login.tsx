@@ -171,7 +171,7 @@ export const Login = () => {
             isAuthorized = role === 'admin' || role === 'institution';
             break;
           case 'representatives':
-            isAuthorized = role === 'admin' || role === 'local_manager' || role === 'contributor';
+            isAuthorized = role === 'admin' || role === 'local_manager';
             break;
           case 'annonceur':
             isAuthorized = role === 'admin' || role === 'annonceur';

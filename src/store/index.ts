@@ -406,7 +406,7 @@ export const useConfigStore = create<ConfigState>()(
 // ----- Navigation Store -----
 
 interface NavigationState {
-  currentSpace: 'institution' | 'sector' | 'admin' | 'contributor' | null;
+  currentSpace: 'institution' | 'sector' | 'admin' | 'annonceur' | null;
   currentSector: Sector | null;
   breadcrumbs: Array<{ label: string; path?: string }>;
 

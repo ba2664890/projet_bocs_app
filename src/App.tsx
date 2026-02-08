@@ -10,7 +10,6 @@ import { InstitutionDashboard } from '@/pages/institution/Dashboard';
 import { HealthDashboard } from '@/pages/sector/HealthDashboard';
 import { EducationDashboard } from '@/pages/sector/EducationDashboard';
 import { AdminDashboard } from '@/pages/admin/AdminDashboard';
-import { ContributorDashboard } from '@/pages/contributor/ContributorDashboard';
 import { AnnonceurDashboard } from '@/pages/annonceur/AnnonceurDashboard';
 import { CampaignsPage } from '@/pages/annonceur/CampaignsPage';
 import { AudiencesPage } from '@/pages/annonceur/AudiencesPage';
@@ -87,8 +86,7 @@ const DefaultRoute = () => {
     case 'sector_education':
       return <Navigate to="/sector/education" replace />;
     case 'local_manager':
-    case 'contributor':
-      return <Navigate to="/contributor" replace />;
+      return <Navigate to="/sector/health" replace />;
     case 'annonceur':
       return <Navigate to="/annonceur" replace />;
     default:
@@ -150,14 +148,7 @@ function App() {
         <Route path="/admin/audit" element={<ProtectedRoute allowedRoles={['admin']}><AuditPage /></ProtectedRoute>} />
         <Route path="/admin/settings" element={<ProtectedRoute allowedRoles={['admin']}><SettingsPage /></ProtectedRoute>} />
 
-        {/* Contributor Space */}
-        <Route path="/contributor" element={<ProtectedRoute allowedRoles={['contributor', 'local_manager']}><ContributorDashboard /></ProtectedRoute>} />
-        <Route path="/contributor/collections" element={<ProtectedRoute allowedRoles={['contributor', 'local_manager']}><CollectionsPage /></ProtectedRoute>} />
-        <Route path="/contributor/forms" element={<ProtectedRoute allowedRoles={['contributor', 'local_manager']}><FormsPage /></ProtectedRoute>} />
-        <Route path="/contributor/forms/:formId" element={<ProtectedRoute allowedRoles={['contributor', 'local_manager']}><FormSubmissionPage /></ProtectedRoute>} />
-        <Route path="/sector/forms" element={<ProtectedRoute allowedRoles={['sector_health', 'sector_education', 'contributor', 'local_manager']}><FormsPage /></ProtectedRoute>} />
-        <Route path="/sector/forms/:formId" element={<ProtectedRoute allowedRoles={['sector_health', 'sector_education']}><FormSubmissionPage /></ProtectedRoute>} />
-        <Route path="/contributor/notifications" element={<ProtectedRoute allowedRoles={['contributor', 'local_manager']}><AlertsPage /></ProtectedRoute>} />
+
 
         {/* Annonceur Space */}
         <Route path="/annonceur" element={<ProtectedRoute allowedRoles={['annonceur']}><AnnonceurDashboard /></ProtectedRoute>} />

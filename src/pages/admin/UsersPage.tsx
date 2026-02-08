@@ -142,7 +142,6 @@ export const UsersPage = () => {
                             role === 'admin' && "border-purple-200 bg-purple-50 text-purple-700",
                             role.startsWith('sector') && "border-teal-200 bg-teal-50 text-teal-700",
                             role === 'institution' && "border-blue-200 bg-blue-50 text-blue-700",
-                            role === 'contributor' && "border-amber-200 bg-amber-50 text-amber-700",
                         )}
                     >
                         {role.replace('_', ' ')}
@@ -258,7 +257,7 @@ export const UsersPage = () => {
                                     </div>
                                     <div className="grid grid-cols-4 items-center gap-4">
                                         <Label htmlFor="role" className="text-right text-xs font-bold uppercase">Rôle</Label>
-                                        <Select defaultValue="contributor">
+                                        <Select defaultValue="local_manager">
                                             <SelectTrigger className="col-span-3 h-9">
                                                 <SelectValue placeholder="Choisir un rôle" />
                                             </SelectTrigger>
@@ -266,7 +265,7 @@ export const UsersPage = () => {
                                                 <SelectItem value="institution">Institutionnel</SelectItem>
                                                 <SelectItem value="sector_health">Responsable Santé</SelectItem>
                                                 <SelectItem value="sector_education">Responsable Éducation</SelectItem>
-                                                <SelectItem value="contributor">Collecteur (DREN/SR)</SelectItem>
+                                                <SelectItem value="local_manager">Responsable Local</SelectItem>
                                             </SelectContent>
                                         </Select>
                                     </div>
@@ -356,7 +355,7 @@ export const UsersPage = () => {
                                         <SelectItem value="institution">Institutionnel</SelectItem>
                                         <SelectItem value="sector_health">Plateforme Santé</SelectItem>
                                         <SelectItem value="sector_education">Plateforme Éducation</SelectItem>
-                                        <SelectItem value="contributor">Contributeur</SelectItem>
+                                        <SelectItem value="local_manager">Responsable Local</SelectItem>
                                     </SelectContent>
                                 </Select>
                             </div>

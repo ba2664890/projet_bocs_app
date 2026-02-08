@@ -10,7 +10,7 @@ import { cn } from '@/lib/utils';
 
 interface MainLayoutProps {
   children: React.ReactNode;
-  space?: 'institution' | 'sector' | 'admin' | 'contributor' | 'annonceur';
+  space?: 'institution' | 'sector' | 'admin' | 'annonceur';
   title?: string;
 }
 

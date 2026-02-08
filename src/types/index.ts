@@ -11,7 +11,6 @@ export type UserRole =
   | 'sector_health'
   | 'sector_education'
   | 'local_manager'
-  | 'contributor'
   | 'annonceur'
   | 'viewer';
 
