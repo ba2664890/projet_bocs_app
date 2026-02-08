@@ -1,6 +1,6 @@
 // ============================================
-// FATI - Dashboard Annonceurs
-// Espace Communication et Partenaires
+// FATI - Dashboard Public
+// Espace de participation citoyenne
 // ============================================
 
 import { useState, useEffect, useRef } from 'react';
@@ -119,9 +119,9 @@ export const AnnonceurDashboard = () => {
                             <Megaphone className="h-8 w-8 text-white relative z-10 hover-glow" />
                         </div>
                         <div>
-                            <h1 className="text-4xl font-black tracking-tight gradient-text-animated">Espace Annonceurs</h1>
+                            <h1 className="text-4xl font-black tracking-tight gradient-text-animated">Espace Public</h1>
                             <p className="text-muted-foreground font-medium mt-1">
-                                Pilotage des campagnes et analyse de la portée territoriale
+                                Participation à la collecte des données pour l'aide à la décision
                             </p>
                         </div>
                     </div>
@@ -135,7 +135,7 @@ export const AnnonceurDashboard = () => {
                         <Button className="gap-2 btn-premium text-white font-bold" asChild>
                             <a href="/annonceur/campaigns">
                                 <Plus className="h-4 w-4" />
-                                Gérer les Campagnes
+                                Suivre les Collectes
                             </a>
                         </Button>
                     </div>
@@ -233,7 +233,7 @@ export const AnnonceurDashboard = () => {
                             <div className="relative z-10">
                                 <div className="flex items-start justify-between mb-4">
                                     <div>
-                                        <p className="text-xs font-bold text-teal-600 dark:text-teal-400 uppercase tracking-widest mb-2">Campagnes Actives</p>
+                                        <p className="text-xs font-bold text-teal-600 dark:text-teal-400 uppercase tracking-widest mb-2">Collectes Actives</p>
                                         <p className="text-4xl font-black bg-gradient-to-br from-teal-600 to-green-600 bg-clip-text text-transparent">
                                             {stats.activeCampaigns}
                                         </p>
@@ -266,7 +266,7 @@ export const AnnonceurDashboard = () => {
                             <CardHeader className="bg-gradient-to-r from-purple-50 to-blue-50 dark:from-slate-800/50 dark:to-slate-800/30 border-b border-purple-100 dark:border-slate-700">
                                 <div className="flex items-center justify-between">
                                     <div>
-                                        <CardTitle className="text-xl font-black bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">Campagnes récentes</CardTitle>
+                                        <CardTitle className="text-xl font-black bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">Collectes récentes</CardTitle>
                                         <CardDescription className="font-medium">Flux d'activité de vos collectes et diffusions</CardDescription>
                                     </div>
                                     <Button variant="ghost" size="sm" className="text-purple-600 font-bold hover:bg-purple-100 dark:hover:bg-purple-900/30" asChild>
@@ -309,7 +309,7 @@ export const AnnonceurDashboard = () => {
                                         </div>
                                     )) : (
                                         <div className="p-12 text-center text-muted-foreground italic">
-                                            Aucune campagne enregistrée.
+                                            Aucune collecte enregistrée.
                                         </div>
                                     )}
                                 </div>

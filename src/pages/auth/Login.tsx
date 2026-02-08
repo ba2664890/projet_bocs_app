@@ -53,10 +53,10 @@ const spaceOptions = [
   },
   {
     id: 'representatives',
-    label: 'Acteurs',
+    label: 'Agents',
     icon: Users,
     color: 'indigo',
-    description: 'Personnes habilitées - Supervision et validation',
+    description: 'Saisie des données et remplissage des formulaires',
     bg: 'bg-indigo-600',
     hoverBg: 'hover:bg-indigo-700',
     text: 'text-indigo-600',
@@ -71,10 +71,10 @@ const spaceOptions = [
   },
   {
     id: 'annonceur',
-    label: 'Population',
+    label: 'Public',
     icon: Smartphone,
     color: 'purple',
-    description: 'Accès à la collecte et participation',
+    description: 'Participation à la collecte citoyenne',
     bg: 'bg-purple-600',
     hoverBg: 'hover:bg-purple-700',
     text: 'text-purple-600',
@@ -361,7 +361,7 @@ export const Login = () => {
                       )}
                       {space.id === 'health' && <p><strong>Santé:</strong> health@fati.gov / password</p>}
                       {space.id === 'education' && <p><strong>Éducation:</strong> education@fati.gov / password</p>}
-                      {space.id === 'annonceur' && <p><strong>Annonceur:</strong> annonceur@fati.gov / password</p>}
+                      {space.id === 'annonceur' && <p><strong>Public:</strong> public@fati.gov / password</p>}
                     </div>
                   </div>
                 </TabsContent>

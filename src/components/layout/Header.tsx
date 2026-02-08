@@ -57,7 +57,7 @@ const getSpaceTitle = (space: string) => {
       return 'Espace Administration';
 
     case 'annonceur':
-      return 'Espace Annonceur';
+      return 'Espace Public';
     default:
       return 'FATI';
   }

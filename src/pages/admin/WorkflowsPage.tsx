@@ -55,7 +55,7 @@ export const WorkflowsPage = () => {
                 <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                     <div>
                         <h1 className="text-3xl font-black tracking-tight">Processus & Workflows</h1>
-                        <p className="text-muted-foreground font-medium">Suivi en temps réel des campagnes de collecte et cycles de validation</p>
+                        <p className="text-muted-foreground font-medium">Suivi en temps réel des collectes de données et cycles de validation</p>
                     </div>
                     <div className="flex items-center gap-2">
                         <Button variant="outline" className="gap-2 border-2">
@@ -116,7 +116,7 @@ export const WorkflowsPage = () => {
                         <div className="flex items-center justify-between mb-2 px-1">
                             <h2 className="text-xl font-extrabold flex items-center gap-2">
                                 <Layers className="h-5 w-5 text-purple-600" />
-                                Campagnes Actuelles
+                                Collectes Actuelles
                             </h2>
                             <Button variant="ghost" size="sm" className="font-bold underline">Vue Timeline</Button>
                         </div>
@@ -179,7 +179,7 @@ export const WorkflowsPage = () => {
                             </Card>
                         )) : !isLoadingCollections && (
                             <div className="p-10 text-center text-muted-foreground italic border-2 border-dashed rounded-2xl">
-                                Aucune campagne de collecte active
+                                Aucune collecte de données active
                             </div>
                         )}
                     </div>

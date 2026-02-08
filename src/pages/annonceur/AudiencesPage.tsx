@@ -101,12 +101,12 @@ export const AudiencesPage = () => {
                 {/* Header Section */}
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                     <div>
-                        <h1 className="text-3xl font-bold tracking-tight">Analyse d'Audience</h1>
-                        <p className="text-muted-foreground mt-1">Comprenez la portée potentielle de vos communications sur le territoire.</p>
+                        <h1 className="text-3xl font-bold tracking-tight">Analyse d'Impact Territorial</h1>
+                        <p className="text-muted-foreground mt-1">Comprenez l'impact potentiel des décisions sur le territoire.</p>
                     </div>
                     <div className="flex items-center gap-2 bg-indigo-50 dark:bg-indigo-900/20 px-4 py-2 rounded-xl border border-indigo-100 dark:border-indigo-800">
                         <Users className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />
-                        <span className="font-bold text-indigo-700 dark:text-indigo-300">{(totalPopulation / 1000000).toFixed(1)}M Portée Totale (Pop.)</span>
+                        <span className="font-bold text-indigo-700 dark:text-indigo-300">{(totalPopulation / 1000000).toFixed(1)}M Impact Potentiel (Pop.)</span>
                     </div>
                 </div>
 
@@ -118,8 +118,8 @@ export const AudiencesPage = () => {
                             <div className="flex items-center gap-3">
                                 <MapPin className="h-5 w-5 text-indigo-600" />
                                 <div>
-                                    <CardTitle className="text-lg">Distribution Géographique (Population)</CardTitle>
-                                    <CardDescription>Portée potentielle par région basée sur les données réelles.</CardDescription>
+                                    <CardTitle className="text-lg">Distribution des Bénéficiaires (Population)</CardTitle>
+                                    <CardDescription>Impact potentiel par région basé sur les données réelles.</CardDescription>
                                 </div>
                             </div>
                         </CardHeader>
@@ -164,8 +164,8 @@ export const AudiencesPage = () => {
                             <div className="flex items-center gap-3">
                                 <Building2 className="h-5 w-5 text-rose-500" />
                                 <div>
-                                    <CardTitle className="text-lg">Cibles par Secteur</CardTitle>
-                                    <CardDescription>Nombre d'établissements territoriaux atteints.</CardDescription>
+                                    <CardTitle className="text-lg">Impact par Secteur</CardTitle>
+                                    <CardDescription>Nombre d'établissements territoriaux concernés.</CardDescription>
                                 </div>
                             </div>
                         </CardHeader>
@@ -208,8 +208,8 @@ export const AudiencesPage = () => {
                             <div className="flex items-center gap-3">
                                 <Target className="h-5 w-5 text-indigo-600" />
                                 <div>
-                                    <CardTitle className="text-lg">Portée Potentielle Détaillée</CardTitle>
-                                    <CardDescription>Volume d'audience locale par région administrative.</CardDescription>
+                                    <CardTitle className="text-lg">Détail de l'Impact Territorial</CardTitle>
+                                    <CardDescription>Volume de population concerné par région administrative.</CardDescription>
                                 </div>
                             </div>
                         </CardHeader>

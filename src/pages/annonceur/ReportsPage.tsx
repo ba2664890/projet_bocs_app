@@ -97,8 +97,8 @@ export const ReportsPage = () => {
                 {/* Header Section */}
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                     <div>
-                        <h1 className="text-3xl font-bold tracking-tight">Rapports de Performance</h1>
-                        <p className="text-muted-foreground mt-1">Consultez et analysez les indicateurs de performance territoriale.</p>
+                        <h1 className="text-3xl font-bold tracking-tight">Indicateurs de Performance</h1>
+                        <p className="text-muted-foreground mt-1">Suivez l'évolution des indicateurs pour les prises de décision.</p>
                     </div>
                     <div className="flex gap-2">
                         <Button variant="outline" className="gap-2 bg-white dark:bg-slate-900">
@@ -131,9 +131,9 @@ export const ReportsPage = () => {
                         <CardContent className="p-8">
                             <div className="flex justify-between items-start">
                                 <div>
-                                    <p className="text-muted-foreground font-medium">Rapports Générés</p>
+                                    <p className="text-muted-foreground font-medium">Analyses Disponibles</p>
                                     <h3 className="text-3xl font-bold mt-2 text-slate-900 dark:text-white">{stats.totalReports}</h3>
-                                    <p className="text-sm text-emerald-600 font-medium mt-4">Disponibles en téléchargement</p>
+                                    <p className="text-sm text-emerald-600 font-medium mt-4">Disponibles en consultation</p>
                                 </div>
                                 <div className="p-3 bg-slate-50 dark:bg-slate-800 rounded-xl">
                                     <FileText className="h-6 w-6 text-indigo-600" />
@@ -146,9 +146,9 @@ export const ReportsPage = () => {
                         <CardContent className="p-8">
                             <div className="flex justify-between items-start">
                                 <div>
-                                    <p className="text-muted-foreground font-medium">Taux de Complétion</p>
+                                    <p className="text-muted-foreground font-medium">Taux de Saisie</p>
                                     <h3 className="text-3xl font-bold mt-2 text-slate-900 dark:text-white">92.4%</h3>
-                                    <p className="text-sm text-indigo-600 font-medium mt-4">Collecte de données optimale</p>
+                                    <p className="text-sm text-indigo-600 font-medium mt-4">Saisie des données territoriales</p>
                                 </div>
                                 <div className="p-3 bg-indigo-50 dark:bg-indigo-900/30 rounded-xl">
                                     <BarChart3 className="h-6 w-6 text-indigo-600" />
@@ -165,8 +165,8 @@ export const ReportsPage = () => {
                             <div className="flex items-center gap-3">
                                 <TrendingUp className="h-5 w-5 text-indigo-600" />
                                 <div>
-                                    <CardTitle className="text-lg">Évolution des Indicateurs</CardTitle>
-                                    <CardDescription>Analyse temporelle des dernières valeurs collectées.</CardDescription>
+                                    <CardTitle className="text-lg">Tendance des Données</CardTitle>
+                                    <CardDescription>Suivi chronologique des formulaires soumis.</CardDescription>
                                 </div>
                             </div>
                         </div>
@@ -256,7 +256,7 @@ export const ReportsPage = () => {
                     {/* Report Status */}
                     <Card className="border-none shadow-xl bg-white dark:bg-slate-900">
                         <CardHeader className="border-b">
-                            <CardTitle className="text-lg">État de la Collecte</CardTitle>
+                            <CardTitle className="text-lg">État de la Saisie</CardTitle>
                         </CardHeader>
                         <CardContent className="p-6 space-y-6">
                             {[

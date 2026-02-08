@@ -88,12 +88,12 @@ export const CampaignsPage = () => {
                 {/* Header Section */}
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                     <div>
-                        <h1 className="text-3xl font-bold tracking-tight">Gestion des Campagnes</h1>
-                        <p className="text-muted-foreground mt-1">Gérez et optimisez vos campagnes de collecte et de communication.</p>
+                        <h1 className="text-3xl font-bold tracking-tight">Gestion des Collectes</h1>
+                        <p className="text-muted-foreground mt-1">Gérez vos formulaires et collectes de données territoriales.</p>
                     </div>
                     <Button className="bg-indigo-600 hover:bg-indigo-700 text-white gap-2 shadow-lg shadow-indigo-200 dark:shadow-none">
                         <Plus className="h-4 w-4" />
-                        Nouvelle Campagne
+                        Nouvelle Collecte
                     </Button>
                 </div>
 
@@ -103,7 +103,7 @@ export const CampaignsPage = () => {
                         <div className="relative flex-1">
                             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                             <Input
-                                placeholder="Rechercher une campagne..."
+                                placeholder="Rechercher une collecte..."
                                 className="pl-10 bg-white dark:bg-slate-950"
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
@@ -127,7 +127,7 @@ export const CampaignsPage = () => {
                     <CardHeader className="border-b bg-slate-50/50 dark:bg-slate-800/50">
                         <div className="flex items-center justify-between">
                             <div>
-                                <CardTitle className="text-lg">Toutes les campagnes</CardTitle>
+                                <CardTitle className="text-lg">Toutes les collectes</CardTitle>
                                 <CardDescription>Visualisez la performance globale des collectes territoriales.</CardDescription>
                             </div>
                             <Badge variant="outline" className="font-mono">{filteredCampaigns.length} au total</Badge>
@@ -143,7 +143,7 @@ export const CampaignsPage = () => {
                             <Table>
                                 <TableHeader>
                                     <TableRow className="hover:bg-transparent bg-slate-50/30 dark:bg-slate-800/30">
-                                        <TableHead className="w-[400px] py-4">Nom de la Campagne</TableHead>
+                                        <TableHead className="w-[400px] py-4">Nom de la Collecte</TableHead>
                                         <TableHead>Secteur</TableHead>
                                         <TableHead>Statut</TableHead>
                                         <TableHead>Année</TableHead>
@@ -201,7 +201,7 @@ export const CampaignsPage = () => {
                                     {filteredCampaigns.length === 0 && (
                                         <TableRow>
                                             <TableCell colSpan={6} className="h-32 text-center text-muted-foreground">
-                                                Aucune campagne trouvée.
+                                                Aucune collecte trouvée.
                                             </TableCell>
                                         </TableRow>
                                     )}

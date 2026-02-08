@@ -211,8 +211,8 @@ export const Register = () => {
                                         </SelectTrigger>
                                         <SelectContent>
                                             <SelectItem value="institution">Gouvernement</SelectItem>
-                                            <SelectItem value="local_manager">Acteurs - Personnes habilitées</SelectItem>
-                                            <SelectItem value="annonceur">Population - Annonceurs</SelectItem>
+                                            <SelectItem value="local_manager">Agents - Saisie des données</SelectItem>
+                                            <SelectItem value="viewers">Public - Consultation</SelectItem>
                                         </SelectContent>
                                     </Select>
                                 </div>

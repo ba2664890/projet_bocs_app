@@ -112,7 +112,7 @@ const getNavigation = (space: string, locationPath: string, userRole: string): N
       if (!hasRole(['annonceur'])) return [];
       return [
         { label: 'Tableau de bord', path: `${basePath}`, icon: LayoutDashboard },
-        { label: 'Campagnes', path: `${basePath}/campaigns`, icon: Megaphone },
+        { label: 'Collectes', path: `${basePath}/campaigns`, icon: Megaphone },
         { label: 'Audiences', path: `${basePath}/audiences`, icon: Users },
         { label: 'Rapports', path: `${basePath}/reports`, icon: FileText },
       ];
@@ -145,7 +145,7 @@ const getSpaceConfig = (space: string) => {
 
     case 'annonceur':
       return {
-        name: 'Annonceurs',
+        name: 'Public',
         color: 'bg-indigo-600',
         icon: Megaphone,
       };
