@@ -83,8 +83,8 @@ const getNavigation = (space: string, locationPath: string, userRole: string): N
       ];
 
     case 'sector':
-      if (currentSector === 'health' && !hasRole(['sector_health'])) return [];
-      if (currentSector === 'education' && !hasRole(['sector_education'])) return [];
+      if (currentSector === 'health' && !hasRole(['sector_health', 'local_manager'])) return [];
+      if (currentSector === 'education' && !hasRole(['sector_education', 'local_manager'])) return [];
 
       const structuresLabel = currentSector === 'education' ? 'Établissements' : 'Structures';
       return [

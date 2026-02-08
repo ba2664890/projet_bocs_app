@@ -107,7 +107,7 @@ function App() {
         <Route path="/" element={<DefaultRoute />} />
 
         {/* Institution Space */}
-        <Route path="/institution" element={<ProtectedRoute allowedRoles={['institution']}><InstitutionLayout /></ProtectedRoute>}>
+        <Route path="/institution" element={<ProtectedRoute allowedRoles={['institution', 'viewer']}><InstitutionLayout /></ProtectedRoute>}>
           <Route index element={<InstitutionDashboard />} />
           <Route path="map" element={<MapPage />} />
           <Route path="indicators" element={<IndicatorsPage />} />
@@ -118,26 +118,26 @@ function App() {
         </Route>
 
         {/* Sector Space - Health */}
-        <Route path="/sector/health" element={<ProtectedRoute allowedRoles={['sector_health']}><HealthDashboard /></ProtectedRoute>} />
-        <Route path="/sector/health/map" element={<ProtectedRoute allowedRoles={['sector_health']}><MapPage /></ProtectedRoute>} />
-        <Route path="/sector/health/indicators" element={<ProtectedRoute allowedRoles={['sector_health']}><IndicatorsPage /></ProtectedRoute>} />
-        <Route path="/sector/health/facilities" element={<ProtectedRoute allowedRoles={['sector_health']}><FacilitiesPage /></ProtectedRoute>} />
-        <Route path="/sector/health/collections" element={<ProtectedRoute allowedRoles={['sector_health']}><CollectionsPage /></ProtectedRoute>} />
-        <Route path="/sector/health/forms" element={<ProtectedRoute allowedRoles={['sector_health']}><FormsPage /></ProtectedRoute>} />
-        <Route path="/sector/health/forms/:formId" element={<ProtectedRoute allowedRoles={['sector_health']}><FormSubmissionPage /></ProtectedRoute>} />
-        <Route path="/sector/health/analytics" element={<ProtectedRoute allowedRoles={['sector_health']}><AnalyticsPage /></ProtectedRoute>} />
-        <Route path="/sector/health/exports" element={<ProtectedRoute allowedRoles={['sector_health']}><ExportsPage /></ProtectedRoute>} />
+        <Route path="/sector/health" element={<ProtectedRoute allowedRoles={['sector_health', 'local_manager']}><HealthDashboard /></ProtectedRoute>} />
+        <Route path="/sector/health/map" element={<ProtectedRoute allowedRoles={['sector_health', 'local_manager']}><MapPage /></ProtectedRoute>} />
+        <Route path="/sector/health/indicators" element={<ProtectedRoute allowedRoles={['sector_health', 'local_manager']}><IndicatorsPage /></ProtectedRoute>} />
+        <Route path="/sector/health/facilities" element={<ProtectedRoute allowedRoles={['sector_health', 'local_manager']}><FacilitiesPage /></ProtectedRoute>} />
+        <Route path="/sector/health/collections" element={<ProtectedRoute allowedRoles={['sector_health', 'local_manager']}><CollectionsPage /></ProtectedRoute>} />
+        <Route path="/sector/health/forms" element={<ProtectedRoute allowedRoles={['sector_health', 'local_manager']}><FormsPage /></ProtectedRoute>} />
+        <Route path="/sector/health/forms/:formId" element={<ProtectedRoute allowedRoles={['sector_health', 'local_manager']}><FormSubmissionPage /></ProtectedRoute>} />
+        <Route path="/sector/health/analytics" element={<ProtectedRoute allowedRoles={['sector_health', 'local_manager']}><AnalyticsPage /></ProtectedRoute>} />
+        <Route path="/sector/health/exports" element={<ProtectedRoute allowedRoles={['sector_health', 'local_manager']}><ExportsPage /></ProtectedRoute>} />
 
         {/* Sector Space - Education */}
-        <Route path="/sector/education" element={<ProtectedRoute allowedRoles={['sector_education']}><EducationDashboard /></ProtectedRoute>} />
-        <Route path="/sector/education/map" element={<ProtectedRoute allowedRoles={['sector_education']}><MapPage /></ProtectedRoute>} />
-        <Route path="/sector/education/indicators" element={<ProtectedRoute allowedRoles={['sector_education']}><IndicatorsPage /></ProtectedRoute>} />
-        <Route path="/sector/education/facilities" element={<ProtectedRoute allowedRoles={['sector_education']}><FacilitiesPage /></ProtectedRoute>} />
-        <Route path="/sector/education/collections" element={<ProtectedRoute allowedRoles={['sector_education']}><CollectionsPage /></ProtectedRoute>} />
-        <Route path="/sector/education/forms" element={<ProtectedRoute allowedRoles={['sector_education']}><FormsPage /></ProtectedRoute>} />
-        <Route path="/sector/education/forms/:formId" element={<ProtectedRoute allowedRoles={['sector_education']}><FormSubmissionPage /></ProtectedRoute>} />
-        <Route path="/sector/education/analytics" element={<ProtectedRoute allowedRoles={['sector_education']}><AnalyticsPage /></ProtectedRoute>} />
-        <Route path="/sector/education/exports" element={<ProtectedRoute allowedRoles={['sector_education']}><ExportsPage /></ProtectedRoute>} />
+        <Route path="/sector/education" element={<ProtectedRoute allowedRoles={['sector_education', 'local_manager']}><EducationDashboard /></ProtectedRoute>} />
+        <Route path="/sector/education/map" element={<ProtectedRoute allowedRoles={['sector_education', 'local_manager']}><MapPage /></ProtectedRoute>} />
+        <Route path="/sector/education/indicators" element={<ProtectedRoute allowedRoles={['sector_education', 'local_manager']}><IndicatorsPage /></ProtectedRoute>} />
+        <Route path="/sector/education/facilities" element={<ProtectedRoute allowedRoles={['sector_education', 'local_manager']}><FacilitiesPage /></ProtectedRoute>} />
+        <Route path="/sector/education/collections" element={<ProtectedRoute allowedRoles={['sector_education', 'local_manager']}><CollectionsPage /></ProtectedRoute>} />
+        <Route path="/sector/education/forms" element={<ProtectedRoute allowedRoles={['sector_education', 'local_manager']}><FormsPage /></ProtectedRoute>} />
+        <Route path="/sector/education/forms/:formId" element={<ProtectedRoute allowedRoles={['sector_education', 'local_manager']}><FormSubmissionPage /></ProtectedRoute>} />
+        <Route path="/sector/education/analytics" element={<ProtectedRoute allowedRoles={['sector_education', 'local_manager']}><AnalyticsPage /></ProtectedRoute>} />
+        <Route path="/sector/education/exports" element={<ProtectedRoute allowedRoles={['sector_education', 'local_manager']}><ExportsPage /></ProtectedRoute>} />
 
         {/* Admin Space */}
         <Route path="/admin" element={<ProtectedRoute allowedRoles={['admin']}><AdminDashboard /></ProtectedRoute>} />
