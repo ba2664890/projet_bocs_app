@@ -30,7 +30,7 @@ import {
   TableRow
 } from '@/components/ui/table';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Loader2, MapPin, BarChart3 } from 'lucide-react';
+import { Loader2, MapPin, BarChart3, Building2, ShieldCheck } from 'lucide-react';
 import { useGeographicData } from '@/hooks/useData';
 import { MapDisplay } from '@/components/common/MapDisplay';
 
@@ -283,6 +283,3 @@ export const MapPage = () => {
     </MainLayout>
   );
 };
-
-// Imports manquants
-import { Building2, ShieldCheck } from 'lucide-react';

@@ -54,9 +54,9 @@ export const useGeographicData = () => {
         geographyService.getCommunes({ page_size: 500 }, signal),
       ]);
 
-      setRegions(regionsRes.results);
-      setDepartments(departmentsRes.results.map((d: any) => ({ ...d, parentId: d.region })));
-      setCommunes(communesRes.results.map((c: any) => ({ ...c, parentId: c.department })));
+      setRegions(regionsRes.results.map((r: any) => ({ ...r, id: String(r.id) })));
+      setDepartments(departmentsRes.results.map((d: any) => ({ ...d, id: String(d.id), parentId: String(d.region) })));
+      setCommunes(communesRes.results.map((c: any) => ({ ...c, id: String(c.id), parentId: String(c.department) })));
     } catch (error) {
       if (axios.isCancel(error)) return;
       console.error('Failed to load geographic data:', error);

@@ -130,7 +130,19 @@ export const FacilitiesPage = () => {
 
     const handleCreateSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+
+        // Validation de base
+        if (!newFacility.communeId) {
+            alert("Veuillez sélectionner une Commune dans la section Localisation Administrative.");
+            return;
+        }
+
         try {
+            // Sécuriser les coordonnées pour éviter les erreurs GDAL (NaN ou null)
+            const lng = parseFloat(coords?.longitude as any);
+            const lat = parseFloat(coords?.latitude as any);
+            const isValidCoords = !isNaN(lng) && !isNaN(lat);
+
             const commonData = {
                 name: newFacility.name,
                 code: newFacility.code,
@@ -139,7 +151,7 @@ export const FacilitiesPage = () => {
                 phone: newFacility.phone,
                 email: newFacility.email,
                 is_active: true,
-                location: coords ? { type: 'Point', coordinates: [coords.longitude, coords.latitude] } : null
+                location: isValidCoords ? { type: 'Point', coordinates: [lng, lat] } : null
             };
 
             if (newFacility.sector === 'health') {
