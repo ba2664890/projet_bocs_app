@@ -17,7 +17,8 @@ import {
     ArrowLeft,
     MapPin,
     Users,
-    Building2
+    Building2,
+    Loader2
 } from 'lucide-react';
 import {
     Select,
@@ -31,6 +32,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { dataCollectionService } from '@/services/dataCollection';
 import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '@/store';
+import { useGeolocation } from '@/hooks/useGeolocation';
 
 // ===== FORMULAIRE SANTÉ =====
 const HealthForm = () => {
@@ -46,21 +48,21 @@ const HealthForm = () => {
         phone: '',
         email: '',
         managerName: '',
-        
+
         // Infrastructure
         buildingCondition: '',
         electricityAccess: false,
         waterAccess: false,
         internetAccess: false,
         emergencyPower: false,
-        
+
         // Capacité
         bedCapacity: '',
         outpatientCapacity: '',
         surgicalRooms: '',
         laboratoryEquipped: false,
         imagingEquipped: false,
-        
+
         // Personnel
         doctors: '',
         nurses: '',
@@ -69,7 +71,7 @@ const HealthForm = () => {
         otherStaff: '',
         doctorvacancies: '',
         nursevacancies: '',
-        
+
         // Services
         emergencyService: false,
         maternityService: false,
@@ -78,7 +80,7 @@ const HealthForm = () => {
         laboratoryService: false,
         imagingService: false,
         outpatientService: false,
-        
+
         // Équipements critiques
         defibrillator: false,
         xrayMachine: false,
@@ -86,13 +88,13 @@ const HealthForm = () => {
         incubator: false,
         respirator: false,
         bloodBank: false,
-        
+
         // Données de performance
         monthlyPatients: '',
         monthlyBirths: '',
         monthlyDeaths: '',
         surgeryPerformed: '',
-        
+
         // Remarques
         notes: ''
     });
@@ -100,6 +102,11 @@ const HealthForm = () => {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [activeSection, setActiveSection] = useState(0);
     const navigate = useNavigate();
+    const { coords, isLoading: geoLoading, getPosition } = useGeolocation();
+
+    useEffect(() => {
+        getPosition();
+    }, [getPosition]);
 
     const sections = [
         { id: 0, label: 'Informations de Base', icon: Building2 },
@@ -125,7 +132,11 @@ const HealthForm = () => {
         try {
             const payload = {
                 ...formData,
-                type: 'health'
+                type: 'health',
+                location: coords ? {
+                    type: 'Point',
+                    coordinates: [coords.longitude, coords.latitude]
+                } : null
             };
             await dataCollectionService.createSubmission({ data: payload, status: 'draft' } as any);
             alert('Formulaire sauvegardé avec succès!');
@@ -149,6 +160,18 @@ const HealthForm = () => {
                     </div>
                     <Progress value={progress} className="h-2" />
                 </div>
+                <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-100 dark:bg-slate-800 border">
+                    {geoLoading ? (
+                        <Loader2 className="h-3 w-3 animate-spin text-indigo-600" />
+                    ) : coords ? (
+                        <MapPin className="h-3 w-3 text-emerald-600" />
+                    ) : (
+                        <MapPin className="h-3 w-3 text-rose-600" />
+                    )}
+                    <span className="text-[10px] font-bold uppercase tracking-tight">
+                        {geoLoading ? 'GPS en cours...' : coords ? 'GPS Fixé' : 'GPS Non fixé'}
+                    </span>
+                </div>
             </div>
 
             {/* Sections et contenu */}
@@ -160,11 +183,10 @@ const HealthForm = () => {
                             <button
                                 key={section.id}
                                 onClick={() => setActiveSection(section.id)}
-                                className={`w-full text-left px-4 py-3 rounded-lg transition-all ${
-                                    activeSection === section.id
-                                        ? 'bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 border-l-4 border-indigo-600'
-                                        : 'hover:bg-muted'
-                                }`}
+                                className={`w-full text-left px-4 py-3 rounded-lg transition-all ${activeSection === section.id
+                                    ? 'bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 border-l-4 border-indigo-600'
+                                    : 'hover:bg-muted'
+                                    }`}
                             >
                                 <div className="flex items-center gap-2">
                                     <section.icon className="h-4 w-4" />
@@ -197,7 +219,7 @@ const HealthForm = () => {
                                 </div>
                                 <div>
                                     <label className="text-sm font-medium">Type de structure</label>
-                                    <Select value={formData.facilityType} onValueChange={(v) => setFormData({...formData, facilityType: v})}>
+                                    <Select value={formData.facilityType} onValueChange={(v) => setFormData({ ...formData, facilityType: v })}>
                                         <SelectTrigger>
                                             <SelectValue placeholder="Sélectionner..." />
                                         </SelectTrigger>
@@ -255,7 +277,7 @@ const HealthForm = () => {
                             <CardContent className="space-y-4">
                                 <div>
                                     <label className="text-sm font-medium">État du bâtiment</label>
-                                    <Select value={formData.buildingCondition} onValueChange={(v) => setFormData({...formData, buildingCondition: v})}>
+                                    <Select value={formData.buildingCondition} onValueChange={(v) => setFormData({ ...formData, buildingCondition: v })}>
                                         <SelectTrigger>
                                             <SelectValue placeholder="Sélectionner..." />
                                         </SelectTrigger>
@@ -279,10 +301,10 @@ const HealthForm = () => {
                                             { name: 'emergencyPower', label: 'Générateur/Énergie urgence', icon: '🔋' }
                                         ].map(item => (
                                             <label key={item.name} className="flex items-center gap-3 cursor-pointer">
-                                                <Checkbox 
+                                                <Checkbox
                                                     name={item.name}
                                                     checked={(formData as any)[item.name]}
-                                                    onCheckedChange={(checked) => handleInputChange({target: {name: item.name, type: 'checkbox', checked}})}
+                                                    onCheckedChange={(checked) => handleInputChange({ target: { name: item.name, type: 'checkbox', checked } })}
                                                 />
                                                 <span className="text-sm">{item.icon} {item.label}</span>
                                             </label>
@@ -333,10 +355,10 @@ const HealthForm = () => {
                                             { name: 'bloodBank', label: 'Banque de sang' }
                                         ].map(item => (
                                             <label key={item.name} className="flex items-center gap-2 cursor-pointer">
-                                                <Checkbox 
+                                                <Checkbox
                                                     name={item.name}
                                                     checked={(formData as any)[item.name]}
-                                                    onCheckedChange={(checked) => handleInputChange({target: {name: item.name, type: 'checkbox', checked}})}
+                                                    onCheckedChange={(checked) => handleInputChange({ target: { name: item.name, type: 'checkbox', checked } })}
                                                 />
                                                 <span className="text-sm">{item.label}</span>
                                             </label>
@@ -408,10 +430,10 @@ const HealthForm = () => {
                                     { name: 'outpatientService', label: '👨‍⚕️ Consultation externe' }
                                 ].map(item => (
                                     <label key={item.name} className="flex items-center gap-3 cursor-pointer">
-                                        <Checkbox 
+                                        <Checkbox
                                             name={item.name}
                                             checked={(formData as any)[item.name]}
-                                            onCheckedChange={(checked) => handleInputChange({target: {name: item.name, type: 'checkbox', checked}})}
+                                            onCheckedChange={(checked) => handleInputChange({ target: { name: item.name, type: 'checkbox', checked } })}
                                         />
                                         <span className="text-sm">{item.label}</span>
                                     </label>
@@ -503,7 +525,7 @@ const EducationForm = () => {
         phone: '',
         email: '',
         principalName: '',
-        
+
         // Infrastructure
         classrooms: '',
         usableClassrooms: '',
@@ -515,7 +537,7 @@ const EducationForm = () => {
         playground: false,
         library: false,
         computerLab: false,
-        
+
         // Personnel enseignant
         totalTeachers: '',
         trainedTeachers: '',
@@ -523,7 +545,7 @@ const EducationForm = () => {
         maleTeachers: '',
         supportStaff: '',
         teachervacancies: '',
-        
+
         // Données étudiantes
         totalStudents: '',
         femaleStudents: '',
@@ -531,7 +553,7 @@ const EducationForm = () => {
         repeaters: '',
         dropouts: '',
         completionRate: '',
-        
+
         // Services
         freeMeals: false,
         meditationProgram: false,
@@ -539,7 +561,7 @@ const EducationForm = () => {
         sportsProgram: false,
         artProgram: false,
         scholarshipProgram: false,
-        
+
         // Remarques
         notes: ''
     });
@@ -547,6 +569,11 @@ const EducationForm = () => {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [activeSection, setActiveSection] = useState(0);
     const navigate = useNavigate();
+    const { coords, isLoading: geoLoading, getPosition } = useGeolocation();
+
+    useEffect(() => {
+        getPosition();
+    }, [getPosition]);
 
     const sections = [
         { id: 0, label: 'Informations', icon: School },
@@ -571,7 +598,11 @@ const EducationForm = () => {
         try {
             const payload = {
                 ...formData,
-                type: 'education'
+                type: 'education',
+                location: coords ? {
+                    type: 'Point',
+                    coordinates: [coords.longitude, coords.latitude]
+                } : null
             };
             await dataCollectionService.createSubmission({ data: payload, status: 'draft' } as any);
             alert('Formulaire sauvegardé avec succès!');
@@ -595,6 +626,18 @@ const EducationForm = () => {
                     </div>
                     <Progress value={progress} className="h-2" />
                 </div>
+                <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-100 dark:bg-slate-800 border ml-4">
+                    {geoLoading ? (
+                        <Loader2 className="h-3 w-3 animate-spin text-indigo-600" />
+                    ) : coords ? (
+                        <MapPin className="h-3 w-3 text-emerald-600" />
+                    ) : (
+                        <MapPin className="h-3 w-3 text-rose-600" />
+                    )}
+                    <span className="text-[10px] font-bold uppercase tracking-tight">
+                        {geoLoading ? 'GPS en cours...' : coords ? 'GPS Fixé' : 'GPS Non fixé'}
+                    </span>
+                </div>
             </div>
 
             {/* Sections et contenu */}
@@ -606,11 +649,10 @@ const EducationForm = () => {
                             <button
                                 key={section.id}
                                 onClick={() => setActiveSection(section.id)}
-                                className={`w-full text-left px-4 py-3 rounded-lg transition-all ${
-                                    activeSection === section.id
-                                        ? 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 border-l-4 border-emerald-600'
-                                        : 'hover:bg-muted'
-                                }`}
+                                className={`w-full text-left px-4 py-3 rounded-lg transition-all ${activeSection === section.id
+                                    ? 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 border-l-4 border-emerald-600'
+                                    : 'hover:bg-muted'
+                                    }`}
                             >
                                 <div className="flex items-center gap-2">
                                     <section.icon className="h-4 w-4" />
@@ -644,7 +686,7 @@ const EducationForm = () => {
                                 <div className="grid grid-cols-2 gap-4">
                                     <div>
                                         <label className="text-sm font-medium">Type d'école</label>
-                                        <Select value={formData.schoolType} onValueChange={(v) => setFormData({...formData, schoolType: v})}>
+                                        <Select value={formData.schoolType} onValueChange={(v) => setFormData({ ...formData, schoolType: v })}>
                                             <SelectTrigger>
                                                 <SelectValue placeholder="Sélectionner..." />
                                             </SelectTrigger>
@@ -658,7 +700,7 @@ const EducationForm = () => {
                                     </div>
                                     <div>
                                         <label className="text-sm font-medium">Niveau</label>
-                                        <Select value={formData.schoolLevel} onValueChange={(v) => setFormData({...formData, schoolLevel: v})}>
+                                        <Select value={formData.schoolLevel} onValueChange={(v) => setFormData({ ...formData, schoolLevel: v })}>
                                             <SelectTrigger>
                                                 <SelectValue placeholder="Sélectionner..." />
                                             </SelectTrigger>
@@ -745,10 +787,10 @@ const EducationForm = () => {
                                             { name: 'computerLab', label: '🖥️ Salle informatique' }
                                         ].map(item => (
                                             <label key={item.name} className="flex items-center gap-2 cursor-pointer">
-                                                <Checkbox 
+                                                <Checkbox
                                                     name={item.name}
                                                     checked={(formData as any)[item.name]}
-                                                    onCheckedChange={(checked) => handleInputChange({target: {name: item.name, type: 'checkbox', checked}})}
+                                                    onCheckedChange={(checked) => handleInputChange({ target: { name: item.name, type: 'checkbox', checked } })}
                                                 />
                                                 <span className="text-sm">{item.label}</span>
                                             </label>
@@ -864,10 +906,10 @@ const EducationForm = () => {
                                     { name: 'scholarshipProgram', label: '🎓 Programme de bourses' }
                                 ].map(item => (
                                     <label key={item.name} className="flex items-center gap-3 cursor-pointer">
-                                        <Checkbox 
+                                        <Checkbox
                                             name={item.name}
                                             checked={(formData as any)[item.name]}
-                                            onCheckedChange={(checked) => handleInputChange({target: {name: item.name, type: 'checkbox', checked}})}
+                                            onCheckedChange={(checked) => handleInputChange({ target: { name: item.name, type: 'checkbox', checked } })}
                                         />
                                         <span className="text-sm">{item.label}</span>
                                     </label>
