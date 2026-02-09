@@ -131,32 +131,37 @@ export const FacilitiesPage = () => {
     const handleCreateSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         try {
-            const payload = {
-                ...newFacility,
-                isActive: true,
+            const commonData = {
+                name: newFacility.name,
+                code: newFacility.code,
+                commune: newFacility.communeId,
+                address: newFacility.address,
+                phone: newFacility.phone,
+                email: newFacility.email,
+                is_active: true,
                 location: coords ? { type: 'Point', coordinates: [coords.longitude, coords.latitude] } : null
             };
 
             if (newFacility.sector === 'health') {
                 await facilitiesService.createHealthFacility({
-                    ...payload,
+                    ...commonData,
                     facility_type: newFacility.type,
+                    manager_name: newFacility.managerName,
                     bed_capacity: parseInt(newFacility.capacity) || 0,
-                    commune: newFacility.communeId
                 } as any);
             } else {
                 await facilitiesService.createEducationFacility({
-                    ...payload,
+                    ...commonData,
                     facility_type: newFacility.type,
+                    principal_name: newFacility.managerName,
                     student_capacity: parseInt(newFacility.capacity) || 0,
-                    commune: newFacility.communeId,
                     level: 'basic'
                 } as any);
             }
             window.location.reload();
         } catch (err) {
             console.error(err);
-            alert("Erreur lors de la création de la structure");
+            alert("Erreur lors de la création de la structure. Vérifiez les données saisies.");
         }
     };
 
