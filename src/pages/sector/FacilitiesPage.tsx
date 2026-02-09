@@ -578,8 +578,8 @@ export const FacilitiesPage = () => {
                             </SelectTrigger>
                             <SelectContent>
                                 <SelectItem value="all">Tous les types</SelectItem>
-                                {allFacilities.map(f => f.type).filter((v, i, a) => a.indexOf(v) === i).map(t => (
-                                    <SelectItem key={t} value={t}>{t.charAt(0).toUpperCase() + t.slice(1).replace('_', ' ')}</SelectItem>
+                                {allFacilities.map(f => f.type).filter((v, i, a) => v && a.indexOf(v) === i).map(t => (
+                                    <SelectItem key={t} value={t}>{(t || '').charAt(0).toUpperCase() + (t || '').slice(1).replace('_', ' ')}</SelectItem>
                                 ))}
                             </SelectContent>
                         </Select>
@@ -636,7 +636,7 @@ export const FacilitiesPage = () => {
                                     <div className="grid grid-cols-2 gap-2">
                                         <div className="bg-muted/10 p-2 rounded-lg border border-muted/20">
                                             <p className="text-[10px] uppercase font-bold text-muted-foreground">Type</p>
-                                            <p className="text-xs font-bold truncate">{facility.type.replace('_', ' ')}</p>
+                                            <p className="text-xs font-bold truncate">{facility.type?.replace('_', ' ') || 'Type inconnu'}</p>
                                         </div>
                                         <div className="bg-muted/10 p-2 rounded-lg border border-muted/20">
                                             <p className="text-[10px] uppercase font-bold text-muted-foreground">Capacité</p>
@@ -691,7 +691,7 @@ export const FacilitiesPage = () => {
                                                 <span className="font-bold">{f.name}</span>
                                             </div>
                                         </TableCell>
-                                        <TableCell className="capitalize text-xs">{f.type.replace('_', ' ')}</TableCell>
+                                        <TableCell className="capitalize text-xs">{f.type?.replace('_', ' ') || 'Type inconnu'}</TableCell>
                                         <TableCell className="text-xs">{f.communeName}</TableCell>
                                         <TableCell className="text-xs italic">{f.managerName || f.principalName || "N/A"}</TableCell>
                                         <TableCell className="font-medium tabular-nums text-xs">
