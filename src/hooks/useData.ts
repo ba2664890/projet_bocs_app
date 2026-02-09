@@ -50,13 +50,23 @@ export const useGeographicData = () => {
       setLoading('isLoadingRegions', true);
       const [regionsRes, departmentsRes, communesRes] = await Promise.all([
         geographyService.getRegions({ page_size: 100 }, signal),
-        geographyService.getDepartments({ page_size: 100 }, signal),
-        geographyService.getCommunes({ page_size: 500 }, signal),
+        geographyService.getDepartments({ page_size: 200 }, signal),
+        geographyService.getCommunes({ page_size: 1000 }, signal),
       ]);
 
-      setRegions(regionsRes.results.map((r: any) => ({ ...r, id: String(r.id) })));
-      setDepartments(departmentsRes.results.map((d: any) => ({ ...d, id: String(d.id), parentId: String(d.region) })));
-      setCommunes(communesRes.results.map((c: any) => ({ ...c, id: String(c.id), parentId: String(c.department) })));
+      const extractResults = (res: any) => Array.isArray(res) ? res : (res?.results || []);
+
+      setRegions(extractResults(regionsRes).map((r: any) => ({ ...r, id: String(r.id) })));
+      setDepartments(extractResults(departmentsRes).map((d: any) => ({
+        ...d,
+        id: String(d.id),
+        parentId: d.region ? String(d.region) : undefined
+      })));
+      setCommunes(extractResults(communesRes).map((c: any) => ({
+        ...c,
+        id: String(c.id),
+        parentId: c.department ? String(c.department) : undefined
+      })));
     } catch (error) {
       if (axios.isCancel(error)) return;
       console.error('Failed to load geographic data:', error);
@@ -198,8 +208,9 @@ export const useIndicatorValues = (filters?: {
       // Map properties to match interface
       const mappedResults = response.results.map((v: any) => ({
         ...v,
-        indicatorId: v.indicatorId || v.indicator,
-        geographicId: v.geographicId || v.region || v.department || v.commune,
+        id: String(v.id),
+        indicatorId: v.indicatorId || v.indicator ? String(v.indicatorId || v.indicator) : undefined,
+        geographicId: v.geographicId || v.region || v.department || v.commune ? String(v.geographicId || v.region || v.department || v.commune) : undefined,
       }));
       setIndicatorValues(mappedResults);
     } catch (error) {
@@ -392,7 +403,14 @@ export const useHealthFacilities = () => {
     try {
       setLoading('isLoadingHealthFacilities', true);
       const response = await facilitiesService.getHealthFacilities({ page_size: 1000 }, signal);
-      const mappedResults = response.results.map((f: any) => ({ ...f, sector: 'health' }));
+      const mappedResults = response.results.map((f: any) => ({
+        ...f,
+        id: String(f.id),
+        communeId: f.commune ? String(f.commune) : String(f.communeId),
+        departmentId: String(f.department_id),
+        regionId: String(f.region_id),
+        sector: 'health'
+      }));
       setHealthFacilities(mappedResults);
     } catch (e) {
       if (axios.isCancel(e)) return;
@@ -441,7 +459,14 @@ export const useEducationFacilities = () => {
     try {
       setLoading('isLoadingEducationFacilities', true);
       const response = await facilitiesService.getEducationFacilities({ page_size: 1000 }, signal);
-      const mappedResults = response.results.map((f: any) => ({ ...f, sector: 'education' }));
+      const mappedResults = response.results.map((f: any) => ({
+        ...f,
+        id: String(f.id),
+        communeId: f.commune ? String(f.commune) : String(f.communeId),
+        departmentId: String(f.department_id),
+        regionId: String(f.region_id),
+        sector: 'education'
+      }));
       setEducationFacilities(mappedResults);
     } catch (e) {
       if (axios.isCancel(e)) return;

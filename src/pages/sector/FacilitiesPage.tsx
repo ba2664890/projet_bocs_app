@@ -132,8 +132,20 @@ export const FacilitiesPage = () => {
         e.preventDefault();
 
         // Validation de base
+        if (!newFacility.name) {
+            alert("Veuillez saisir le nom de l'établissement.");
+            return;
+        }
+        if (!newFacility.type) {
+            alert("Veuillez sélectionner le type d'établissement.");
+            return;
+        }
         if (!newFacility.communeId) {
             alert("Veuillez sélectionner une Commune dans la section Localisation Administrative.");
+            return;
+        }
+        if (!newFacility.sector) {
+            alert("Veuillez sélectionner un secteur.");
             return;
         }
 
@@ -170,10 +182,25 @@ export const FacilitiesPage = () => {
                     level: 'basic'
                 } as any);
             }
-            window.location.reload();
-        } catch (err) {
+        } catch (err: any) {
             console.error(err);
-            alert("Erreur lors de la création de la structure. Vérifiez les données saisies.");
+            let errorMessage = "Erreur lors de la création de la structure.";
+
+            if (err.response?.data) {
+                const data = err.response.data;
+                if (typeof data === 'object') {
+                    const details = Object.entries(data)
+                        .map(([key, value]) => `${key}: ${Array.isArray(value) ? value.join(', ') : value}`)
+                        .join('\n');
+                    errorMessage += `\n\nDétails:\n${details}`;
+                } else {
+                    errorMessage += `\n\n${data}`;
+                }
+            } else {
+                errorMessage += `\n\n${err.message}`;
+            }
+
+            alert(errorMessage);
         }
     };
 
