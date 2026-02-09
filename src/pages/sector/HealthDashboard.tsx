@@ -153,12 +153,12 @@ export const HealthDashboard = () => {
             </div>
           </div>
           <div className="flex items-center gap-3">
-            <Button variant="outline" className="gap-2" onClick={handleExport}>
+            <Button variant="outline" className="gap-2 h-11 px-6 border-blue-200 hover:bg-blue-50 text-blue-700 hidden md:flex" onClick={handleExport}>
               <Download className="h-4 w-4" />
               Rapport
             </Button>
-            <Button className="gap-2 bg-blue-600 hover:bg-blue-700 shadow-sm" onClick={() => navigate('/sector/health/forms')}>
-              <Plus className="h-4 w-4" />
+            <Button className="gap-3 bg-blue-600 hover:bg-blue-700 h-11 px-8 text-lg font-bold shadow-lg shadow-blue-200 dark:shadow-none animate-pulse-subtle" onClick={() => navigate('/sector/health/collections')}>
+              <Plus className="h-5 w-5" />
               Collecte de données
             </Button>
           </div>
@@ -166,7 +166,7 @@ export const HealthDashboard = () => {
 
         {/* Navigation secondaire */}
         <div className="flex flex-wrap gap-2">
-          <Button variant="secondary" className="gap-2 shadow-sm rounded-full px-4 bg-blue-50 hover:bg-blue-100 text-blue-700 dark:bg-blue-950/30 dark:text-blue-400 dark:hover:bg-blue-950/50 border border-blue-200 dark:border-blue-800" onClick={() => navigate('/sector/health/forms')}>
+          <Button variant="secondary" className="gap-2 shadow-sm rounded-full px-4 bg-blue-50 hover:bg-blue-100 text-blue-700 dark:bg-blue-950/30 dark:text-blue-400 dark:hover:bg-blue-950/50 border border-blue-200 dark:border-blue-800" onClick={() => navigate('/sector/health/collections')}>
             <FileText className="h-4 w-4" />
             Collecte de données
           </Button>

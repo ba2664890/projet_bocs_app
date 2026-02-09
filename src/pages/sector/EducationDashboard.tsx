@@ -157,12 +157,12 @@ export const EducationDashboard = () => {
             </div>
           </div>
           <div className="flex items-center gap-3">
-            <Button variant="outline" className="gap-2" onClick={handleExport}>
+            <Button variant="outline" className="gap-2 h-11 px-6 border-teal-200 hover:bg-teal-50 text-teal-700 hidden md:flex" onClick={handleExport}>
               <Download className="h-4 w-4" />
               Rapport
             </Button>
-            <Button className="gap-2 bg-teal-600 hover:bg-teal-700 shadow-sm" onClick={() => navigate('/sector/education/forms')}>
-              <Plus className="h-4 w-4" />
+            <Button className="gap-3 bg-teal-600 hover:bg-teal-700 h-11 px-8 text-lg font-bold shadow-lg shadow-teal-200 dark:shadow-none animate-pulse-subtle" onClick={() => navigate('/sector/education/collections')}>
+              <Plus className="h-5 w-5" />
               Collecte de données
             </Button>
           </div>
@@ -170,7 +170,7 @@ export const EducationDashboard = () => {
 
         {/* Navigation secondaire */}
         <div className="flex flex-wrap gap-2">
-          <Button variant="secondary" className="gap-2 shadow-sm rounded-full px-4 bg-teal-50 hover:bg-teal-100 text-teal-700 dark:bg-teal-950/30 dark:text-teal-400 dark:hover:bg-teal-950/50 border border-teal-200 dark:border-teal-800" onClick={() => navigate('/sector/education/forms')}>
+          <Button variant="secondary" className="gap-2 shadow-sm rounded-full px-4 bg-teal-50 hover:bg-teal-100 text-teal-700 dark:bg-teal-950/30 dark:text-teal-400 dark:hover:bg-teal-950/50 border border-teal-200 dark:border-teal-800" onClick={() => navigate('/sector/education/collections')}>
             <FileText className="h-4 w-4" />
             Collecte de données
           </Button>
