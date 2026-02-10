@@ -215,13 +215,13 @@ export const Register = () => {
                                 </div>
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                     <div className="space-y-1.5">
-                                        <Label htmlFor="firstName" className="text-xs font-bold ml-1">Prénom</Label>
+                                        <Label htmlFor="firstName" className="text-xs font-bold ml-1 text-slate-700 dark:text-slate-300">Prénom</Label>
                                         <div className="relative group">
                                             <User className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400 group-focus-within:text-primary transition-colors" />
                                             <Input
                                                 id="firstName"
                                                 placeholder="Jean"
-                                                className="pl-12 h-12 rounded-xl bg-white dark:bg-slate-900/50 border-slate-200 dark:border-slate-800 focus-visible:ring-primary/20"
+                                                className="pl-12 h-12 rounded-xl bg-white dark:bg-slate-900/50 border-slate-200 dark:border-slate-800 focus-visible:ring-primary/20 text-slate-900 dark:text-white font-medium"
                                                 value={formData.firstName}
                                                 onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
                                                 required
@@ -229,11 +229,11 @@ export const Register = () => {
                                         </div>
                                     </div>
                                     <div className="space-y-1.5">
-                                        <Label htmlFor="lastName" className="text-xs font-bold ml-1">Nom</Label>
+                                        <Label htmlFor="lastName" className="text-xs font-bold ml-1 text-slate-700 dark:text-slate-300">Nom</Label>
                                         <Input
                                             id="lastName"
                                             placeholder="Dupont"
-                                            className="h-12 rounded-xl bg-white dark:bg-slate-900/50 border-slate-200 dark:border-slate-800 focus-visible:ring-primary/20"
+                                            className="h-12 rounded-xl bg-white dark:bg-slate-900/50 border-slate-200 dark:border-slate-800 focus-visible:ring-primary/20 text-slate-900 dark:text-white font-medium"
                                             value={formData.lastName}
                                             onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
                                             required
@@ -241,13 +241,13 @@ export const Register = () => {
                                     </div>
                                 </div>
                                 <div className="space-y-1.5">
-                                    <Label htmlFor="phone" className="text-xs font-bold ml-1">Téléphone</Label>
+                                    <Label htmlFor="phone" className="text-xs font-bold ml-1 text-slate-700 dark:text-slate-300">Téléphone</Label>
                                     <div className="relative group">
                                         <Phone className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400 group-focus-within:text-primary transition-colors" />
                                         <Input
                                             id="phone"
                                             placeholder="+221 ..."
-                                            className="pl-12 h-12 rounded-xl bg-white dark:bg-slate-900/50 border-slate-200 dark:border-slate-800 focus-visible:ring-primary/20"
+                                            className="pl-12 h-12 rounded-xl bg-white dark:bg-slate-900/50 border-slate-200 dark:border-slate-800 focus-visible:ring-primary/20 text-slate-900 dark:text-white font-medium"
                                             value={formData.phone}
                                             onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                                         />
@@ -278,12 +278,12 @@ export const Register = () => {
                                 </div>
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                     <div className="space-y-1.5">
-                                        <Label htmlFor="role" className="text-xs font-bold ml-1">Rôle souhaité</Label>
+                                        <Label htmlFor="role" className="text-xs font-bold ml-1 text-slate-700 dark:text-slate-300">Rôle souhaité</Label>
                                         <Select
                                             value={formData.role}
                                             onValueChange={(value) => setFormData({ ...formData, role: value })}
                                         >
-                                            <SelectTrigger id="role" className="h-12 rounded-xl bg-white dark:bg-slate-900/50 border-slate-200 dark:border-slate-800 focus:ring-primary/20">
+                                            <SelectTrigger id="role" className="h-12 rounded-xl bg-white dark:bg-slate-900/50 border-slate-200 dark:border-slate-800 focus:ring-primary/20 text-slate-900 dark:text-white font-medium">
                                                 <SelectValue placeholder="Sélectionner" />
                                             </SelectTrigger>
                                             <SelectContent className="rounded-xl border-slate-200 dark:border-slate-800">
@@ -293,20 +293,23 @@ export const Register = () => {
                                             </SelectContent>
                                         </Select>
                                     </div>
-                                    <div className="space-y-1.5">
-                                        <Label htmlFor="organization" className="text-xs font-bold ml-1">Institution</Label>
-                                        <div className="relative group">
-                                            <Building2 className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400 group-focus-within:text-primary transition-colors" />
-                                            <Input
-                                                id="organization"
-                                                placeholder="Ministère..."
-                                                className="pl-12 h-12 rounded-xl bg-white dark:bg-slate-900/50 border-slate-200 dark:border-slate-800 focus-visible:ring-primary/20"
-                                                value={formData.organization}
-                                                onChange={(e) => setFormData({ ...formData, organization: e.target.value })}
-                                                required
-                                            />
+
+                                    {formData.role !== 'viewers' && (
+                                        <div className="space-y-1.5 animate-in fade-in slide-in-from-top-2 duration-300">
+                                            <Label htmlFor="organization" className="text-xs font-bold ml-1 text-slate-700 dark:text-slate-300">Institution / Organisation</Label>
+                                            <div className="relative group">
+                                                <Building2 className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400 group-focus-within:text-primary transition-colors" />
+                                                <Input
+                                                    id="organization"
+                                                    placeholder="Ministère, Agence, ONG..."
+                                                    className="pl-12 h-12 rounded-xl bg-white dark:bg-slate-900/50 border-slate-200 dark:border-slate-800 focus-visible:ring-primary/20 text-slate-900 dark:text-white font-medium"
+                                                    value={formData.organization}
+                                                    onChange={(e) => setFormData({ ...formData, organization: e.target.value })}
+                                                    required
+                                                />
+                                            </div>
                                         </div>
-                                    </div>
+                                    )}
                                 </div>
                             </div>
 

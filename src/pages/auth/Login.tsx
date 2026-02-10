@@ -325,14 +325,14 @@ export const Login = () => {
                 <TabsContent key={space.id} value={space.id} className="mt-8 space-y-6 animate-in fade-in zoom-in-95 duration-500 outline-none">
                   <form onSubmit={handleSubmit} className="space-y-5">
                     <div className="space-y-2">
-                      <Label htmlFor={`email-${space.id}`} className="text-sm font-semibold ml-1">Email professionnel</Label>
+                      <Label htmlFor={`email-${space.id}`} className="text-sm font-semibold ml-1 text-slate-700 dark:text-slate-300">Email professionnel</Label>
                       <div className="relative group">
                         <Mail className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400 group-focus-within:text-primary transition-colors" />
                         <Input
                           id={`email-${space.id}`}
                           type="email"
                           placeholder="votre@email.com"
-                          className="pl-12 h-13 rounded-2xl bg-white dark:bg-slate-900/50 border-slate-200 dark:border-slate-800 focus-visible:ring-primary/20 focus-visible:ring-offset-0 focus-visible:border-primary transition-all duration-300"
+                          className="pl-12 h-13 rounded-2xl bg-white dark:bg-slate-900/50 border-slate-200 dark:border-slate-800 focus-visible:ring-primary/20 focus-visible:ring-offset-0 focus-visible:border-primary transition-all duration-300 text-slate-900 dark:text-white"
                           value={formData.email}
                           onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                           required
@@ -342,7 +342,7 @@ export const Login = () => {
 
                     <div className="space-y-2">
                       <div className="flex items-center justify-between ml-1">
-                        <Label htmlFor={`password-${space.id}`} className="text-sm font-semibold">Mot de passe</Label>
+                        <Label htmlFor={`password-${space.id}`} className="text-sm font-semibold text-slate-700 dark:text-slate-300">Mot de passe</Label>
                         <Button variant="link" className="h-auto p-0 text-xs font-semibold text-primary hover:text-primary transition-colors">
                           Oublié ?
                         </Button>
@@ -353,7 +353,7 @@ export const Login = () => {
                           id={`password-${space.id}`}
                           type={showPassword ? 'text' : 'password'}
                           placeholder="••••••••"
-                          className="pl-12 pr-12 h-13 rounded-2xl bg-white dark:bg-slate-900/50 border-slate-200 dark:border-slate-800 focus-visible:ring-primary/20 focus-visible:ring-offset-0 focus-visible:border-primary transition-all duration-300"
+                          className="pl-12 pr-12 h-13 rounded-2xl bg-white dark:bg-slate-900/50 border-slate-200 dark:border-slate-800 focus-visible:ring-primary/20 focus-visible:ring-offset-0 focus-visible:border-primary transition-all duration-300 text-slate-900 dark:text-white"
                           value={formData.password}
                           onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                           required
