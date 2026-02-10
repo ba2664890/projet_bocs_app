@@ -10,7 +10,6 @@ import { useAuthStore } from '@/store';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -90,10 +89,18 @@ const spaceOptions = [
 ];
 
 const BackgroundGradient = () => (
-  <div className="fixed inset-0 -z-10 overflow-hidden">
-    <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-blue-500/20 blur-[120px] animate-pulse" />
-    <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] rounded-full bg-teal-500/20 blur-[120px] animate-pulse" style={{ animationDelay: '1s' }} />
-    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[60%] h-[60%] rounded-full bg-purple-500/10 blur-[150px]" />
+  <div className="fixed inset-0 -z-10 overflow-hidden bg-[#fafafa] dark:bg-[#050505]">
+    {/* Animated Blobs */}
+    <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] rounded-full bg-primary/20 blur-[120px] animate-pulse duration-[10s]" />
+    <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] rounded-full bg-blue-500/20 blur-[120px] animate-pulse duration-[8s]" style={{ animationDelay: '2s' }} />
+    <div className="absolute top-[20%] right-[10%] w-[30%] h-[30%] rounded-full bg-purple-500/10 blur-[100px] animate-pulse duration-[12s]" />
+
+    {/* Mesh pattern overlay */}
+    <div className="absolute inset-0 bg-grid-pattern opacity-[0.2] dark:opacity-[0.1]" />
+
+    {/* Subtle Noise Texture overlay could go here but using css grain is more complex, 
+        staying with gradient mesh for now */}
+    <div className="absolute inset-0 bg-gradient-mesh" />
   </div>
 );
 
@@ -111,7 +118,8 @@ export const Login = () => {
   });
 
   const containerRef = useRef<HTMLDivElement>(null);
-  const formRef = useRef<HTMLDivElement>(null);
+  const leftSideRef = useRef<HTMLDivElement>(null);
+  const rightSideRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -125,28 +133,28 @@ export const Login = () => {
     tl.fromTo(
       containerRef.current,
       { opacity: 0 },
-      { opacity: 1, duration: 1 }
+      { opacity: 1, duration: 0.8 }
     );
 
     tl.fromTo(
-      ".auth-header",
-      { opacity: 0, y: -20 },
-      { opacity: 1, y: 0, duration: 0.8, ease: "power3.out" },
-      "-=0.5"
-    );
-
-    tl.fromTo(
-      formRef.current,
-      { opacity: 0, y: 40, scale: 0.95 },
-      { opacity: 1, y: 0, scale: 1, duration: 0.8, ease: "power4.out" },
-      "-=0.6"
-    );
-
-    tl.fromTo(
-      ".auth-footer",
-      { opacity: 0 },
-      { opacity: 1, duration: 1 },
+      leftSideRef.current,
+      { opacity: 0, x: -50 },
+      { opacity: 1, x: 0, duration: 1, ease: "power4.out" },
       "-=0.4"
+    );
+
+    tl.fromTo(
+      rightSideRef.current,
+      { opacity: 0, x: 50 },
+      { opacity: 1, x: 0, duration: 1, ease: "power4.out" },
+      "-=0.8"
+    );
+
+    tl.fromTo(
+      ".auth-header-content > *",
+      { opacity: 0, y: 20 },
+      { opacity: 1, y: 0, duration: 0.6, stagger: 0.1, ease: "power3.out" },
+      "-=0.5"
     );
   }, []);
 
@@ -215,76 +223,116 @@ export const Login = () => {
   return (
     <div
       ref={containerRef}
-      className="relative flex min-h-screen flex-col items-center justify-center bg-slate-50 dark:bg-slate-950 p-4 transition-colors duration-500"
+      className="relative min-h-screen w-full flex overflow-hidden"
     >
       <BackgroundGradient />
 
-      {/* Logo & Header */}
-      <div className="auth-header mb-8 text-center">
-        <div className="mx-auto mb-6 flex h-24 w-24 items-center justify-center rounded-3xl bg-gradient-to-tr from-primary via-primary/90 to-blue-400 shadow-2xl shadow-primary/20 ring-4 ring-white/50 dark:ring-white/10 rotate-3 hover:rotate-0 transition-transform duration-500">
-          <Building2 className="h-12 w-12 text-white" />
-        </div>
-        <h1 className="text-4xl font-extrabold tracking-tighter text-slate-900 dark:text-white sm:text-5xl">
-          FATI
-        </h1>
-        <p className="mt-2 text-lg font-medium text-slate-500 dark:text-slate-400">
-          Fond d'Analyse Territoriale Intégrée
-        </p>
-      </div>
+      {/* Modern Split Layout */}
+      <div className="flex w-full flex-col lg:flex-row">
 
-      {/* Login Card */}
-      <div ref={formRef} className="w-full max-w-md">
-        <Card className="glass-card border-white/20 dark:border-slate-800/50 shadow-[0_32px_64px_-16px_rgba(0,0,0,0.1)] overflow-hidden">
-          <CardHeader className="space-y-1 pb-4">
-            <CardTitle className="text-3xl font-bold tracking-tight">Connexion</CardTitle>
-            <CardDescription className="text-base">
-              Portail sécurisé de pilotage territorial
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            {/* Space Selection - 4 Tabs Redesign */}
-            {/* Error Alert */}
+        {/* Left Side: Brand & Visuals (Visible only on desktop) */}
+        <div
+          ref={leftSideRef}
+          className="hidden lg:flex lg:w-[45%] xl:w-[50%] relative flex-col items-center justify-center p-12 text-white overflow-hidden"
+        >
+          {/* Decorative Elements */}
+          <div className="absolute inset-0 bg-primary/10 backdrop-blur-[2px]" />
+          <div className="absolute -top-24 -left-24 w-96 h-96 bg-primary/20 rounded-full blur-[100px]" />
+          <div className="absolute -bottom-24 -right-24 w-96 h-96 bg-blue-500/20 rounded-full blur-[100px]" />
+
+          <div className="auth-header-content relative z-10 max-w-lg text-center lg:text-left">
+            <div className="mb-8 inline-flex h-20 w-20 items-center justify-center rounded-2xl bg-white shadow-2xl shadow-primary/40 rotate-3 hover:rotate-0 transition-transform duration-500 cursor-default">
+              <Building2 className="h-10 w-10 text-primary" />
+            </div>
+            <h1 className="text-6xl font-black tracking-tighter sm:text-7xl mb-6">
+              FATI
+            </h1>
+            <h2 className="text-2xl font-bold text-white/90 mb-6 leading-tight">
+              Fond d'Analyse Territoriale Intégrée
+            </h2>
+            <p className="text-lg text-white/70 font-medium mb-12 max-w-md">
+              La plateforme intelligente de pilotage, de collecte et de suivi des indicateurs territoriaux pour une gouvernance éclairée.
+            </p>
+
+            <div className="grid grid-cols-2 gap-6 mt-12">
+              <div className="p-5 rounded-2xl bg-white/10 backdrop-blur-md border border-white/10">
+                <div className="h-10 w-10 rounded-xl bg-primary/30 flex items-center justify-center mb-3">
+                  <Users className="h-5 w-5 text-white" />
+                </div>
+                <h3 className="font-bold mb-1">Collaboratif</h3>
+                <p className="text-xs text-white/60">Connectez tous les acteurs du territoire sur une plateforme unique.</p>
+              </div>
+              <div className="p-5 rounded-2xl bg-white/10 backdrop-blur-md border border-white/10">
+                <div className="h-10 w-10 rounded-xl bg-blue-500/30 flex items-center justify-center mb-3">
+                  <Smartphone className="h-5 w-5 text-white" />
+                </div>
+                <h3 className="font-bold mb-1">Temps Réel</h3>
+                <p className="text-xs text-white/60">Suivez l'évolution de vos indicateurs en direct sur le terrain.</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="absolute bottom-8 left-12 right-12 flex justify-between items-center opacity-40">
+            <p className="text-xs font-medium uppercase tracking-widest">République du Sénégal</p>
+            <div className="h-px flex-1 mx-4 bg-white/20"></div>
+            <p className="text-xs font-medium uppercase tracking-widest">Pilier de la Gouvernance</p>
+          </div>
+        </div>
+
+        {/* Right Side: Form */}
+        <div
+          ref={rightSideRef}
+          className="flex-1 flex flex-col items-center justify-center p-4 sm:p-8 lg:p-12 xl:p-24 z-10"
+        >
+          {/* Mobile Header (Visible only on mobile/tablet) */}
+          <div className="lg:hidden mb-12 text-center">
+            <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-primary shadow-xl rotate-3">
+              <Building2 className="h-8 w-8 text-white" />
+            </div>
+            <h1 className="text-4xl font-black tracking-tight text-slate-900 dark:text-white">FATI</h1>
+          </div>
+
+          <div className="w-full max-w-[440px] space-y-8">
+            <div className="space-y-2">
+              <h2 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-white">Bienvenue</h2>
+              <p className="text-slate-500 dark:text-slate-400 font-medium">Connectez-vous pour accéder à votre espace de travail</p>
+            </div>
+
             {error && (
-              <Alert variant="destructive" className="animate-in fade-in slide-in-from-top-2">
+              <Alert variant="destructive" className="animate-in fade-in slide-in-from-top-2 rounded-xl border-red-200 bg-red-50 text-red-900 dark:bg-red-950/30 dark:text-red-400 dark:border-red-900/50">
                 <AlertCircle className="h-4 w-4" />
-                <AlertDescription>{error}</AlertDescription>
+                <AlertDescription className="font-medium text-xs">{error}</AlertDescription>
               </Alert>
             )}
 
             <Tabs value={selectedSpace} onValueChange={setSelectedSpace} className="w-full">
-              <TabsList className="grid w-full grid-cols-3 gap-2 p-1.5 h-auto bg-slate-100/50 dark:bg-slate-800/50 rounded-2xl backdrop-blur-sm">
+              <TabsList className="grid w-full grid-cols-3 gap-3 p-1.5 h-auto bg-slate-200/50 dark:bg-slate-800/40 rounded-[20px] backdrop-blur-md">
                 {spaceOptions.map((space) => (
                   <TabsTrigger
                     key={space.id}
                     value={space.id}
-                    className="flex flex-col items-center gap-2 py-4 px-2 data-[state=active]:bg-white dark:data-[state=active]:bg-slate-700 data-[state=active]:shadow-lg data-[state=active]:text-slate-900 dark:data-[state=active]:text-white rounded-xl transition-all duration-300 group"
+                    className="flex flex-col items-center gap-1.5 py-3.5 px-2 data-[state=active]:bg-white dark:data-[state=active]:bg-slate-700 data-[state=active]:shadow-lg data-[state=active]:text-slate-900 dark:data-[state=active]:text-white rounded-[14px] transition-all duration-300 group ring-offset-0 focus-visible:ring-0"
                   >
-                    <div className={`p-2 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 group-data-[state=active]:scale-110 transition-transform duration-300 ${space.text} ${space.darkText} ${space.activeBg} ${space.activeDarkBg}`}>
+                    <div className={`p-2 rounded-xl transition-all duration-300 group-data-[state=active]:scale-110 ${space.text} ${space.darkText} bg-white dark:bg-slate-800 shadow-sm border border-slate-100 dark:border-slate-700`}>
                       <space.icon className="h-5 w-5" />
                     </div>
-                    <span className="text-xs font-bold uppercase tracking-wider">{space.label}</span>
+                    <span className="text-[10px] font-bold uppercase tracking-wider opacity-70 group-data-[state=active]:opacity-100">{space.label}</span>
                   </TabsTrigger>
                 ))}
               </TabsList>
 
               {spaceOptions.map((space) => (
-                <TabsContent key={space.id} value={space.id} className="mt-6 space-y-6 outline-none animate-in fade-in slide-in-from-bottom-2 duration-300">
-                  <div className={`rounded-2xl border-2 p-4 text-center ${space.border} ${space.lightBg} ${space.darkBorder} ${space.darkLightBg} backdrop-blur-sm`}>
-                    <p className={`text-sm font-bold tracking-wide uppercase ${space.text} ${space.darkText}`}>Espace {space.label}</p>
-                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 font-medium">{space.description}</p>
-                  </div>
-
-                  {/* Login Form localized in Tab */}
-                  <form onSubmit={handleSubmit} className="space-y-4">
+                <TabsContent key={space.id} value={space.id} className="mt-8 space-y-6 animate-in fade-in zoom-in-95 duration-500 outline-none">
+                  <form onSubmit={handleSubmit} className="space-y-5">
                     <div className="space-y-2">
-                      <Label htmlFor="email">Email professionnel</Label>
-                      <div className="relative">
-                        <Mail className={`absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground`} />
+                      <Label htmlFor={`email-${space.id}`} className="text-sm font-semibold ml-1">Email professionnel</Label>
+                      <div className="relative group">
+                        <Mail className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400 group-focus-within:text-primary transition-colors" />
                         <Input
-                          id="email"
+                          id={`email-${space.id}`}
                           type="email"
                           placeholder="votre@email.com"
-                          className="pl-10 focus-visible:ring-offset-0 focus-visible:ring-1"
+                          className="pl-12 h-13 rounded-2xl bg-white dark:bg-slate-900/50 border-slate-200 dark:border-slate-800 focus-visible:ring-primary/20 focus-visible:ring-offset-0 focus-visible:border-primary transition-all duration-300"
                           value={formData.email}
                           onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                           required
@@ -293,14 +341,19 @@ export const Login = () => {
                     </div>
 
                     <div className="space-y-2">
-                      <Label htmlFor="password">Mot de passe</Label>
-                      <div className="relative">
-                        <Lock className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                      <div className="flex items-center justify-between ml-1">
+                        <Label htmlFor={`password-${space.id}`} className="text-sm font-semibold">Mot de passe</Label>
+                        <Button variant="link" className="h-auto p-0 text-xs font-semibold text-primary hover:text-primary transition-colors">
+                          Oublié ?
+                        </Button>
+                      </div>
+                      <div className="relative group">
+                        <Lock className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400 group-focus-within:text-primary transition-colors" />
                         <Input
-                          id="password"
+                          id={`password-${space.id}`}
                           type={showPassword ? 'text' : 'password'}
                           placeholder="••••••••"
-                          className="pl-10 pr-10 focus-visible:ring-offset-0 focus-visible:ring-1"
+                          className="pl-12 pr-12 h-13 rounded-2xl bg-white dark:bg-slate-900/50 border-slate-200 dark:border-slate-800 focus-visible:ring-primary/20 focus-visible:ring-offset-0 focus-visible:border-primary transition-all duration-300"
                           value={formData.password}
                           onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                           required
@@ -308,84 +361,100 @@ export const Login = () => {
                         <button
                           type="button"
                           onClick={() => setShowPassword(!showPassword)}
-                          className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                          className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-primary transition-colors"
                         >
                           {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                         </button>
                       </div>
                     </div>
 
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center space-x-2">
-                        <Checkbox
-                          id="remember"
-                          checked={formData.rememberMe}
-                          onCheckedChange={(checked) =>
-                            setFormData({ ...formData, rememberMe: checked as boolean })
-                          }
-                        />
-                        <Label htmlFor="remember" className="text-xs font-normal cursor-pointer">
-                          Se souvenir de moi
-                        </Label>
-                      </div>
-                      <Button variant="link" className="h-auto p-0 text-xs font-semibold text-slate-500 hover:text-primary transition-colors">
-                        Oublié ?
-                      </Button>
+                    <div className="flex items-center space-x-2 ml-1">
+                      <Checkbox
+                        id={`remember-${space.id}`}
+                        checked={formData.rememberMe}
+                        onCheckedChange={(checked) =>
+                          setFormData({ ...formData, rememberMe: checked as boolean })
+                        }
+                        className="rounded-md border-slate-300"
+                      />
+                      <Label htmlFor={`remember-${space.id}`} className="text-xs font-medium text-slate-500 cursor-pointer select-none">
+                        Rester connecté sur cet appareil
+                      </Label>
                     </div>
 
                     <Button
                       type="submit"
-                      className={`w-full h-12 gap-2 text-base font-bold shadow-lg ${space.shadow} ${space.bg} ${space.hoverBg} text-white rounded-xl transition-all duration-300 hover:scale-[1.02] active:scale-95`}
+                      className={`w-full h-14 gap-3 text-base font-bold shadow-xl shadow-primary/20 bg-primary hover:bg-primary/90 text-white rounded-2xl transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] mt-2`}
                       disabled={isLoading}
                     >
                       {isLoading ? (
-                        <span className="animate-pulse">Connexion...</span>
+                        <div className="flex items-center gap-2">
+                          <div className="h-4 w-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                          <span>Authentification...</span>
+                        </div>
                       ) : (
                         <>
-                          Se connecter au portail {space.label}
-                          <ArrowRight className="h-4 w-4" />
+                          Accéder au portail {space.label}
+                          <ArrowRight className="h-5 w-5" />
                         </>
                       )}
                     </Button>
                   </form>
 
-                  {/* Demo Credentials Filtered */}
-                  <div className={`rounded-lg bg-${space.color}-50 dark:bg-${space.color}-950/30 p-3 border border-${space.color}-100 dark:border-${space.color}-900`}>
-                    <p className={`mb-2 text-xs font-semibold text-${space.color}-700 dark:text-${space.color}-400`}>Compte de démonstration {space.label} :</p>
-                    <div className="space-y-1 text-[10px] text-muted-foreground">
-                      {space.id === 'institution' && (
+                  {/* Redesigned Demo Credentials */}
+                  <div className="p-4 rounded-2xl bg-slate-100/50 dark:bg-slate-800/30 border border-slate-200 dark:border-slate-800/50">
+                    <div className="flex items-center gap-2 mb-3">
+                      <div className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse" />
+                      <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Accès Démo : {space.label}</p>
+                    </div>
+                    <div className="grid grid-cols-1 gap-2">
+                      {space.id === 'government' && (
                         <>
-                          <p><strong>Institution:</strong> institution@fati.gov / password</p>
-                          <p><strong>Admin:</strong> admin@fati.gov / password</p>
+                          <div className="flex justify-between items-center text-[11px] p-2 rounded-xl bg-white dark:bg-slate-900/50 border border-slate-100 dark:border-slate-800 shadow-sm">
+                            <span className="font-semibold text-slate-600 dark:text-slate-400">Institution:</span>
+                            <code className="text-primary font-bold">institution@fati.gov / password</code>
+                          </div>
+                          <div className="flex justify-between items-center text-[11px] p-2 rounded-xl bg-white dark:bg-slate-900/50 border border-slate-100 dark:border-slate-800 shadow-sm">
+                            <span className="font-semibold text-slate-600 dark:text-slate-400">Administrateur:</span>
+                            <code className="text-primary font-bold">admin@fati.gov / password</code>
+                          </div>
                         </>
                       )}
-                      {space.id === 'health' && <p><strong>Santé:</strong> health@fati.gov / password</p>}
-                      {space.id === 'education' && <p><strong>Éducation:</strong> education@fati.gov / password</p>}
-                      {space.id === 'annonceur' && <p><strong>Public:</strong> public@fati.gov / password</p>}
+                      {space.id === 'representatives' && (
+                        <div className="flex justify-between items-center text-[11px] p-2 rounded-xl bg-white dark:bg-slate-900/50 border border-slate-100 dark:border-slate-800 shadow-sm">
+                          <span className="font-semibold text-slate-600 dark:text-slate-400">Agent:</span>
+                          <code className="text-primary font-bold">agent@fati.gov / password</code>
+                        </div>
+                      )}
+                      {space.id === 'annonceur' && (
+                        <div className="flex justify-between items-center text-[11px] p-2 rounded-xl bg-white dark:bg-slate-900/50 border border-slate-100 dark:border-slate-800 shadow-sm">
+                          <span className="font-semibold text-slate-600 dark:text-slate-400">Public:</span>
+                          <code className="text-primary font-bold">public@fati.gov / password</code>
+                        </div>
+                      )}
                     </div>
                   </div>
                 </TabsContent>
               ))}
             </Tabs>
-          </CardContent>
-          <CardFooter className="flex flex-col items-center gap-2 border-t py-4">
-            <p className="text-sm text-muted-foreground">
-              Pas encore de compte ?{' '}
-              <Link to="/register" className="font-medium text-primary hover:underline">
-                Créer un compte
-              </Link>
-            </p>
-          </CardFooter>
-        </Card>
-      </div>
 
-      {/* Footer */}
-      <div className="auth-footer mt-12 text-center text-sm">
-        <p className="text-slate-500 dark:text-slate-400 font-medium">© 2024 FATI - Fond d'Analyse Territoriale Intégrée</p>
-        <div className="mt-2 flex items-center justify-center gap-4">
-          <span className="h-px w-8 bg-slate-300 dark:bg-slate-700"></span>
-          <p className="text-xs text-slate-400 dark:text-slate-500 uppercase tracking-widest font-bold">Ministère de la Santé & de l'Éducation</p>
-          <span className="h-px w-8 bg-slate-300 dark:bg-slate-700"></span>
+            <div className="pt-6 text-center">
+              <p className="text-sm text-slate-500 dark:text-slate-400 font-medium">
+                Nouveau sur la plateforme ?{' '}
+                <Link to="/register" className="font-bold text-primary hover:underline underline-offset-4">
+                  Créer un compte professionnel
+                </Link>
+              </p>
+            </div>
+          </div>
+
+          {/* Footer Branding for Mobile */}
+          <div className="mt-auto pt-12 lg:hidden text-center">
+            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-loose">
+              Fond d'Analyse Territoriale Intégrée<br />
+              © 2024 - Plan de Développement Territorial
+            </p>
+          </div>
         </div>
       </div>
     </div>
