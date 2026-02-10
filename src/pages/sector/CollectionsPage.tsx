@@ -1,6 +1,6 @@
 // ============================================
 // FATI - Centre de Collecte
-// Accès direct aux formulaires de saisie
+// Accès direct aux formulaires de saisiee
 // ============================================
 
 import { useState, useEffect, useMemo } from 'react';
