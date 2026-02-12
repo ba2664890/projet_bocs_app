@@ -1,9 +1,4 @@
-// ============================================
-// FATI - Dashboard Institution
-// Espace Institutions & Gouvernements
-// ============================================
-
-import { useEffect, useRef } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import { gsap } from 'gsap';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -14,7 +9,8 @@ import {
   AlertTriangle,
   TrendingUp,
   Activity,
-  Zap
+  Sparkles,
+  CheckCircle2,
 } from 'lucide-react';
 import { useAlerts, useIndicatorValues } from '@/hooks/useData';
 import type { KPIData } from '@/types';
@@ -25,9 +21,9 @@ import { TrendChart } from '@/components/charts/TrendChart';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Separator } from '@/components/ui/separator';
+
+const includesAny = (value: string, words: string[]) => words.some((word) => value.includes(word));
 
 export const InstitutionDashboard = () => {
   const navigate = useNavigate();
@@ -39,24 +35,134 @@ export const InstitutionDashboard = () => {
     if (containerRef.current) {
       gsap.fromTo(
         containerRef.current.children,
-        { opacity: 0, y: 20 },
+        { opacity: 0, y: 18 },
         {
           opacity: 1,
           y: 0,
-          duration: 0.6,
-          stagger: 0.1,
+          duration: 0.55,
+          stagger: 0.09,
           ease: 'power3.out',
         }
       );
     }
   }, []);
 
+  const healthValues = useMemo(
+    () =>
+      allValues.filter((v) => {
+        const name = (v.indicatorName || '').toLowerCase();
+        return includesAny(name, ['santé', 'vaccination']);
+      }),
+    [allValues]
+  );
+
+  const educationValues = useMemo(
+    () =>
+      allValues.filter((v) => {
+        const name = (v.indicatorName || '').toLowerCase();
+        return includesAny(name, ['éducation', 'scolarisation']);
+      }),
+    [allValues]
+  );
+
+  const avgHealth = useMemo(() => {
+    if (healthValues.length === 0) return 0;
+    return healthValues.reduce((acc, v) => acc + v.value, 0) / healthValues.length;
+  }, [healthValues]);
+
+  const avgEducation = useMemo(() => {
+    if (educationValues.length === 0) return 0;
+    return educationValues.reduce((acc, v) => acc + v.value, 0) / educationValues.length;
+  }, [educationValues]);
+
+  const criticalAlertsCount = alerts.filter((a) => a.severity === 'critical').length;
+  const resolvedShare = alerts.length > 0 ? ((alerts.length - unreadAlertsCount) / alerts.length) * 100 : 100;
+
+  const availableYears = Array.from(new Set(allValues.map((v) => v.year))).sort((a, b) => a - b);
+  const years = availableYears.length > 0 ? availableYears : [new Date().getFullYear()];
+
+  const trendData = years.map((year) => {
+    const yearValues = allValues.filter((v) => v.year === year);
+    const yearHealth = yearValues.filter((v) => includesAny((v.indicatorName || '').toLowerCase(), ['santé', 'vaccination']));
+    const yearEducation = yearValues.filter((v) => includesAny((v.indicatorName || '').toLowerCase(), ['éducation', 'scolarisation']));
+
+    return {
+      name: String(year),
+      health: yearHealth.length > 0 ? yearHealth.reduce((acc, v) => acc + v.value, 0) / yearHealth.length : 0,
+      education: yearEducation.length > 0 ? yearEducation.reduce((acc, v) => acc + v.value, 0) / yearEducation.length : 0,
+    };
+  });
+
+  const kpis: KPIData[] = [
+    {
+      id: 'kpi-health',
+      title: 'Performance santé',
+      value: avgHealth,
+      formattedValue: avgHealth > 0 ? `${avgHealth.toFixed(1)}%` : 'N/A',
+      unit: '%',
+      color: 'blue',
+      variation: 2.5,
+      variationType: 'positive',
+      trend: [65, 68, 70, 72, 75, avgHealth],
+    },
+    {
+      id: 'kpi-education',
+      title: 'Performance éducation',
+      value: avgEducation,
+      formattedValue: avgEducation > 0 ? `${avgEducation.toFixed(1)}%` : 'N/A',
+      unit: '%',
+      color: 'green',
+      variation: 1.2,
+      variationType: 'positive',
+      trend: [60, 62, 65, 66, 68, avgEducation],
+    },
+    {
+      id: 'kpi-completeness',
+      title: 'Complétude des données',
+      value: 94.2,
+      formattedValue: '94.2%',
+      unit: '%',
+      color: 'teal',
+      variation: 0.5,
+      variationType: 'positive',
+      trend: [90, 91, 92, 93, 94, 94.2],
+    },
+    {
+      id: 'kpi-alerts',
+      title: 'Alertes critiques',
+      value: criticalAlertsCount,
+      formattedValue: String(criticalAlertsCount),
+      color: 'red',
+      variation: -1,
+      variationType: 'positive',
+      trend: [],
+    },
+  ];
+
+  const strategicInsights = [
+    {
+      title: 'Dynamique positive',
+      message: `Le secteur santé se stabilise à ${avgHealth.toFixed(1)}%, avec une progression régulière sur les derniers exercices.`,
+      tone: 'success',
+    },
+    {
+      title: 'Arbitrage à prioriser',
+      message: `Écart de ${(Math.abs(avgHealth - avgEducation)).toFixed(1)} points entre Santé et Éducation: renforcer le suivi ciblé des districts en recul.`,
+      tone: 'warning',
+    },
+    {
+      title: 'Qualité opérationnelle',
+      message: `${resolvedShare.toFixed(0)}% des alertes sont déjà traitées, maintenir ce rythme pour réduire les risques critiques.`,
+      tone: 'info',
+    },
+  ] as const;
+
   const handleExport = (format: 'pdf' | 'excel') => {
-    // Create a simple export file (mock implementation)
-    const content = format === 'pdf' 
-      ? 'Rapport PDF - Tableau de bord stratégique\n\nCe fichier serait un PDF contenant tous les indicateurs et alertes.'
-      : 'Tableau,Performance Santé,Performance Éducation,Complétude\nValeurs,' + allValues.filter(v => (v.indicatorName || '').toLowerCase().includes('santé')).length + ',' + allValues.filter(v => (v.indicatorName || '').toLowerCase().includes('éducation')).length + ',94.2';
-    
+    const content =
+      format === 'pdf'
+        ? 'Rapport PDF - Tableau de bord stratégique\n\nCe fichier serait un PDF contenant tous les indicateurs et alertes.'
+        : `Tableau,Performance Santé,Performance Éducation,Complétude\nValeurs,${healthValues.length},${educationValues.length},94.2`;
+
     const element = document.createElement('a');
     const file = new Blob([content], { type: format === 'pdf' ? 'application/pdf' : 'text/csv' });
     element.href = URL.createObjectURL(file);
@@ -66,154 +172,119 @@ export const InstitutionDashboard = () => {
     document.body.removeChild(element);
   };
 
-  const calculateKPIs = (): KPIData[] => {
-    const healthValues = allValues.filter(v => (v.indicatorName || '').toLowerCase().includes('santé') || (v.indicatorName || '').toLowerCase().includes('vaccination'));
-    const educationValues = allValues.filter(v => (v.indicatorName || '').toLowerCase().includes('éducation') || (v.indicatorName || '').toLowerCase().includes('scolarisation'));
-
-    const avgHealth = healthValues.length > 0 ? healthValues.reduce((acc, v) => acc + v.value, 0) / healthValues.length : 0;
-    const avgEdu = educationValues.length > 0 ? educationValues.reduce((acc, v) => acc + v.value, 0) / educationValues.length : 0;
-
-    return [
-      {
-        id: 'kpi-health',
-        title: 'Performance Santé',
-        value: avgHealth,
-        formattedValue: avgHealth > 0 ? `${avgHealth.toFixed(1)}%` : 'N/A',
-        unit: '%',
-        color: 'blue',
-        variation: 2.5,
-        variationType: 'positive',
-        trend: [65, 68, 70, 72, 75, avgHealth]
-      },
-      {
-        id: 'kpi-education',
-        title: 'Performance Éducation',
-        value: avgEdu,
-        formattedValue: avgEdu > 0 ? `${avgEdu.toFixed(1)}%` : 'N/A',
-        unit: '%',
-        color: 'green',
-        variation: 1.2,
-        variationType: 'positive',
-        trend: [60, 62, 65, 66, 68, avgEdu]
-      },
-      {
-        id: 'kpi-completeness',
-        title: 'Complétude des données',
-        value: 94.2,
-        formattedValue: '94.2%',
-        unit: '%',
-        color: 'teal',
-        variation: 0.5,
-        variationType: 'positive',
-        trend: [90, 91, 92, 93, 94, 94.2]
-      },
-      {
-        id: 'kpi-alerts',
-        title: 'Alertes Critiques',
-        value: alerts.filter(a => a.severity === 'critical').length,
-        formattedValue: String(alerts.filter(a => a.severity === 'critical').length),
-        color: 'red',
-        variation: -1,
-        variationType: 'positive', // Less alerts is good
-        trend: []
-      }
-    ];
-  };
-
-  const kpis = calculateKPIs();
-
-  // Extract unique years from data or default to recent years
-  const availableYears = Array.from(new Set(allValues.map(v => v.year))).sort();
-  const years = availableYears.length > 0 ? availableYears : [new Date().getFullYear()];
-
-  const trendData = years.map(year => {
-    const yearValues = allValues.filter(v => v.year === year);
-    const health = yearValues.filter(v => (v.indicatorName || '').toLowerCase().includes('santé') || (v.indicatorName || '').toLowerCase().includes('vaccination'));
-    const edu = yearValues.filter(v => (v.indicatorName || '').toLowerCase().includes('éducation') || (v.indicatorName || '').toLowerCase().includes('scolarisation'));
-
-    return {
-      name: String(year),
-      health: health.length > 0 ? health.reduce((acc, v) => acc + v.value, 0) / health.length : 0,
-      education: edu.length > 0 ? edu.reduce((acc, v) => acc + v.value, 0) / edu.length : 0,
-    };
-  });
-
   return (
-    <div ref={containerRef} className="space-y-8 animate-in fade-in duration-700">
-      {/* Header Section */}
-      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between bg-card p-6 rounded-xl border shadow-sm">
-        <div className="space-y-1">
-          <div className="flex items-center gap-2">
-            <h1 className="text-3xl font-bold tracking-tight bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
-              Tableau de bord stratégique
-            </h1>
-            <Badge variant="outline" className="ml-2 border-blue-200 text-blue-700 bg-blue-50">National</Badge>
+    <div ref={containerRef} className="space-y-7">
+      <section className="institution-hero">
+        <div className="relative z-10 flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
+          <div className="space-y-3">
+            <p className="institution-kicker">Vision nationale</p>
+            <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">Tableau de bord stratégique</h1>
+            <p className="max-w-2xl text-sm text-slate-100/90 sm:text-base">
+              Consolidez la performance territoriale, anticipez les alertes prioritaires et pilotez les actions
+              intersectorielles depuis un seul point d'entrée.
+            </p>
+            <div className="flex flex-wrap gap-2">
+              <span className="inline-flex items-center gap-1 rounded-full border border-white/30 bg-white/15 px-3 py-1 text-xs font-medium">
+                <AlertTriangle className="h-3.5 w-3.5" />
+                {unreadAlertsCount} alertes non lues
+              </span>
+              <span className="inline-flex items-center gap-1 rounded-full border border-white/30 bg-white/15 px-3 py-1 text-xs font-medium">
+                <CheckCircle2 className="h-3.5 w-3.5" />
+                Données jusqu'en {Math.max(...years)}
+              </span>
+            </div>
           </div>
-          <p className="text-muted-foreground text-lg">
-            Vue d'ensemble et pilotage des indicateurs de performance
-          </p>
-        </div>
-        <div className="flex items-center gap-3">
-          <Button variant="outline" size="sm" className="hidden sm:flex gap-2" onClick={() => handleExport('pdf')}>
-            <FileText className="h-4 w-4" />
-            Rapport PDF
-          </Button>
-          <Button size="sm" className="gap-2 bg-blue-600 hover:bg-blue-700" onClick={() => handleExport('excel')}>
-            <Download className="h-4 w-4" />
-            Exporter
-          </Button>
-        </div>
-      </div>
 
-      {/* KPI Grid */}
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+          <div className="flex flex-wrap items-center gap-3">
+            <Button
+              variant="outline"
+              size="sm"
+              className="gap-2 border-white/35 bg-white/10 text-white hover:bg-white/20"
+              onClick={() => handleExport('pdf')}
+            >
+              <FileText className="h-4 w-4" />
+              Rapport PDF
+            </Button>
+            <Button
+              size="sm"
+              className="gap-2 bg-white text-slate-900 hover:bg-slate-100"
+              onClick={() => handleExport('excel')}
+            >
+              <Download className="h-4 w-4" />
+              Export Excel
+            </Button>
+          </div>
+        </div>
+
+        <div className="relative z-10 mt-6 grid gap-3 sm:grid-cols-3">
+          <div className="rounded-xl border border-white/25 bg-white/10 p-3">
+            <p className="text-xs uppercase tracking-[0.16em] text-slate-200">Données suivies</p>
+            <p className="mt-1 text-2xl font-semibold">{allValues.length}</p>
+            <p className="text-xs text-slate-200/85">Mesures consolidées</p>
+          </div>
+          <div className="rounded-xl border border-white/25 bg-white/10 p-3">
+            <p className="text-xs uppercase tracking-[0.16em] text-slate-200">Cycle actuel</p>
+            <p className="mt-1 text-2xl font-semibold">{years.length} an(s)</p>
+            <p className="text-xs text-slate-200/85">Historique exploité</p>
+          </div>
+          <div className="rounded-xl border border-white/25 bg-white/10 p-3">
+            <p className="text-xs uppercase tracking-[0.16em] text-slate-200">Alertes critiques</p>
+            <p className="mt-1 text-2xl font-semibold">{criticalAlertsCount}</p>
+            <p className="text-xs text-slate-200/85">Niveau à surveiller</p>
+          </div>
+        </div>
+      </section>
+
+      <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         {kpis.map((kpi) => (
-          <KPICard key={kpi.id} data={kpi} className="shadow-sm hover:shadow-md transition-all duration-300" />
+          <KPICard
+            key={kpi.id}
+            data={kpi}
+            className="border-slate-200/80 bg-white/90 shadow-xs transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md dark:border-slate-800 dark:bg-slate-950/65"
+          />
         ))}
-      </div>
+      </section>
 
-      <div className="grid gap-6 lg:grid-cols-3">
-        {/* Main Charts Area */}
-        <div className="lg:col-span-2 space-y-6">
-          <Card className="shadow-sm border-none bg-background/60 backdrop-blur-sm">
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <CardTitle className="text-xl flex items-center gap-2">
-                  <TrendingUp className="h-5 w-5 text-blue-500" />
-                  Analyse des Tendances
-                </CardTitle>
-                <Tabs defaultValue="trends" className="w-[300px]">
-                  <TabsList className="grid w-full grid-cols-2">
-                    <TabsTrigger value="trends">Evolution</TabsTrigger>
-                    <TabsTrigger value="comparison">Comparaison</TabsTrigger>
-                  </TabsList>
-                </Tabs>
+      <section className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_360px]">
+        <div className="space-y-6">
+          <Card className="institution-panel overflow-hidden">
+            <CardHeader className="space-y-3 border-b border-slate-200/70 pb-5 dark:border-slate-800/80">
+              <div className="flex flex-wrap items-start justify-between gap-3">
+                <div>
+                  <CardTitle className="flex items-center gap-2 text-xl text-slate-900 dark:text-slate-100">
+                    <TrendingUp className="h-5 w-5 text-[hsl(var(--institution-blue))]" />
+                    Analyse des tendances sectorielles
+                  </CardTitle>
+                  <CardDescription>
+                    Évolution comparée des performances Santé et Éducation sur la période disponible.
+                  </CardDescription>
+                </div>
+                <span className="institution-chip">{years[0]} - {years[years.length - 1]}</span>
               </div>
-              <CardDescription>Visualisation comparative des secteurs Santé et Education sur 5 ans</CardDescription>
             </CardHeader>
-            <CardContent className="pt-2">
+            <CardContent className="pt-5">
               <TrendChart
                 data={trendData}
                 lines={[
-                  { key: 'health', name: 'Santé', color: '#3b82f6' },
-                  { key: 'education', name: 'Éducation', color: '#10b981' },
+                  { key: 'health', name: 'Santé', color: '#0891b2' },
+                  { key: 'education', name: 'Éducation', color: '#1d4ed8' },
                 ]}
-                height={350}
+                height={340}
                 referenceLine={80}
               />
             </CardContent>
           </Card>
 
-          {/* Map Section */}
-          <Card className="overflow-hidden shadow-sm">
-            <CardHeader className="pb-0">
-              <div className="flex items-center justify-between">
-                <CardTitle className="text-xl flex items-center gap-2">
-                  <MapIcon className="h-5 w-5 text-indigo-500" />
-                  Répartition Géographique
+          <Card className="institution-panel overflow-hidden">
+            <CardHeader className="border-b border-slate-200/70 pb-4 dark:border-slate-800/80">
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <CardTitle className="flex items-center gap-2 text-xl text-slate-900 dark:text-slate-100">
+                  <MapIcon className="h-5 w-5 text-[hsl(var(--institution-teal))]" />
+                  Répartition géographique
                 </CardTitle>
                 <Button variant="ghost" size="sm" onClick={() => navigate('/institution/compare')}>
-                  Vue détaillée <ArrowRight className="ml-2 h-4 w-4" />
+                  Vue détaillée
+                  <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>
               </div>
             </CardHeader>
@@ -223,47 +294,51 @@ export const InstitutionDashboard = () => {
           </Card>
         </div>
 
-        {/* Sidebar: Alerts & Insights */}
         <div className="space-y-6">
-          {/* AI Insights / Highlights */}
-          <Card className="bg-gradient-to-br from-indigo-50 to-white dark:from-slate-900 dark:to-slate-950 border-indigo-100 dark:border-slate-800">
+          <Card className="institution-panel border-[hsl(var(--institution-blue)/0.25)] bg-gradient-to-br from-white via-white to-sky-50/70 dark:from-slate-950 dark:via-slate-950 dark:to-slate-900/70">
             <CardHeader>
-              <CardTitle className="text-lg flex items-center gap-2 text-indigo-700 dark:text-indigo-400">
-                <Zap className="h-5 w-5 fill-indigo-100" />
-                Points Clés (IA)
+              <CardTitle className="flex items-center gap-2 text-lg text-slate-900 dark:text-slate-100">
+                <Sparkles className="h-5 w-5 text-[hsl(var(--institution-blue))]" />
+                Points clés de pilotage
               </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex gap-3 items-start p-3 bg-white dark:bg-slate-900 rounded-lg border border-indigo-50 dark:border-slate-800 shadow-sm">
-                <div className="mt-1 h-2 w-2 rounded-full bg-green-500 flex-shrink-0" />
-                <div>
-                  <p className="text-sm font-medium text-foreground">Progression notable</p>
-                  <p className="text-xs text-muted-foreground mt-1">Le taux de vaccination a augmenté de 12% dans la région Nord par rapport à 2023.</p>
+            <CardContent className="space-y-3">
+              {strategicInsights.map((insight) => (
+                <div key={insight.title} className="rounded-xl border border-slate-200/70 bg-white/80 p-3 dark:border-slate-800 dark:bg-slate-900/65">
+                  <div className="flex items-start gap-2">
+                    <span
+                      className={`mt-1 h-2.5 w-2.5 rounded-full ${
+                        insight.tone === 'success'
+                          ? 'bg-emerald-500'
+                          : insight.tone === 'warning'
+                            ? 'bg-amber-500'
+                            : 'bg-sky-500'
+                      }`}
+                    />
+                    <div>
+                      <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">{insight.title}</p>
+                      <p className="mt-1 text-xs text-slate-600 dark:text-slate-300">{insight.message}</p>
+                    </div>
+                  </div>
                 </div>
-              </div>
-              <div className="flex gap-3 items-start p-3 bg-white dark:bg-slate-900 rounded-lg border border-indigo-50 dark:border-slate-800 shadow-sm">
-                <div className="mt-1 h-2 w-2 rounded-full bg-amber-500 flex-shrink-0" />
-                <div>
-                  <p className="text-sm font-medium text-foreground">Attention requise</p>
-                  <p className="text-xs text-muted-foreground mt-1">Léger recul de la scolarisation primaire observé dans 3 districts du Sud.</p>
-                </div>
-              </div>
+              ))}
             </CardContent>
           </Card>
 
-          {/* Alerts Widget */}
-          <Card className="flex flex-col shadow-sm">
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <div>
-                <CardTitle className="text-lg flex items-center gap-2">
+          <Card className="institution-panel flex flex-col">
+            <CardHeader className="border-b border-slate-200/70 pb-4 dark:border-slate-800/80">
+              <div className="flex items-center justify-between gap-2">
+                <CardTitle className="flex items-center gap-2 text-lg text-slate-900 dark:text-slate-100">
                   <AlertTriangle className="h-5 w-5 text-amber-500" />
-                  Alertes Récentes
+                  Alertes récentes
                 </CardTitle>
+                <Badge variant="secondary" className="bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-500/15 dark:text-amber-300 dark:border-amber-500/30">
+                  {unreadAlertsCount} nouvelles
+                </Badge>
               </div>
-              <Badge variant="secondary" className="bg-amber-50 text-amber-700 border-amber-200">{unreadAlertsCount} nouvelles</Badge>
             </CardHeader>
-            <CardContent className="flex-1">
-              <ScrollArea className="h-[400px] pr-4">
+            <CardContent className="flex-1 pt-5">
+              <ScrollArea className="h-[360px] pr-4">
                 <div className="space-y-3">
                   {alerts.slice(0, 5).map((alert) => (
                     <AlertCard
@@ -275,23 +350,27 @@ export const InstitutionDashboard = () => {
                     />
                   ))}
                   {alerts.length === 0 && (
-                    <div className="text-center py-8">
-                      <div className="h-12 w-12 bg-muted rounded-full flex items-center justify-center mx-auto mb-3">
-                        <Activity className="h-6 w-6 text-muted-foreground" />
+                    <div className="rounded-xl border border-dashed border-slate-300/90 bg-slate-50 p-6 text-center dark:border-slate-700 dark:bg-slate-900/60">
+                      <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-slate-100 dark:bg-slate-800">
+                        <Activity className="h-5 w-5 text-slate-500" />
                       </div>
-                      <p className="text-muted-foreground">Tout est calme. Aucune alerte.</p>
+                      <p className="text-sm text-muted-foreground">Aucune alerte active actuellement.</p>
                     </div>
                   )}
                 </div>
               </ScrollArea>
-              <Separator className="my-4" />
-              <Button variant="ghost" className="w-full text-muted-foreground hover:text-foreground" onClick={() => navigate('/institution/alerts')}>
-                Voir toutes les alertes <ArrowRight className="ml-2 h-4 w-4" />
+              <Button
+                variant="ghost"
+                className="mt-4 w-full text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white"
+                onClick={() => navigate('/institution/alerts')}
+              >
+                Voir toutes les alertes
+                <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
             </CardContent>
           </Card>
         </div>
-      </div>
+      </section>
     </div>
   );
 };

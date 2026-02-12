@@ -68,6 +68,14 @@
     --sidebar-accent-foreground: 240 10% 10%;
     --sidebar-border: 240 6% 90%;
     --sidebar-ring: 262 83% 58%;
+
+    /* Institution visual language */
+    --institution-navy: 212 62% 18%;
+    --institution-blue: 204 91% 45%;
+    --institution-teal: 170 70% 36%;
+    --institution-gold: 39 90% 58%;
+    --institution-surface: 210 43% 98%;
+    --institution-border: 214 24% 86%;
   }
 
   .dark {
@@ -107,6 +115,14 @@
     --sidebar-accent-foreground: 240 5% 96%;
     --sidebar-border: 240 4% 16%;
     --sidebar-ring: 262 83% 65%;
+
+    /* Institution visual language (dark) */
+    --institution-navy: 212 80% 72%;
+    --institution-blue: 203 90% 62%;
+    --institution-teal: 170 66% 52%;
+    --institution-gold: 39 92% 66%;
+    --institution-surface: 223 26% 12%;
+    --institution-border: 218 18% 28%;
   }
 }
 
@@ -136,6 +152,46 @@
 }
 
 @layer components {
+  .institution-shell {
+    @apply relative isolate overflow-hidden rounded-[1.75rem] border p-4 shadow-soft sm:p-6 lg:p-8;
+    border-color: hsl(var(--institution-border) / 0.9);
+    background:
+      radial-gradient(circle at 0% -15%, hsl(var(--institution-blue) / 0.13), transparent 40%),
+      radial-gradient(circle at 100% 120%, hsl(var(--institution-teal) / 0.14), transparent 40%),
+      linear-gradient(160deg, hsl(var(--institution-surface)) 0%, hsl(var(--card)) 65%, hsl(var(--background)) 100%);
+  }
+
+  .institution-hero {
+    @apply relative overflow-hidden rounded-2xl border px-5 py-6 text-white shadow-elevated sm:px-7;
+    border-color: hsl(var(--institution-blue) / 0.35);
+    background:
+      radial-gradient(circle at 20% -10%, rgba(255, 255, 255, 0.28), transparent 40%),
+      radial-gradient(circle at 100% 100%, rgba(255, 255, 255, 0.14), transparent 40%),
+      linear-gradient(125deg, hsl(var(--institution-navy)) 0%, hsl(var(--institution-blue)) 45%, hsl(var(--institution-teal)) 100%);
+  }
+
+  .institution-hero::after {
+    content: '';
+    @apply pointer-events-none absolute -right-10 -top-12 h-40 w-40 rounded-full;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.25) 0%, transparent 72%);
+  }
+
+  .institution-kicker {
+    @apply text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-200/90;
+  }
+
+  .institution-panel {
+    @apply rounded-2xl border bg-white/85 shadow-xs backdrop-blur-sm dark:bg-slate-950/55;
+    border-color: hsl(var(--institution-border) / 0.8);
+  }
+
+  .institution-chip {
+    @apply inline-flex items-center rounded-full border px-3 py-1 text-xs font-medium;
+    border-color: hsl(var(--institution-blue) / 0.25);
+    background-color: hsl(var(--institution-blue) / 0.1);
+    color: hsl(var(--institution-navy));
+  }
+
   /* ============================================ */
   /* GLASSMORPHISM EFFECTS */
   /* ============================================ */
