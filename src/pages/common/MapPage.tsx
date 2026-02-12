@@ -37,6 +37,7 @@ import { MapDisplay } from '@/components/common/MapDisplay';
 export const MapPage = () => {
   const location = useLocation();
   const space = location.pathname.split('/')[1] as any;
+  const isEmbeddedInInstitutionLayout = space === 'institution';
   const { regions, departments, communes, isLoading } = useGeographicData();
   const [selectedRegion, setSelectedRegion] = useState<string>('');
   const [viewMode, setViewMode] = useState<'map' | 'table'>('map');
@@ -73,18 +74,25 @@ export const MapPage = () => {
   };
 
   if (isLoading) {
+    const loadingContent = (
+      <div className="flex h-[600px] items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+      </div>
+    );
+
+    if (isEmbeddedInInstitutionLayout) {
+      return loadingContent;
+    }
+
     return (
       <MainLayout space={space} title="Cartographie">
-        <div className="flex h-[600px] items-center justify-center">
-          <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
-        </div>
+        {loadingContent}
       </MainLayout>
     );
   }
 
-  return (
-    <MainLayout space={space} title="Cartographie">
-      <div className="space-y-6">
+  const content = (
+    <div className="space-y-6">
         {/* Header with controls */}
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between bg-card p-6 rounded-xl border shadow-sm">
           <div className="space-y-1">
@@ -279,7 +287,16 @@ export const MapPage = () => {
             <span className="font-black">GIS SYNC OK:</span> {regions.length} régions, {departments.length} départements et {communes.length} communes synchronisées avec les serveurs PostGIS.
           </p>
         </div>
-      </div>
+    </div>
+  );
+
+  if (isEmbeddedInInstitutionLayout) {
+    return content;
+  }
+
+  return (
+    <MainLayout space={space} title="Cartographie">
+      {content}
     </MainLayout>
   );
 };

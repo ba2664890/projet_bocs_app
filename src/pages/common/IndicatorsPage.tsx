@@ -26,6 +26,7 @@ import { TrendChart } from '@/components/charts/TrendChart';
 export const IndicatorsPage = () => {
   const location = useLocation();
   const space = location.pathname.split('/')[1] as any;
+  const isEmbeddedInInstitutionLayout = space === 'institution';
   const { indicators, isLoading: loadingIndicators } = useIndicators();
   const { allValues, isLoading: loadingValues } = useIndicatorValues();
   const [selectedSector, setSelectedSector] = useState<string>('all');
@@ -64,18 +65,25 @@ export const IndicatorsPage = () => {
   const isLoading = loadingIndicators || loadingValues;
 
   if (isLoading) {
+    const loadingContent = (
+      <div className="flex h-[600px] items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+      </div>
+    );
+
+    if (isEmbeddedInInstitutionLayout) {
+      return loadingContent;
+    }
+
     return (
       <MainLayout space={space} title="Indicateurs">
-        <div className="flex h-[600px] items-center justify-center">
-          <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
-        </div>
+        {loadingContent}
       </MainLayout>
     );
   }
 
-  return (
-    <MainLayout space={space} title="Indicateurs">
-      <div className="space-y-8">
+  const content = (
+    <div className="space-y-8">
         {/* Header */}
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between bg-card p-6 rounded-xl border shadow-sm">
           <div className="space-y-1">
@@ -280,7 +288,16 @@ export const IndicatorsPage = () => {
             </p>
           </CardContent>
         </Card>
-      </div>
+    </div>
+  );
+
+  if (isEmbeddedInInstitutionLayout) {
+    return content;
+  }
+
+  return (
+    <MainLayout space={space} title="Indicateurs">
+      {content}
     </MainLayout>
   );
 };
