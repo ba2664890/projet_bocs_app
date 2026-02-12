@@ -45,24 +45,54 @@ export const useGeographicData = () => {
     setLoading,
   } = useDataStore();
 
+  const fetchAllPages = useCallback(
+    async (
+      fetchPage: (params?: Record<string, unknown>, signal?: AbortSignal) => Promise<any>,
+      initialParams: Record<string, unknown> = {},
+      signal?: AbortSignal
+    ) => {
+      const allResults: any[] = [];
+      let page = 1;
+      const maxPages = 500;
+
+      while (page <= maxPages) {
+        const response = await fetchPage({ ...initialParams, page }, signal);
+        const results = Array.isArray(response) ? response : (response?.results || []);
+        allResults.push(...results);
+
+        // If API is not paginated, we stop after first response
+        if (Array.isArray(response)) {
+          break;
+        }
+
+        if (!response?.next || results.length === 0) {
+          break;
+        }
+
+        page += 1;
+      }
+
+      return allResults;
+    },
+    []
+  );
+
   const loadData = useCallback(async (signal?: AbortSignal) => {
     try {
       setLoading('isLoadingRegions', true);
-      const [regionsRes, departmentsRes, communesRes] = await Promise.all([
-        geographyService.getRegions({ page_size: 100 }, signal),
-        geographyService.getDepartments({ page_size: 200 }, signal),
-        geographyService.getCommunes({ page_size: 1000 }, signal),
+      const [allRegions, allDepartments, allCommunes] = await Promise.all([
+        fetchAllPages((params, s) => geographyService.getRegions(params, s), {}, signal),
+        fetchAllPages((params, s) => geographyService.getDepartments(params, s), {}, signal),
+        fetchAllPages((params, s) => geographyService.getCommunes(params, s), {}, signal),
       ]);
 
-      const extractResults = (res: any) => Array.isArray(res) ? res : (res?.results || []);
-
-      setRegions(extractResults(regionsRes).map((r: any) => ({ ...r, id: String(r.id) })));
-      setDepartments(extractResults(departmentsRes).map((d: any) => ({
+      setRegions(allRegions.map((r: any) => ({ ...r, id: String(r.id) })));
+      setDepartments(allDepartments.map((d: any) => ({
         ...d,
         id: String(d.id),
         parentId: d.region ? String(d.region) : undefined
       })));
-      setCommunes(extractResults(communesRes).map((c: any) => ({
+      setCommunes(allCommunes.map((c: any) => ({
         ...c,
         id: String(c.id),
         parentId: c.department ? String(c.department) : undefined
@@ -73,7 +103,7 @@ export const useGeographicData = () => {
     } finally {
       setLoading('isLoadingRegions', false);
     }
-  }, [setRegions, setDepartments, setCommunes, setLoading]);
+  }, [fetchAllPages, setRegions, setDepartments, setCommunes, setLoading]);
 
   useEffect(() => {
     if (regions.length === 0) {
@@ -671,4 +701,3 @@ export const useSystemStats = () => {
 
   return { stats, isLoading, refresh: loadStats };
 };
-
