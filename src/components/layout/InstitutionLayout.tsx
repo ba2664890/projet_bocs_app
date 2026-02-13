@@ -54,10 +54,10 @@ export const InstitutionLayout = () => {
 
   const getActiveTab = () => {
     const path = location.pathname;
-    if (path.endsWith('/reports')) return 'reports';
-    if (path.endsWith('/sectors')) return 'sectors';
-    if (path.endsWith('/compare')) return 'compare';
-    if (path.endsWith('/alerts')) return 'alerts';
+    if (path.includes('/reports')) return 'reports';
+    if (path.includes('/sectors')) return 'sectors';
+    if (path.includes('/compare')) return 'compare';
+    if (path.includes('/alerts')) return 'alerts';
     return 'dashboard';
   };
 

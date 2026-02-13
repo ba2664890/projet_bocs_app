@@ -1,6 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { useIndicators } from '@/hooks/useData';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import {
@@ -67,6 +67,7 @@ const EDUCATION_SUBSECTORS: SubSectorDescriptor[] = [
 export const SectorsPage = () => {
   const { indicators } = useIndicators();
   const navigate = useNavigate();
+  const location = useLocation();
 
   const healthIndicators = indicators.filter((indicator) => {
     const category = indicator.category?.toLowerCase() ?? '';
@@ -109,6 +110,25 @@ export const SectorsPage = () => {
     },
   ] as const;
 
+  const focusedSector =
+    location.pathname.includes('/institution/sectors/health')
+      ? 'health'
+      : location.pathname.includes('/institution/sectors/education')
+        ? 'education'
+        : 'all';
+
+  const visibleSectorCards =
+    focusedSector === 'all'
+      ? sectorCards
+      : sectorCards.filter((sector) => sector.key === focusedSector);
+
+  const focusedSectorLabel =
+    focusedSector === 'health'
+      ? 'Santé publique'
+      : focusedSector === 'education'
+        ? 'Éducation'
+        : null;
+
   const totalIndicators = healthIndicators.length + educationIndicators.length;
 
   return (
@@ -149,8 +169,20 @@ export const SectorsPage = () => {
         </div>
       </section>
 
+      {focusedSectorLabel && (
+        <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-slate-200/80 bg-white/80 p-4 dark:border-slate-800 dark:bg-slate-950/60">
+          <div>
+            <p className="text-xs uppercase tracking-[0.14em] text-muted-foreground">Dashboard actif</p>
+            <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">{focusedSectorLabel}</p>
+          </div>
+          <Button variant="outline" onClick={() => navigate('/institution/sectors')}>
+            Voir tous les secteurs
+          </Button>
+        </div>
+      )}
+
       <section className="grid gap-6 xl:grid-cols-2">
-        {sectorCards.map((sector) => {
+        {visibleSectorCards.map((sector) => {
           const SectorIcon = sector.icon;
 
           return (
@@ -241,7 +273,7 @@ export const SectorsPage = () => {
                     }`}
                     onClick={() => navigate(sector.route)}
                   >
-                    Ouvrir le dashboard
+                    {focusedSector === sector.key ? 'Dashboard ouvert' : 'Ouvrir le dashboard'}
                     <ArrowRight className="ml-2 h-4 w-4" />
                   </Button>
                 </div>
