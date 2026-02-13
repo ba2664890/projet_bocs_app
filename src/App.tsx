@@ -14,10 +14,12 @@ import { AnnonceurDashboard } from '@/pages/annonceur/AnnonceurDashboard';
 import { CampaignsPage } from '@/pages/annonceur/CampaignsPage';
 import { AudiencesPage } from '@/pages/annonceur/AudiencesPage';
 import { ReportsPage as AnnonceurReportsPage } from '@/pages/annonceur/ReportsPage';
+import { AlertsPage as AnnonceurAlertsPage } from '@/pages/annonceur/AlertsPage';
 
 import { MapPage } from '@/pages/common/MapPage';
 import { IndicatorsPage } from '@/pages/common/IndicatorsPage';
 import { ProfilePage } from '@/pages/common/ProfilePage';
+import { UserSettingsPage } from '@/pages/common/UserSettingsPage';
 
 // Institution Pages
 import { InstitutionLayout } from '@/components/layout/InstitutionLayout';
@@ -107,6 +109,7 @@ function App() {
         {/* Default */}
         <Route path="/" element={<DefaultRoute />} />
         <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
+        <Route path="/settings" element={<ProtectedRoute><UserSettingsPage /></ProtectedRoute>} />
 
         {/* Institution Space */}
         <Route path="/institution" element={<ProtectedRoute allowedRoles={['institution', 'viewer']}><InstitutionLayout /></ProtectedRoute>}>
@@ -157,6 +160,9 @@ function App() {
         <Route path="/annonceur/campaigns" element={<ProtectedRoute allowedRoles={['annonceur', 'viewer']}><CampaignsPage /></ProtectedRoute>} />
         <Route path="/annonceur/audiences" element={<ProtectedRoute allowedRoles={['annonceur', 'viewer']}><AudiencesPage /></ProtectedRoute>} />
         <Route path="/annonceur/reports" element={<ProtectedRoute allowedRoles={['annonceur', 'viewer']}><AnnonceurReportsPage /></ProtectedRoute>} />
+        <Route path="/annonceur/alerts" element={<ProtectedRoute allowedRoles={['annonceur', 'viewer']}><AnnonceurAlertsPage /></ProtectedRoute>} />
+        <Route path="/annonceur/profile" element={<ProtectedRoute allowedRoles={['annonceur', 'viewer']}><ProfilePage /></ProtectedRoute>} />
+        <Route path="/annonceur/settings" element={<ProtectedRoute allowedRoles={['annonceur', 'viewer']}><UserSettingsPage /></ProtectedRoute>} />
 
         {/* Fallback */}
         <Route path="*" element={<Navigate to="/" replace />} />

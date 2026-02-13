@@ -43,7 +43,7 @@ export interface Permission {
 
 // ----- Géographie & Territoires -----
 
-export type AdministrativeLevel = 'national' | 'region' | 'department' | 'commune' | 'facility';
+export type AdministrativeLevel = 'national' | 'region' | 'regional' | 'department' | 'commune' | 'facility';
 
 export interface GeographicEntity {
   id: string;

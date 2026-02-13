@@ -15,6 +15,7 @@ import {
   GraduationCap,
   HeartPulse,
   Settings,
+  User,
   Users,
   FileText,
   Bell,
@@ -123,6 +124,9 @@ const getNavigation = (space: string, locationPath: string, userRole: string): N
         { label: 'Collectes', path: `${basePath}/campaigns`, icon: Megaphone },
         { label: 'Audiences', path: `${basePath}/audiences`, icon: Users },
         { label: 'Rapports', path: `${basePath}/reports`, icon: FileText },
+        { label: 'Notifications', path: `${basePath}/alerts`, icon: Bell },
+        { label: 'Profil', path: `${basePath}/profile`, icon: User },
+        { label: 'Paramètres', path: `${basePath}/settings`, icon: Settings },
       ];
 
     default:

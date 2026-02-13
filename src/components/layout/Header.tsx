@@ -98,6 +98,9 @@ export const Header = ({ space }: HeaderProps) => {
   };
 
   const ThemeIcon = theme === 'light' ? Sun : theme === 'dark' ? Moon : Monitor;
+  const profileRoute = space === 'annonceur' ? '/annonceur/profile' : '/profile';
+  const settingsRoute = space === 'admin' ? '/admin/settings' : space === 'annonceur' ? '/annonceur/settings' : '/settings';
+  const alertsRoute = space === 'annonceur' ? '/annonceur/alerts' : `/${space}/alerts`;
 
   return (
     <>
@@ -163,7 +166,7 @@ export const Header = ({ space }: HeaderProps) => {
             variant="ghost"
             size="icon"
             className="relative"
-            onClick={() => navigate(`/${space}/alerts`)}
+            onClick={() => navigate(alertsRoute)}
           >
             <Bell className="h-5 w-5" />
             {unreadAlertsCount > 0 && (
@@ -200,11 +203,11 @@ export const Header = ({ space }: HeaderProps) => {
                 </div>
               </DropdownMenuLabel>
               <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={() => navigate('/profile')}>
+              <DropdownMenuItem onClick={() => navigate(profileRoute)}>
                 <User className="mr-2 h-4 w-4" />
                 Profil
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => navigate('/settings')}>
+              <DropdownMenuItem onClick={() => navigate(settingsRoute)}>
                 <Settings className="mr-2 h-4 w-4" />
                 Paramètres
               </DropdownMenuItem>

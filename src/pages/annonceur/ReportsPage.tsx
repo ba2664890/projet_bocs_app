@@ -32,6 +32,26 @@ export const ReportsPage = () => {
     const [isLoading, setIsLoading] = useState(true);
     const containerRef = useRef<HTMLDivElement>(null);
 
+    const handleExport = () => {
+        const lines: string[] = [];
+        lines.push('section,date,valeur,cible');
+        performanceData.forEach((item: any) => {
+            lines.push(`performance,${item.date},${item.value},${item.target}`);
+        });
+        reports.forEach((report) => {
+            lines.push(`rapport,${report.createdAt || ''},${report.id},${report.fileUrl || ''}`);
+        });
+
+        const csv = lines.join('\n');
+        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `rapports-public-${new Date().toISOString().slice(0, 10)}.csv`;
+        link.click();
+        URL.revokeObjectURL(url);
+    };
+
     useEffect(() => {
         const fetchData = async () => {
             try {
@@ -101,13 +121,13 @@ export const ReportsPage = () => {
                         <p className="text-muted-foreground mt-1">Suivez l'évolution des indicateurs pour les prises de décision.</p>
                     </div>
                     <div className="flex gap-2">
-                        <Button variant="outline" className="gap-2 bg-white dark:bg-slate-900">
+                        <Button variant="outline" className="gap-2 bg-white dark:bg-slate-900" onClick={() => window.print()}>
                             <Printer className="h-4 w-4" />
                             Imprimer
                         </Button>
-                        <Button className="bg-indigo-600 hover:bg-indigo-700 text-white gap-2 shadow-lg shadow-indigo-200 dark:shadow-none">
+                        <Button className="bg-indigo-600 hover:bg-indigo-700 text-white gap-2 shadow-lg shadow-indigo-200 dark:shadow-none" onClick={handleExport}>
                             <Download className="h-4 w-4" />
-                            Exporter (.pdf)
+                            Exporter (.csv)
                         </Button>
                     </div>
                 </div>

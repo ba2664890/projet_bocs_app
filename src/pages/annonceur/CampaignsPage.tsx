@@ -1,10 +1,15 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback, FormEvent } from 'react';
 import { gsap } from 'gsap';
 import { MainLayout } from '@/components/layout/MainLayout';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { dataCollectionService } from '@/services/dataCollection';
 import type { DataCollection } from '@/types';
 import {
@@ -15,7 +20,8 @@ import {
     MoreVertical,
     BarChart3,
     Calendar,
-    Loader2
+    Loader2,
+    AlertCircle
 } from 'lucide-react';
 import {
     Table,
@@ -27,25 +33,40 @@ import {
 } from "@/components/ui/table";
 
 export const CampaignsPage = () => {
+    const currentYear = new Date().getFullYear();
     const [searchTerm, setSearchTerm] = useState('');
     const [campaigns, setCampaigns] = useState<DataCollection[]>([]);
     const [isLoading, setIsLoading] = useState(true);
+    const [isCreateOpen, setIsCreateOpen] = useState(false);
+    const [isCreating, setIsCreating] = useState(false);
+    const [createError, setCreateError] = useState<string | null>(null);
+    const [createForm, setCreateForm] = useState({
+        name: '',
+        description: '',
+        sector: 'health',
+        year: String(currentYear),
+        period: 'Annuel',
+        startDate: `${currentYear}-01-01`,
+        endDate: `${currentYear}-12-31`,
+        geographicScope: 'national',
+    });
     const containerRef = useRef<HTMLDivElement>(null);
 
-    useEffect(() => {
-        const fetchCampaigns = async () => {
-            try {
-                const response = await dataCollectionService.getCollections();
-                setCampaigns(response.results);
-            } catch (error) {
-                console.error('Failed to fetch campaigns:', error);
-            } finally {
-                setIsLoading(false);
-            }
-        };
-
-        fetchCampaigns();
+    const fetchCampaigns = useCallback(async () => {
+        try {
+            setIsLoading(true);
+            const response = await dataCollectionService.getCollections();
+            setCampaigns(response.results);
+        } catch (error) {
+            console.error('Failed to fetch campaigns:', error);
+        } finally {
+            setIsLoading(false);
+        }
     }, []);
+
+    useEffect(() => {
+        fetchCampaigns();
+    }, [fetchCampaigns]);
 
     useEffect(() => {
         if (!isLoading && containerRef.current) {
@@ -82,6 +103,52 @@ export const CampaignsPage = () => {
         c.name.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
+    const resetCreateForm = () => {
+        setCreateForm({
+            name: '',
+            description: '',
+            sector: 'health',
+            year: String(currentYear),
+            period: 'Annuel',
+            startDate: `${currentYear}-01-01`,
+            endDate: `${currentYear}-12-31`,
+            geographicScope: 'national',
+        });
+    };
+
+    const handleCreateCollection = async (event: FormEvent) => {
+        event.preventDefault();
+        setCreateError(null);
+        setIsCreating(true);
+
+        try {
+            const payload: any = {
+                name: createForm.name,
+                description: createForm.description,
+                sector: createForm.sector,
+                year: Number(createForm.year),
+                period: createForm.period,
+                startDate: createForm.startDate,
+                endDate: createForm.endDate,
+                geographicScope: createForm.geographicScope,
+                status: 'planned',
+            };
+
+            const created = await dataCollectionService.createCollection(payload);
+            setCampaigns((prev) => [created, ...prev]);
+            setIsCreateOpen(false);
+            resetCreateForm();
+        } catch (error: any) {
+            const apiError =
+                error?.response?.data?.detail ||
+                error?.response?.data?.name?.[0] ||
+                error?.response?.data?.error;
+            setCreateError(apiError || 'Impossible de créer la collecte.');
+        } finally {
+            setIsCreating(false);
+        }
+    };
+
     return (
         <MainLayout space="annonceur">
             <div ref={containerRef} className="max-w-[1600px] mx-auto space-y-8">
@@ -91,11 +158,143 @@ export const CampaignsPage = () => {
                         <h1 className="text-3xl font-bold tracking-tight">Gestion des Collectes</h1>
                         <p className="text-muted-foreground mt-1">Gérez vos formulaires et collectes de données territoriales.</p>
                     </div>
-                    <Button className="bg-indigo-600 hover:bg-indigo-700 text-white gap-2 shadow-lg shadow-indigo-200 dark:shadow-none">
+                    <Button
+                        className="bg-indigo-600 hover:bg-indigo-700 text-white gap-2 shadow-lg shadow-indigo-200 dark:shadow-none"
+                        onClick={() => setIsCreateOpen(true)}
+                    >
                         <Plus className="h-4 w-4" />
                         Nouvelle Collecte
                     </Button>
                 </div>
+
+                <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
+                    <DialogContent className="sm:max-w-xl">
+                        <DialogHeader>
+                            <DialogTitle>Nouvelle collecte</DialogTitle>
+                            <DialogDescription>
+                                Créez une nouvelle campagne de collecte citoyenne.
+                            </DialogDescription>
+                        </DialogHeader>
+
+                        <form onSubmit={handleCreateCollection} className="space-y-4">
+                            <div className="space-y-2">
+                                <Label htmlFor="collection-name">Nom</Label>
+                                <Input
+                                    id="collection-name"
+                                    value={createForm.name}
+                                    onChange={(event) => setCreateForm((prev) => ({ ...prev, name: event.target.value }))}
+                                    required
+                                />
+                            </div>
+
+                            <div className="space-y-2">
+                                <Label htmlFor="collection-description">Description</Label>
+                                <Textarea
+                                    id="collection-description"
+                                    value={createForm.description}
+                                    onChange={(event) => setCreateForm((prev) => ({ ...prev, description: event.target.value }))}
+                                />
+                            </div>
+
+                            <div className="grid gap-4 sm:grid-cols-2">
+                                <div className="space-y-2">
+                                    <Label>Secteur</Label>
+                                    <Select
+                                        value={createForm.sector}
+                                        onValueChange={(value) => setCreateForm((prev) => ({ ...prev, sector: value }))}
+                                    >
+                                        <SelectTrigger>
+                                            <SelectValue />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="health">Santé</SelectItem>
+                                            <SelectItem value="education">Éducation</SelectItem>
+                                            <SelectItem value="both">Santé & Éducation</SelectItem>
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+
+                                <div className="space-y-2">
+                                    <Label htmlFor="collection-year">Année</Label>
+                                    <Input
+                                        id="collection-year"
+                                        type="number"
+                                        min={2000}
+                                        max={2100}
+                                        value={createForm.year}
+                                        onChange={(event) => setCreateForm((prev) => ({ ...prev, year: event.target.value }))}
+                                        required
+                                    />
+                                </div>
+
+                                <div className="space-y-2">
+                                    <Label htmlFor="collection-start">Date de début</Label>
+                                    <Input
+                                        id="collection-start"
+                                        type="date"
+                                        value={createForm.startDate}
+                                        onChange={(event) => setCreateForm((prev) => ({ ...prev, startDate: event.target.value }))}
+                                        required
+                                    />
+                                </div>
+
+                                <div className="space-y-2">
+                                    <Label htmlFor="collection-end">Date de fin</Label>
+                                    <Input
+                                        id="collection-end"
+                                        type="date"
+                                        value={createForm.endDate}
+                                        onChange={(event) => setCreateForm((prev) => ({ ...prev, endDate: event.target.value }))}
+                                        required
+                                    />
+                                </div>
+
+                                <div className="space-y-2">
+                                    <Label htmlFor="collection-period">Période</Label>
+                                    <Input
+                                        id="collection-period"
+                                        value={createForm.period}
+                                        onChange={(event) => setCreateForm((prev) => ({ ...prev, period: event.target.value }))}
+                                    />
+                                </div>
+
+                                <div className="space-y-2">
+                                    <Label>Portée géographique</Label>
+                                    <Select
+                                        value={createForm.geographicScope}
+                                        onValueChange={(value) => setCreateForm((prev) => ({ ...prev, geographicScope: value }))}
+                                    >
+                                        <SelectTrigger>
+                                            <SelectValue />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="national">Nationale</SelectItem>
+                                            <SelectItem value="regional">Régionale</SelectItem>
+                                            <SelectItem value="department">Départementale</SelectItem>
+                                            <SelectItem value="commune">Communale</SelectItem>
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+                            </div>
+
+                            {createError && (
+                                <Alert variant="destructive">
+                                    <AlertCircle className="h-4 w-4" />
+                                    <AlertDescription>{createError}</AlertDescription>
+                                </Alert>
+                            )}
+
+                            <DialogFooter>
+                                <Button type="button" variant="outline" onClick={() => setIsCreateOpen(false)}>
+                                    Annuler
+                                </Button>
+                                <Button type="submit" disabled={isCreating}>
+                                    {isCreating ? 'Création...' : 'Créer la collecte'}
+                                </Button>
+                            </DialogFooter>
+                        </form>
+                    </DialogContent>
+                </Dialog>
 
                 {/* Filters & Search */}
                 <Card className="border-none shadow-sm bg-white/50 dark:bg-slate-900/50 backdrop-blur-sm">
