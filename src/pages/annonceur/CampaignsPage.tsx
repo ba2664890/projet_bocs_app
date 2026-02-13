@@ -1,4 +1,5 @@
-import { useState, useEffect, useRef, useCallback, FormEvent } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
+import type { FormEvent } from 'react';
 import { gsap } from 'gsap';
 import { MainLayout } from '@/components/layout/MainLayout';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
