@@ -289,12 +289,12 @@ export const Register = () => {
                                             <SelectContent className="rounded-xl border-slate-200 dark:border-slate-800">
                                                 <SelectItem value="institution">Gouvernement</SelectItem>
                                                 <SelectItem value="local_manager">Agents de Terrain</SelectItem>
-                                                <SelectItem value="viewers">Public / Consultation</SelectItem>
+                                                <SelectItem value="viewer">Public / Consultation</SelectItem>
                                             </SelectContent>
                                         </Select>
                                     </div>
 
-                                    {formData.role !== 'viewers' && (
+                                    {formData.role !== 'viewer' && (
                                         <div className="space-y-1.5 animate-in fade-in slide-in-from-top-2 duration-300">
                                             <Label htmlFor="organization" className="text-xs font-bold ml-1 text-slate-700 dark:text-slate-300">Institution / Organisation</Label>
                                             <div className="relative group">
