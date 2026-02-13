@@ -76,10 +76,8 @@ export const authService = {
 
     /**
      * Update user profile
-     * Note: Backend 'me' endpoint currently only supports GET. 
-     * Update might fail if backend 'me' doesn't handle PATCH.
      */
-    async updateProfile(data: Partial<User>): Promise<User> {
+    async updateProfile(data: Partial<User> | FormData): Promise<User> {
         const response = await apiClient.patch<User>('/auth/users/me/', data);
         return response.data;
     },

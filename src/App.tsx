@@ -17,6 +17,7 @@ import { ReportsPage as AnnonceurReportsPage } from '@/pages/annonceur/ReportsPa
 
 import { MapPage } from '@/pages/common/MapPage';
 import { IndicatorsPage } from '@/pages/common/IndicatorsPage';
+import { ProfilePage } from '@/pages/common/ProfilePage';
 
 // Institution Pages
 import { InstitutionLayout } from '@/components/layout/InstitutionLayout';
@@ -105,6 +106,7 @@ function App() {
 
         {/* Default */}
         <Route path="/" element={<DefaultRoute />} />
+        <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
 
         {/* Institution Space */}
         <Route path="/institution" element={<ProtectedRoute allowedRoles={['institution', 'viewer']}><InstitutionLayout /></ProtectedRoute>}>

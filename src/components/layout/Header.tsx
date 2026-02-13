@@ -25,6 +25,7 @@ import {
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -46,6 +47,13 @@ import { useSearch } from '@/hooks/useData';
 interface HeaderProps {
   space: 'institution' | 'sector' | 'admin' | 'annonceur';
 }
+
+const getInitials = (firstName?: string, lastName?: string): string => {
+  const first = (firstName || '').trim().charAt(0);
+  const last = (lastName || '').trim().charAt(0);
+  const initials = `${first}${last}`.toUpperCase();
+  return initials || 'U';
+};
 
 const getSpaceTitle = (space: string) => {
   switch (space) {
@@ -172,11 +180,10 @@ export const Header = ({ space }: HeaderProps) => {
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" className="gap-2 pl-2">
-                <img
-                  src={user?.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${user?.id}`}
-                  alt={user?.firstName}
-                  className="h-8 w-8 rounded-full bg-accent"
-                />
+                <Avatar className="h-8 w-8">
+                  <AvatarImage src={user?.avatar} alt={user?.firstName || 'Utilisateur'} />
+                  <AvatarFallback>{getInitials(user?.firstName, user?.lastName)}</AvatarFallback>
+                </Avatar>
                 <span className="hidden max-w-[120px] truncate text-sm font-medium sm:inline">
                   {user?.firstName}
                 </span>

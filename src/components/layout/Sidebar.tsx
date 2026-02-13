@@ -31,6 +31,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { cn } from '@/lib/utils';
 
 interface SidebarProps {
@@ -47,6 +48,13 @@ interface NavItem {
   children?: NavItem[];
   roles?: string[];
 }
+
+const getInitials = (firstName?: string, lastName?: string): string => {
+  const first = (firstName || '').trim().charAt(0);
+  const last = (lastName || '').trim().charAt(0);
+  const initials = `${first}${last}`.toUpperCase();
+  return initials || 'U';
+};
 
 const getNavigation = (space: string, locationPath: string, userRole: string): NavItem[] => {
   const isSector = space === 'sector';
@@ -309,11 +317,10 @@ export const Sidebar = ({ space, collapsed, isMobile }: SidebarProps) => {
       <div className="border-t border-border p-4">
         {(!collapsed || isMobile) && user && (
           <div className="mb-4 flex items-center gap-3 rounded-lg bg-accent/50 p-3">
-            <img
-              src={user.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${user.id}`}
-              alt={user.firstName}
-              className="h-10 w-10 rounded-full bg-background"
-            />
+            <Avatar className="h-10 w-10">
+              <AvatarImage src={user.avatar} alt={user.firstName || 'Utilisateur'} />
+              <AvatarFallback>{getInitials(user.firstName, user.lastName)}</AvatarFallback>
+            </Avatar>
             <div className="flex-1 min-w-0">
               <p className="truncate text-sm font-medium">
                 {user.firstName} {user.lastName}
