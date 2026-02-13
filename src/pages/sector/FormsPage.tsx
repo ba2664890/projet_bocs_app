@@ -4,7 +4,7 @@
 // ============================================
 
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { MainLayout } from '@/components/layout/MainLayout';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -32,17 +32,22 @@ export const FormsPage = () => {
     const [submissions, setSubmissions] = useState<any[]>([]);
     const [activeTab, setActiveTab] = useState('available');
     const navigate = useNavigate();
+    const location = useLocation();
     const user = useAuthStore((state) => state.user);
+    const isEducationSpace = location.pathname.includes('/sector/education');
+    const currentSector = isEducationSpace ? 'education' : 'health';
+    const currentSectorLabel = isEducationSpace ? 'éducation' : 'santé';
 
     useEffect(() => {
         const fetchData = async () => {
             try {
                 setIsLoading(true);
                 const [formsRes, submissionsRes] = await Promise.all([
-                    dataCollectionService.getForms(),
+                    dataCollectionService.getForms({ sector: currentSector }),
                     dataCollectionService.getSubmissions()
                 ]);
-                setForms(formsRes.results || formsRes || []);
+                const loadedForms = formsRes.results || formsRes || [];
+                setForms(loadedForms.filter((form: any) => form.sector === currentSector));
                 setSubmissions(submissionsRes.results || submissionsRes || []);
             } catch (err) {
                 console.error('Failed to load forms', err);
@@ -51,7 +56,7 @@ export const FormsPage = () => {
             }
         };
         fetchData();
-    }, []);
+    }, [currentSector]);
 
     const filteredForms = forms.filter(f =>
         f.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -82,7 +87,7 @@ export const FormsPage = () => {
     };
 
     const handleFormClick = (formId: string) => {
-        navigate(`/sector/forms/${formId}`);
+        navigate(`/sector/${currentSector}/forms/${formId}`);
     };
 
     // Stats pour le tableau de bord
@@ -101,9 +106,9 @@ export const FormsPage = () => {
                                 <FileText className="h-8 w-8" />
                             </div>
                             <div>
-                                <h1 className="text-3xl font-bold tracking-tight text-foreground">Collecte de Données</h1>
+                                <h1 className="text-3xl font-bold tracking-tight text-foreground">Formulaires {isEducationSpace ? 'Éducation' : 'Santé'}</h1>
                                 <p className="text-muted-foreground mt-1">
-                                    Participez à la collecte de données pour améliorer les services {user?.role?.includes('health') ? 'de santé' : 'd\'éducation'}
+                                    Remplissez les formulaires {currentSectorLabel} affectés à votre structure.
                                 </p>
                             </div>
                         </div>
@@ -230,14 +235,14 @@ export const FormsPage = () => {
                                             </div>
                                         </div>
                                         <CardDescription className="line-clamp-2">
-                                            {form.description || 'Formulaire de collecte de données'}
+                                            {form.description || 'Formulaire sectoriel à remplir'}
                                         </CardDescription>
                                     </CardHeader>
 
                                     <CardContent className="flex-1 py-4 space-y-4">
                                         <div className="flex flex-wrap gap-2">
                                             <Badge className={getSectorColor(form.sector)}>
-                                                {form.sector || 'Général'}
+                                                {form.sector === 'health' ? 'Santé' : form.sector === 'education' ? 'Éducation' : 'Général'}
                                             </Badge>
                                         </div>
 

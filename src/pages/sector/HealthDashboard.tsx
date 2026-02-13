@@ -157,24 +157,24 @@ export const HealthDashboard = () => {
               <Download className="h-4 w-4" />
               Rapport
             </Button>
-            <Button className="gap-3 bg-blue-600 hover:bg-blue-700 h-11 px-8 text-lg font-bold shadow-lg shadow-blue-200 dark:shadow-none animate-pulse-subtle" onClick={() => navigate('/sector/health/collections')}>
+            <Button className="gap-3 bg-blue-600 hover:bg-blue-700 h-11 px-8 text-lg font-bold shadow-lg shadow-blue-200 dark:shadow-none animate-pulse-subtle" onClick={() => navigate('/sector/health/forms')}>
               <Plus className="h-5 w-5" />
-              Collecte de données
+              Formulaires santé
             </Button>
           </div>
         </div>
 
         {/* Navigation secondaire */}
         <div className="flex flex-wrap gap-2">
-          <Button variant="secondary" className="gap-2 shadow-sm rounded-full px-4 bg-blue-50 hover:bg-blue-100 text-blue-700 dark:bg-blue-950/30 dark:text-blue-400 dark:hover:bg-blue-950/50 border border-blue-200 dark:border-blue-800" onClick={() => navigate('/sector/health/collections')}>
+          <Button variant="secondary" className="gap-2 shadow-sm rounded-full px-4 bg-blue-50 hover:bg-blue-100 text-blue-700 dark:bg-blue-950/30 dark:text-blue-400 dark:hover:bg-blue-950/50 border border-blue-200 dark:border-blue-800" onClick={() => navigate('/sector/health/forms')}>
             <FileText className="h-4 w-4" />
-            Collecte de données
+            Formulaires
           </Button>
-          <Button variant="secondary" className="gap-2 shadow-sm rounded-full px-4" onClick={() => navigate('/sector/facilities')}>
+          <Button variant="secondary" className="gap-2 shadow-sm rounded-full px-4" onClick={() => navigate('/sector/health/facilities')}>
             <Building2 className="h-4 w-4" />
             Structures
           </Button>
-          <Button variant="secondary" className="gap-2 shadow-sm rounded-full px-4" onClick={() => navigate('/sector/analytics')}>
+          <Button variant="secondary" className="gap-2 shadow-sm rounded-full px-4" onClick={() => navigate('/sector/health/analytics')}>
             <Activity className="h-4 w-4" />
             Analyses détaillées
           </Button>
@@ -239,7 +239,7 @@ export const HealthDashboard = () => {
                   </CardTitle>
                   <CardDescription>Répartition géographique des structures</CardDescription>
                 </div>
-                <Button variant="ghost" size="sm" className="gap-2 text-indigo-600 hover:text-indigo-700 hover:bg-indigo-50" onClick={() => navigate('/sector/facilities')}>
+                <Button variant="ghost" size="sm" className="gap-2 text-indigo-600 hover:text-indigo-700 hover:bg-indigo-50" onClick={() => navigate('/sector/health/facilities')}>
                   Voir tout <ArrowRight className="h-4 w-4" />
                 </Button>
               </CardHeader>

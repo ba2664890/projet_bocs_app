@@ -99,7 +99,7 @@ const getNavigation = (space: string, locationPath: string, userRole: string): N
       return [
         ...baseNav,
         { label: structuresLabel, path: `${basePath}/facilities`, icon: Building2 },
-        { label: 'Collectes', path: `${basePath}/collections`, icon: ClipboardList },
+        { label: 'Formulaires', path: `${basePath}/forms`, icon: ClipboardList },
         { label: 'Analyses', path: `${basePath}/analytics`, icon: BarChart3 },
         { label: 'Exports', path: `${basePath}/exports`, icon: FileText },
       ];

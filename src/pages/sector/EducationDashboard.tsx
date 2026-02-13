@@ -161,24 +161,24 @@ export const EducationDashboard = () => {
               <Download className="h-4 w-4" />
               Rapport
             </Button>
-            <Button className="gap-3 bg-teal-600 hover:bg-teal-700 h-11 px-8 text-lg font-bold shadow-lg shadow-teal-200 dark:shadow-none animate-pulse-subtle" onClick={() => navigate('/sector/education/collections')}>
+            <Button className="gap-3 bg-teal-600 hover:bg-teal-700 h-11 px-8 text-lg font-bold shadow-lg shadow-teal-200 dark:shadow-none animate-pulse-subtle" onClick={() => navigate('/sector/education/forms')}>
               <Plus className="h-5 w-5" />
-              Collecte de données
+              Formulaires éducation
             </Button>
           </div>
         </div>
 
         {/* Navigation secondaire */}
         <div className="flex flex-wrap gap-2">
-          <Button variant="secondary" className="gap-2 shadow-sm rounded-full px-4 bg-teal-50 hover:bg-teal-100 text-teal-700 dark:bg-teal-950/30 dark:text-teal-400 dark:hover:bg-teal-950/50 border border-teal-200 dark:border-teal-800" onClick={() => navigate('/sector/education/collections')}>
+          <Button variant="secondary" className="gap-2 shadow-sm rounded-full px-4 bg-teal-50 hover:bg-teal-100 text-teal-700 dark:bg-teal-950/30 dark:text-teal-400 dark:hover:bg-teal-950/50 border border-teal-200 dark:border-teal-800" onClick={() => navigate('/sector/education/forms')}>
             <FileText className="h-4 w-4" />
-            Collecte de données
+            Formulaires
           </Button>
-          <Button variant="secondary" className="gap-2 shadow-sm rounded-full px-4" onClick={() => navigate('/sector/facilities')}>
+          <Button variant="secondary" className="gap-2 shadow-sm rounded-full px-4" onClick={() => navigate('/sector/education/facilities')}>
             <Building2 className="h-4 w-4" />
             Établissements
           </Button>
-          <Button variant="secondary" className="gap-2 shadow-sm rounded-full px-4" onClick={() => navigate('/sector/analytics')}>
+          <Button variant="secondary" className="gap-2 shadow-sm rounded-full px-4" onClick={() => navigate('/sector/education/analytics')}>
             <Activity className="h-4 w-4" />
             Analyses détaillées
           </Button>
@@ -243,7 +243,7 @@ export const EducationDashboard = () => {
                   </CardTitle>
                   <CardDescription>Répartition géographique des établissements</CardDescription>
                 </div>
-                <Button variant="ghost" size="sm" className="gap-2 text-indigo-600 hover:text-indigo-700 hover:bg-indigo-50" onClick={() => navigate('/sector/facilities')}>
+                <Button variant="ghost" size="sm" className="gap-2 text-indigo-600 hover:text-indigo-700 hover:bg-indigo-50" onClick={() => navigate('/sector/education/facilities')}>
                   Voir tout <ArrowRight className="h-4 w-4" />
                 </Button>
               </CardHeader>

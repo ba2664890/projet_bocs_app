@@ -30,7 +30,6 @@ import { AlertsPage } from '@/pages/institution/AlertsPage';
 
 // Sector Pages
 import { FacilitiesPage } from '@/pages/sector/FacilitiesPage';
-import { CollectionsPage } from '@/pages/sector/CollectionsPage';
 import { FormsPage } from '@/pages/sector/FormsPage';
 import { FormSubmissionPage } from '@/pages/sector/FormSubmissionPage';
 import { AnalyticsPage } from '@/pages/sector/AnalyticsPage';
@@ -127,7 +126,7 @@ function App() {
         <Route path="/sector/health/map" element={<ProtectedRoute allowedRoles={['sector_health', 'local_manager']}><MapPage /></ProtectedRoute>} />
         <Route path="/sector/health/indicators" element={<ProtectedRoute allowedRoles={['sector_health', 'local_manager']}><IndicatorsPage /></ProtectedRoute>} />
         <Route path="/sector/health/facilities" element={<ProtectedRoute allowedRoles={['sector_health', 'local_manager']}><FacilitiesPage /></ProtectedRoute>} />
-        <Route path="/sector/health/collections" element={<ProtectedRoute allowedRoles={['sector_health', 'local_manager']}><CollectionsPage /></ProtectedRoute>} />
+        <Route path="/sector/health/collections" element={<ProtectedRoute allowedRoles={['sector_health', 'local_manager']}><Navigate to="/sector/health/forms" replace /></ProtectedRoute>} />
         <Route path="/sector/health/forms" element={<ProtectedRoute allowedRoles={['sector_health', 'local_manager']}><FormsPage /></ProtectedRoute>} />
         <Route path="/sector/health/forms/:formId" element={<ProtectedRoute allowedRoles={['sector_health', 'local_manager']}><FormSubmissionPage /></ProtectedRoute>} />
         <Route path="/sector/health/analytics" element={<ProtectedRoute allowedRoles={['sector_health', 'local_manager']}><AnalyticsPage /></ProtectedRoute>} />
@@ -138,7 +137,7 @@ function App() {
         <Route path="/sector/education/map" element={<ProtectedRoute allowedRoles={['sector_education', 'local_manager']}><MapPage /></ProtectedRoute>} />
         <Route path="/sector/education/indicators" element={<ProtectedRoute allowedRoles={['sector_education', 'local_manager']}><IndicatorsPage /></ProtectedRoute>} />
         <Route path="/sector/education/facilities" element={<ProtectedRoute allowedRoles={['sector_education', 'local_manager']}><FacilitiesPage /></ProtectedRoute>} />
-        <Route path="/sector/education/collections" element={<ProtectedRoute allowedRoles={['sector_education', 'local_manager']}><CollectionsPage /></ProtectedRoute>} />
+        <Route path="/sector/education/collections" element={<ProtectedRoute allowedRoles={['sector_education', 'local_manager']}><Navigate to="/sector/education/forms" replace /></ProtectedRoute>} />
         <Route path="/sector/education/forms" element={<ProtectedRoute allowedRoles={['sector_education', 'local_manager']}><FormsPage /></ProtectedRoute>} />
         <Route path="/sector/education/forms/:formId" element={<ProtectedRoute allowedRoles={['sector_education', 'local_manager']}><FormSubmissionPage /></ProtectedRoute>} />
         <Route path="/sector/education/analytics" element={<ProtectedRoute allowedRoles={['sector_education', 'local_manager']}><AnalyticsPage /></ProtectedRoute>} />

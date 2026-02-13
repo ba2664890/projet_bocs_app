@@ -30,12 +30,11 @@ import {
 import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
 import { dataCollectionService } from '@/services/dataCollection';
-import { useNavigate } from 'react-router-dom';
-import { useAuthStore } from '@/store';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { useGeolocation } from '@/hooks/useGeolocation';
 
 // ===== FORMULAIRE SANTÉ =====
-const HealthForm = () => {
+const HealthForm = ({ formsPath }: { formsPath: string }) => {
     const [formData, setFormData] = useState({
         // Informations de base
         facilityName: '',
@@ -140,7 +139,7 @@ const HealthForm = () => {
             };
             await dataCollectionService.createSubmission({ data: payload, status: 'draft' } as any);
             alert('Formulaire sauvegardé avec succès!');
-            navigate('/sector/forms');
+            navigate(formsPath);
         } catch (err) {
             console.error('Erreur:', err);
             alert('Erreur lors de la sauvegarde');
@@ -511,7 +510,7 @@ const HealthForm = () => {
 };
 
 // ===== FORMULAIRE ÉDUCATION =====
-const EducationForm = () => {
+const EducationForm = ({ formsPath }: { formsPath: string }) => {
     const [formData, setFormData] = useState({
         // Informations de base
         schoolName: '',
@@ -606,7 +605,7 @@ const EducationForm = () => {
             };
             await dataCollectionService.createSubmission({ data: payload, status: 'draft' } as any);
             alert('Formulaire sauvegardé avec succès!');
-            navigate('/sector/forms');
+            navigate(formsPath);
         } catch (err) {
             console.error('Erreur:', err);
             alert('Erreur lors de la sauvegarde');
@@ -955,17 +954,10 @@ const EducationForm = () => {
 // ===== PAGE PRINCIPALE =====
 export const FormSubmissionPage = () => {
     const navigate = useNavigate();
-    const user = useAuthStore((state) => state.user);
-    const [formType, setFormType] = useState<'health' | 'education' | null>(null);
-
-    // Déterminer le type de formulaire basé sur l'utilisateur
-    useEffect(() => {
-        if (user?.role?.includes('education')) {
-            setFormType('education');
-        } else if (user?.role?.includes('health')) {
-            setFormType('health');
-        }
-    }, [user]);
+    const location = useLocation();
+    const isEducationSpace = location.pathname.includes('/sector/education');
+    const formType: 'health' | 'education' = isEducationSpace ? 'education' : 'health';
+    const formsPath = isEducationSpace ? '/sector/education/forms' : '/sector/health/forms';
 
     return (
         <MainLayout space="sector">
@@ -975,7 +967,7 @@ export const FormSubmissionPage = () => {
                     <Button
                         variant="ghost"
                         size="icon"
-                        onClick={() => navigate('/sector/forms')}
+                        onClick={() => navigate(formsPath)}
                     >
                         <ArrowLeft className="h-5 w-5" />
                     </Button>
@@ -988,7 +980,9 @@ export const FormSubmissionPage = () => {
                 </div>
 
                 {/* Formulaires */}
-                {formType === 'health' ? <HealthForm /> : <EducationForm />}
+                {formType === 'health'
+                    ? <HealthForm formsPath={formsPath} />
+                    : <EducationForm formsPath={formsPath} />}
             </div>
         </MainLayout>
     );
