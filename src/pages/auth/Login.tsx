@@ -182,7 +182,7 @@ export const Login = () => {
             isAuthorized = role === 'admin' || role === 'local_manager';
             break;
           case 'annonceur':
-            isAuthorized = role === 'admin' || role === 'annonceur';
+            isAuthorized = role === 'admin' || role === 'annonceur' || role === 'viewer';
             break;
         }
 
@@ -195,14 +195,11 @@ export const Login = () => {
 
         // Redirection selon l'espace sélectionné
         switch (selectedSpace) {
-          case 'institution':
+          case 'government':
             navigate('/institution');
             break;
-          case 'health':
+          case 'representatives':
             navigate('/sector/health');
-            break;
-          case 'education':
-            navigate('/sector/education');
             break;
           case 'annonceur':
             navigate('/annonceur');

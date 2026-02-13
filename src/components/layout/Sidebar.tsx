@@ -109,7 +109,7 @@ const getNavigation = (space: string, locationPath: string, userRole: string): N
 
 
     case 'annonceur':
-      if (!hasRole(['annonceur'])) return [];
+      if (!hasRole(['annonceur', 'viewer'])) return [];
       return [
         { label: 'Tableau de bord', path: `${basePath}`, icon: LayoutDashboard },
         { label: 'Collectes', path: `${basePath}/campaigns`, icon: Megaphone },

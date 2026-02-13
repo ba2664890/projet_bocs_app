@@ -79,16 +79,16 @@ const DefaultRoute = () => {
     case 'admin':
       return <Navigate to="/admin" replace />;
     case 'institution':
-    case 'viewer':
       return <Navigate to="/institution" replace />;
+    case 'viewer':
+    case 'annonceur':
+      return <Navigate to="/annonceur" replace />;
     case 'sector_health':
       return <Navigate to="/sector/health" replace />;
     case 'sector_education':
       return <Navigate to="/sector/education" replace />;
     case 'local_manager':
       return <Navigate to="/sector/health" replace />;
-    case 'annonceur':
-      return <Navigate to="/annonceur" replace />;
     default:
       // Fallback safe for any other unexpected role
       return <Navigate to="/institution" replace />;
@@ -151,10 +151,10 @@ function App() {
 
 
         {/* Annonceur Space */}
-        <Route path="/annonceur" element={<ProtectedRoute allowedRoles={['annonceur']}><AnnonceurDashboard /></ProtectedRoute>} />
-        <Route path="/annonceur/campaigns" element={<ProtectedRoute allowedRoles={['annonceur']}><CampaignsPage /></ProtectedRoute>} />
-        <Route path="/annonceur/audiences" element={<ProtectedRoute allowedRoles={['annonceur']}><AudiencesPage /></ProtectedRoute>} />
-        <Route path="/annonceur/reports" element={<ProtectedRoute allowedRoles={['annonceur']}><AnnonceurReportsPage /></ProtectedRoute>} />
+        <Route path="/annonceur" element={<ProtectedRoute allowedRoles={['annonceur', 'viewer']}><AnnonceurDashboard /></ProtectedRoute>} />
+        <Route path="/annonceur/campaigns" element={<ProtectedRoute allowedRoles={['annonceur', 'viewer']}><CampaignsPage /></ProtectedRoute>} />
+        <Route path="/annonceur/audiences" element={<ProtectedRoute allowedRoles={['annonceur', 'viewer']}><AudiencesPage /></ProtectedRoute>} />
+        <Route path="/annonceur/reports" element={<ProtectedRoute allowedRoles={['annonceur', 'viewer']}><AnnonceurReportsPage /></ProtectedRoute>} />
 
         {/* Fallback */}
         <Route path="*" element={<Navigate to="/" replace />} />
