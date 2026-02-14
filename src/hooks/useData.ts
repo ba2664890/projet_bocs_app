@@ -45,6 +45,23 @@ export const useGeographicData = () => {
     setLoading,
   } = useDataStore();
 
+  const isRequestAborted = useCallback((error: unknown): boolean => {
+    if (axios.isCancel(error)) {
+      return true;
+    }
+
+    const axiosError = error as { code?: string; name?: string; message?: string } | null;
+    const message = axiosError?.message?.toLowerCase() || '';
+
+    return (
+      axiosError?.code === 'ERR_CANCELED' ||
+      axiosError?.name === 'CanceledError' ||
+      message.includes('aborted') ||
+      message.includes('canceled') ||
+      message.includes('cancelled')
+    );
+  }, []);
+
   const fetchAllPages = useCallback(
     async (
       fetchPage: (params?: Record<string, unknown>, signal?: AbortSignal) => Promise<any>,
@@ -56,6 +73,10 @@ export const useGeographicData = () => {
       const maxPages = 500;
 
       while (page <= maxPages) {
+        if (signal?.aborted) {
+          throw new axios.CanceledError('Request aborted');
+        }
+
         const response = await fetchPage({ ...initialParams, page }, signal);
         const results = Array.isArray(response) ? response : (response?.results || []);
         allResults.push(...results);
@@ -80,30 +101,52 @@ export const useGeographicData = () => {
   const loadData = useCallback(async (signal?: AbortSignal) => {
     try {
       setLoading('isLoadingRegions', true);
-      const [allRegions, allDepartments, allCommunes] = await Promise.all([
-        fetchAllPages((params, s) => geographyService.getRegions(params, s), {}, signal),
-        fetchAllPages((params, s) => geographyService.getDepartments(params, s), {}, signal),
-        fetchAllPages((params, s) => geographyService.getCommunes(params, s), {}, signal),
+      const queryParams = { page_size: 1000 };
+      const [regionsResult, departmentsResult, communesResult] = await Promise.allSettled([
+        fetchAllPages((params, s) => geographyService.getRegions(params, s), queryParams, signal),
+        fetchAllPages((params, s) => geographyService.getDepartments(params, s), queryParams, signal),
+        fetchAllPages((params, s) => geographyService.getCommunes(params, s), queryParams, signal),
       ]);
 
-      setRegions(allRegions.map((r: any) => ({ ...r, id: String(r.id) })));
-      setDepartments(allDepartments.map((d: any) => ({
-        ...d,
-        id: String(d.id),
-        parentId: d.region ? String(d.region) : undefined
-      })));
-      setCommunes(allCommunes.map((c: any) => ({
-        ...c,
-        id: String(c.id),
-        parentId: c.department ? String(c.department) : undefined
-      })));
+      const rejectedResults = [regionsResult, departmentsResult, communesResult]
+        .filter((result): result is PromiseRejectedResult => result.status === 'rejected');
+
+      if (signal?.aborted) {
+        return;
+      }
+
+      if (regionsResult.status === 'fulfilled') {
+        setRegions(regionsResult.value.map((r: any) => ({ ...r, id: String(r.id) })));
+      }
+
+      if (departmentsResult.status === 'fulfilled') {
+        setDepartments(departmentsResult.value.map((d: any) => ({
+          ...d,
+          id: String(d.id),
+          parentId: d.region ? String(d.region) : undefined
+        })));
+      }
+
+      if (communesResult.status === 'fulfilled') {
+        setCommunes(communesResult.value.map((c: any) => ({
+          ...c,
+          id: String(c.id),
+          parentId: c.department ? String(c.department) : undefined
+        })));
+      }
+
+      rejectedResults
+        .filter((result) => !isRequestAborted(result.reason))
+        .forEach((result) => {
+          console.error('Failed to load a geographic dataset:', result.reason);
+        });
     } catch (error) {
-      if (axios.isCancel(error)) return;
+      if (signal?.aborted && isRequestAborted(error)) return;
       console.error('Failed to load geographic data:', error);
     } finally {
       setLoading('isLoadingRegions', false);
     }
-  }, [fetchAllPages, setRegions, setDepartments, setCommunes, setLoading]);
+  }, [fetchAllPages, isRequestAborted, setRegions, setDepartments, setCommunes, setLoading]);
 
   useEffect(() => {
     if (regions.length === 0) {
