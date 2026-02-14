@@ -169,112 +169,122 @@ export const CampaignsPage = () => {
                 </div>
 
                 <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
-                    <DialogContent className="sm:max-w-xl">
+                    <DialogContent className="sm:max-w-2xl">
                         <DialogHeader>
                             <DialogTitle>Nouvelle collecte</DialogTitle>
                             <DialogDescription>
-                                Créez une nouvelle campagne de collecte citoyenne.
+                                Remplissez les champs ci-dessous pour créer une collecte lisible et bien structurée.
                             </DialogDescription>
                         </DialogHeader>
 
-                        <form onSubmit={handleCreateCollection} className="space-y-4">
-                            <div className="space-y-2">
-                                <Label htmlFor="collection-name">Nom</Label>
-                                <Input
-                                    id="collection-name"
-                                    value={createForm.name}
-                                    onChange={(event) => setCreateForm((prev) => ({ ...prev, name: event.target.value }))}
-                                    required
-                                />
+                        <form onSubmit={handleCreateCollection} className="space-y-6">
+                            <div className="rounded-lg border bg-slate-50/60 dark:bg-slate-900/40 p-4 space-y-4">
+                                <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Informations principales</p>
+                                <div className="space-y-2">
+                                    <Label htmlFor="collection-name">Nom de la collecte</Label>
+                                    <Input
+                                        id="collection-name"
+                                        placeholder="Ex: Formulaire trimestriel santé communautaire"
+                                        value={createForm.name}
+                                        onChange={(event) => setCreateForm((prev) => ({ ...prev, name: event.target.value }))}
+                                        required
+                                    />
+                                </div>
+
+                                <div className="space-y-2">
+                                    <Label htmlFor="collection-description">Description</Label>
+                                    <Textarea
+                                        id="collection-description"
+                                        placeholder="Décrivez l'objectif du formulaire et les données attendues..."
+                                        className="min-h-[110px]"
+                                        value={createForm.description}
+                                        onChange={(event) => setCreateForm((prev) => ({ ...prev, description: event.target.value }))}
+                                    />
+                                </div>
                             </div>
 
-                            <div className="space-y-2">
-                                <Label htmlFor="collection-description">Description</Label>
-                                <Textarea
-                                    id="collection-description"
-                                    value={createForm.description}
-                                    onChange={(event) => setCreateForm((prev) => ({ ...prev, description: event.target.value }))}
-                                />
-                            </div>
+                            <div className="rounded-lg border bg-slate-50/60 dark:bg-slate-900/40 p-4 space-y-4">
+                                <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Paramètres de collecte</p>
+                                <div className="grid gap-4 sm:grid-cols-2">
+                                    <div className="space-y-2">
+                                        <Label>Secteur</Label>
+                                        <Select
+                                            value={createForm.sector}
+                                            onValueChange={(value) => setCreateForm((prev) => ({ ...prev, sector: value }))}
+                                        >
+                                            <SelectTrigger>
+                                                <SelectValue />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                <SelectItem value="health">Santé</SelectItem>
+                                                <SelectItem value="education">Éducation</SelectItem>
+                                                <SelectItem value="both">Santé & Éducation</SelectItem>
+                                            </SelectContent>
+                                        </Select>
+                                    </div>
 
-                            <div className="grid gap-4 sm:grid-cols-2">
-                                <div className="space-y-2">
-                                    <Label>Secteur</Label>
-                                    <Select
-                                        value={createForm.sector}
-                                        onValueChange={(value) => setCreateForm((prev) => ({ ...prev, sector: value }))}
-                                    >
-                                        <SelectTrigger>
-                                            <SelectValue />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            <SelectItem value="health">Santé</SelectItem>
-                                            <SelectItem value="education">Éducation</SelectItem>
-                                            <SelectItem value="both">Santé & Éducation</SelectItem>
-                                        </SelectContent>
-                                    </Select>
-                                </div>
+                                    <div className="space-y-2">
+                                        <Label htmlFor="collection-year">Année</Label>
+                                        <Input
+                                            id="collection-year"
+                                            type="number"
+                                            min={2000}
+                                            max={2100}
+                                            value={createForm.year}
+                                            onChange={(event) => setCreateForm((prev) => ({ ...prev, year: event.target.value }))}
+                                            required
+                                        />
+                                    </div>
 
-                                <div className="space-y-2">
-                                    <Label htmlFor="collection-year">Année</Label>
-                                    <Input
-                                        id="collection-year"
-                                        type="number"
-                                        min={2000}
-                                        max={2100}
-                                        value={createForm.year}
-                                        onChange={(event) => setCreateForm((prev) => ({ ...prev, year: event.target.value }))}
-                                        required
-                                    />
-                                </div>
+                                    <div className="space-y-2">
+                                        <Label htmlFor="collection-start">Date de début</Label>
+                                        <Input
+                                            id="collection-start"
+                                            type="date"
+                                            value={createForm.startDate}
+                                            onChange={(event) => setCreateForm((prev) => ({ ...prev, startDate: event.target.value }))}
+                                            required
+                                        />
+                                    </div>
 
-                                <div className="space-y-2">
-                                    <Label htmlFor="collection-start">Date de début</Label>
-                                    <Input
-                                        id="collection-start"
-                                        type="date"
-                                        value={createForm.startDate}
-                                        onChange={(event) => setCreateForm((prev) => ({ ...prev, startDate: event.target.value }))}
-                                        required
-                                    />
-                                </div>
+                                    <div className="space-y-2">
+                                        <Label htmlFor="collection-end">Date de fin</Label>
+                                        <Input
+                                            id="collection-end"
+                                            type="date"
+                                            value={createForm.endDate}
+                                            onChange={(event) => setCreateForm((prev) => ({ ...prev, endDate: event.target.value }))}
+                                            required
+                                        />
+                                    </div>
 
-                                <div className="space-y-2">
-                                    <Label htmlFor="collection-end">Date de fin</Label>
-                                    <Input
-                                        id="collection-end"
-                                        type="date"
-                                        value={createForm.endDate}
-                                        onChange={(event) => setCreateForm((prev) => ({ ...prev, endDate: event.target.value }))}
-                                        required
-                                    />
-                                </div>
+                                    <div className="space-y-2">
+                                        <Label htmlFor="collection-period">Périodicité</Label>
+                                        <Input
+                                            id="collection-period"
+                                            placeholder="Mensuel, Trimestriel, Annuel..."
+                                            value={createForm.period}
+                                            onChange={(event) => setCreateForm((prev) => ({ ...prev, period: event.target.value }))}
+                                        />
+                                    </div>
 
-                                <div className="space-y-2">
-                                    <Label htmlFor="collection-period">Période</Label>
-                                    <Input
-                                        id="collection-period"
-                                        value={createForm.period}
-                                        onChange={(event) => setCreateForm((prev) => ({ ...prev, period: event.target.value }))}
-                                    />
-                                </div>
-
-                                <div className="space-y-2">
-                                    <Label>Portée géographique</Label>
-                                    <Select
-                                        value={createForm.geographicScope}
-                                        onValueChange={(value) => setCreateForm((prev) => ({ ...prev, geographicScope: value }))}
-                                    >
-                                        <SelectTrigger>
-                                            <SelectValue />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            <SelectItem value="national">Nationale</SelectItem>
-                                            <SelectItem value="regional">Régionale</SelectItem>
-                                            <SelectItem value="department">Départementale</SelectItem>
-                                            <SelectItem value="commune">Communale</SelectItem>
-                                        </SelectContent>
-                                    </Select>
+                                    <div className="space-y-2">
+                                        <Label>Portée géographique</Label>
+                                        <Select
+                                            value={createForm.geographicScope}
+                                            onValueChange={(value) => setCreateForm((prev) => ({ ...prev, geographicScope: value }))}
+                                        >
+                                            <SelectTrigger>
+                                                <SelectValue />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                <SelectItem value="national">Nationale</SelectItem>
+                                                <SelectItem value="regional">Régionale</SelectItem>
+                                                <SelectItem value="department">Départementale</SelectItem>
+                                                <SelectItem value="commune">Communale</SelectItem>
+                                            </SelectContent>
+                                        </Select>
+                                    </div>
                                 </div>
                             </div>
 

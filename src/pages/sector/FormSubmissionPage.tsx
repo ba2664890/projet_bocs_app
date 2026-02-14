@@ -115,6 +115,7 @@ const HealthForm = ({ formsPath }: { formsPath: string }) => {
         { id: 4, label: 'Services', icon: FileText },
         { id: 5, label: 'Performance', icon: CheckCircle2 },
     ];
+    const sectionCardClass = 'rounded-2xl border border-slate-200/70 bg-white/95 backdrop-blur-sm shadow-xl shadow-indigo-100/40 dark:border-slate-800 dark:bg-slate-900/80 dark:shadow-none';
 
     const progress = Math.round(((activeSection + 1) / sections.length) * 100);
 
@@ -149,17 +150,20 @@ const HealthForm = ({ formsPath }: { formsPath: string }) => {
     };
 
     return (
-        <div className="space-y-6">
+        <div className="space-y-6 rounded-[28px] border border-slate-200/70 bg-gradient-to-br from-white via-slate-50/80 to-indigo-50/40 p-4 shadow-[0_30px_70px_-40px_rgba(99,102,241,0.45)] sm:p-6 lg:p-8 dark:border-slate-800 dark:from-slate-950 dark:via-slate-900 dark:to-slate-900 [&_label]:mb-1.5 [&_label]:block [&_label]:text-xs [&_label]:font-semibold [&_label]:tracking-wide [&_label]:text-slate-600 dark:[&_label]:text-slate-300 [&_input]:h-11 [&_input]:rounded-xl [&_input]:border-slate-200 dark:[&_input]:border-slate-700 [&_textarea]:rounded-xl [&_textarea]:border-slate-200 dark:[&_textarea]:border-slate-700">
             {/* Header avec progress */}
-            <div className="flex items-center justify-between">
-                <div className="flex-1">
-                    <div className="flex items-center justify-between mb-2">
-                        <h2 className="text-sm font-medium">Progression du formulaire</h2>
-                        <span className="text-sm font-bold text-indigo-600">{progress}%</span>
+            <div className="flex flex-col gap-4 rounded-2xl border border-indigo-100 bg-white/80 p-4 shadow-sm sm:p-5 lg:flex-row lg:items-center dark:border-indigo-900/40 dark:bg-slate-900/60">
+                <div className="flex-1 space-y-2">
+                    <div className="flex items-center justify-between">
+                        <h2 className="text-sm font-semibold tracking-wide text-slate-700 dark:text-slate-200">Progression du formulaire</h2>
+                        <span className="text-sm font-black text-indigo-600 dark:text-indigo-400">{progress}%</span>
                     </div>
-                    <Progress value={progress} className="h-2" />
+                    <Progress value={progress} className="h-2.5 rounded-full" />
+                    <p className="text-xs text-muted-foreground">
+                        Étape {activeSection + 1} sur {sections.length}
+                    </p>
                 </div>
-                <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-100 dark:bg-slate-800 border">
+                <div className="flex items-center justify-center gap-2 rounded-xl border bg-slate-50 px-3 py-2 dark:bg-slate-800">
                     {geoLoading ? (
                         <Loader2 className="h-3 w-3 animate-spin text-indigo-600" />
                     ) : coords ? (
@@ -174,25 +178,27 @@ const HealthForm = ({ formsPath }: { formsPath: string }) => {
             </div>
 
             {/* Sections et contenu */}
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
                 {/* Navigation */}
                 <div className="md:col-span-1">
-                    <div className="space-y-2 sticky top-4">
+                    <div className="md:sticky md:top-4">
+                        <div className="flex gap-2 overflow-x-auto rounded-2xl border border-slate-200/80 bg-white/80 p-2 shadow-sm md:flex-col dark:border-slate-800 dark:bg-slate-900/60">
                         {sections.map(section => (
                             <button
                                 key={section.id}
                                 onClick={() => setActiveSection(section.id)}
-                                className={`w-full text-left px-4 py-3 rounded-lg transition-all ${activeSection === section.id
-                                    ? 'bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 border-l-4 border-indigo-600'
-                                    : 'hover:bg-muted'
+                                    className={`min-w-fit rounded-xl px-4 py-2.5 text-left transition-all md:w-full ${activeSection === section.id
+                                    ? 'bg-indigo-600 text-white shadow-md shadow-indigo-200/70 dark:bg-indigo-500 dark:text-white'
+                                    : 'bg-transparent text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800'
                                     }`}
                             >
                                 <div className="flex items-center gap-2">
                                     <section.icon className="h-4 w-4" />
-                                    <span className="text-sm font-medium">{section.label}</span>
+                                    <span className="text-xs font-semibold sm:text-sm">{section.label}</span>
                                 </div>
                             </button>
                         ))}
+                        </div>
                     </div>
                 </div>
 
@@ -200,13 +206,13 @@ const HealthForm = ({ formsPath }: { formsPath: string }) => {
                 <div className="md:col-span-3 space-y-6">
                     {/* Section 0: Informations de Base */}
                     {activeSection === 0 && (
-                        <Card>
+                        <Card className={sectionCardClass}>
                             <CardHeader>
                                 <CardTitle>Informations de Base</CardTitle>
                                 <CardDescription>Identifiez la structure de santé</CardDescription>
                             </CardHeader>
                             <CardContent className="space-y-4">
-                                <div className="grid grid-cols-2 gap-4">
+                                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                                     <div>
                                         <label className="text-sm font-medium">Nom de la structure</label>
                                         <Input name="facilityName" value={formData.facilityName} onChange={handleInputChange} placeholder="Hôpital / Clinique..." />
@@ -230,7 +236,7 @@ const HealthForm = ({ formsPath }: { formsPath: string }) => {
                                         </SelectContent>
                                     </Select>
                                 </div>
-                                <div className="grid grid-cols-3 gap-4">
+                                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
                                     <div>
                                         <label className="text-sm font-medium">Région</label>
                                         <Input name="region" value={formData.region} onChange={handleInputChange} placeholder="Dakar" />
@@ -248,7 +254,7 @@ const HealthForm = ({ formsPath }: { formsPath: string }) => {
                                     <label className="text-sm font-medium">Adresse</label>
                                     <Textarea name="address" value={formData.address} onChange={handleInputChange} placeholder="50 Rue de la Paix..." />
                                 </div>
-                                <div className="grid grid-cols-2 gap-4">
+                                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                                     <div>
                                         <label className="text-sm font-medium">Téléphone</label>
                                         <Input name="phone" type="tel" value={formData.phone} onChange={handleInputChange} placeholder="+221 33..." />
@@ -268,7 +274,7 @@ const HealthForm = ({ formsPath }: { formsPath: string }) => {
 
                     {/* Section 1: Infrastructure */}
                     {activeSection === 1 && (
-                        <Card>
+                        <Card className={sectionCardClass}>
                             <CardHeader>
                                 <CardTitle>État de l'Infrastructure</CardTitle>
                                 <CardDescription>Évaluez les services de base</CardDescription>
@@ -292,14 +298,14 @@ const HealthForm = ({ formsPath }: { formsPath: string }) => {
 
                                 <div className="space-y-3">
                                     <h4 className="font-medium text-sm">Services de base disponibles</h4>
-                                    <div className="bg-muted/50 p-4 rounded-lg space-y-3">
+                                    <div className="space-y-3 rounded-2xl border border-slate-200/70 bg-slate-50/80 p-4 dark:border-slate-800 dark:bg-slate-900/40">
                                         {[
                                             { name: 'electricityAccess', label: 'Électricité', icon: '⚡' },
                                             { name: 'waterAccess', label: 'Eau potable', icon: '💧' },
                                             { name: 'internetAccess', label: 'Internet', icon: '🌐' },
                                             { name: 'emergencyPower', label: 'Générateur/Énergie urgence', icon: '🔋' }
                                         ].map(item => (
-                                            <label key={item.name} className="flex items-center gap-3 cursor-pointer">
+                                            <label key={item.name} className="flex cursor-pointer items-center gap-3 rounded-xl border border-transparent px-3 py-2 transition-colors hover:border-slate-200 hover:bg-white dark:hover:border-slate-700 dark:hover:bg-slate-900/60">
                                                 <Checkbox
                                                     name={item.name}
                                                     checked={(formData as any)[item.name]}
@@ -316,13 +322,13 @@ const HealthForm = ({ formsPath }: { formsPath: string }) => {
 
                     {/* Section 2: Capacité */}
                     {activeSection === 2 && (
-                        <Card>
+                        <Card className={sectionCardClass}>
                             <CardHeader>
                                 <CardTitle>Capacité & Équipements</CardTitle>
                                 <CardDescription>Ressources disponibles</CardDescription>
                             </CardHeader>
                             <CardContent className="space-y-4">
-                                <div className="grid grid-cols-2 gap-4">
+                                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                                     <div>
                                         <label className="text-sm font-medium">Capacité de lits</label>
                                         <Input type="number" name="bedCapacity" value={formData.bedCapacity} onChange={handleInputChange} placeholder="50" />
@@ -333,16 +339,16 @@ const HealthForm = ({ formsPath }: { formsPath: string }) => {
                                     </div>
                                 </div>
 
-                                <div className="grid grid-cols-2 gap-4">
+                                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                                     <div>
                                         <label className="text-sm font-medium">Salles opératoires</label>
                                         <Input type="number" name="surgicalRooms" value={formData.surgicalRooms} onChange={handleInputChange} placeholder="2" />
                                     </div>
                                 </div>
 
-                                <div className="space-y-3 bg-muted/50 p-4 rounded-lg">
+                                <div className="space-y-3 rounded-2xl border border-slate-200/70 bg-slate-50/80 p-4 dark:border-slate-800 dark:bg-slate-900/40">
                                     <h4 className="font-medium text-sm">Équipements clés</h4>
-                                    <div className="grid grid-cols-2 gap-3">
+                                    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                                         {[
                                             { name: 'laboratoryEquipped', label: 'Laboratoire' },
                                             { name: 'imagingEquipped', label: 'Imagerie' },
@@ -353,7 +359,7 @@ const HealthForm = ({ formsPath }: { formsPath: string }) => {
                                             { name: 'respirator', label: 'Respirateur' },
                                             { name: 'bloodBank', label: 'Banque de sang' }
                                         ].map(item => (
-                                            <label key={item.name} className="flex items-center gap-2 cursor-pointer">
+                                            <label key={item.name} className="flex cursor-pointer items-center gap-2 rounded-xl border border-transparent px-3 py-2 transition-colors hover:border-slate-200 hover:bg-white dark:hover:border-slate-700 dark:hover:bg-slate-900/60">
                                                 <Checkbox
                                                     name={item.name}
                                                     checked={(formData as any)[item.name]}
@@ -370,7 +376,7 @@ const HealthForm = ({ formsPath }: { formsPath: string }) => {
 
                     {/* Section 3: Personnel */}
                     {activeSection === 3 && (
-                        <Card>
+                        <Card className={sectionCardClass}>
                             <CardHeader>
                                 <CardTitle>Ressources Humaines</CardTitle>
                                 <CardDescription>Effectifs et postes vacants</CardDescription>
@@ -378,7 +384,7 @@ const HealthForm = ({ formsPath }: { formsPath: string }) => {
                             <CardContent className="space-y-6">
                                 <div>
                                     <h4 className="font-medium text-sm mb-4">Personnel en Poste</h4>
-                                    <div className="grid grid-cols-2 gap-4">
+                                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                                         {[
                                             { name: 'doctors', label: 'Médecins' },
                                             { name: 'nurses', label: 'Infirmiers' },
@@ -396,7 +402,7 @@ const HealthForm = ({ formsPath }: { formsPath: string }) => {
 
                                 <div>
                                     <h4 className="font-medium text-sm mb-4">Postes Vacants</h4>
-                                    <div className="grid grid-cols-2 gap-4">
+                                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                                         <div>
                                             <label className="text-sm font-medium">Médecins</label>
                                             <Input type="number" name="doctorvacancies" value={formData.doctorvacancies} onChange={handleInputChange} placeholder="0" />
@@ -413,12 +419,12 @@ const HealthForm = ({ formsPath }: { formsPath: string }) => {
 
                     {/* Section 4: Services */}
                     {activeSection === 4 && (
-                        <Card>
+                        <Card className={sectionCardClass}>
                             <CardHeader>
                                 <CardTitle>Services Offerts</CardTitle>
                                 <CardDescription>Sélectionnez les services disponibles</CardDescription>
                             </CardHeader>
-                            <CardContent className="space-y-3 bg-muted/50 p-4 rounded-lg">
+                            <CardContent className="space-y-3 rounded-2xl border border-slate-200/70 bg-slate-50/80 p-4 dark:border-slate-800 dark:bg-slate-900/40">
                                 {[
                                     { name: 'emergencyService', label: '🚑 Service d\'urgence' },
                                     { name: 'maternityService', label: '👶 Maternité' },
@@ -428,7 +434,7 @@ const HealthForm = ({ formsPath }: { formsPath: string }) => {
                                     { name: 'imagingService', label: '📸 Imagerie' },
                                     { name: 'outpatientService', label: '👨‍⚕️ Consultation externe' }
                                 ].map(item => (
-                                    <label key={item.name} className="flex items-center gap-3 cursor-pointer">
+                                    <label key={item.name} className="flex cursor-pointer items-center gap-3 rounded-xl border border-transparent px-3 py-2 transition-colors hover:border-slate-200 hover:bg-white dark:hover:border-slate-700 dark:hover:bg-slate-900/60">
                                         <Checkbox
                                             name={item.name}
                                             checked={(formData as any)[item.name]}
@@ -443,13 +449,13 @@ const HealthForm = ({ formsPath }: { formsPath: string }) => {
 
                     {/* Section 5: Performance */}
                     {activeSection === 5 && (
-                        <Card>
+                        <Card className={sectionCardClass}>
                             <CardHeader>
                                 <CardTitle>Données de Performance</CardTitle>
                                 <CardDescription>Activités mensuelles</CardDescription>
                             </CardHeader>
                             <CardContent className="space-y-4">
-                                <div className="grid grid-cols-2 gap-4">
+                                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                                     <div>
                                         <label className="text-sm font-medium">Patients vus (mois)</label>
                                         <Input type="number" name="monthlyPatients" value={formData.monthlyPatients} onChange={handleInputChange} placeholder="500" />
@@ -476,7 +482,7 @@ const HealthForm = ({ formsPath }: { formsPath: string }) => {
                     )}
 
                     {/* Navigation buttons */}
-                    <div className="flex items-center justify-between">
+                    <div className="flex flex-col gap-3 rounded-2xl border border-slate-200/80 bg-white/80 p-3 sm:flex-row sm:items-center sm:justify-between dark:border-slate-800 dark:bg-slate-900/70">
                         <Button
                             variant="outline"
                             onClick={() => setActiveSection(Math.max(0, activeSection - 1))}
@@ -484,14 +490,14 @@ const HealthForm = ({ formsPath }: { formsPath: string }) => {
                         >
                             ← Précédent
                         </Button>
-                        <div className="text-sm text-muted-foreground">
+                        <div className="text-sm text-muted-foreground sm:order-none order-first">
                             Étape {activeSection + 1} / {sections.length}
                         </div>
                         {activeSection === sections.length - 1 ? (
                             <Button
                                 onClick={handleSubmit}
                                 disabled={isSubmitting}
-                                className="bg-green-600 hover:bg-green-700"
+                                className="bg-emerald-600 hover:bg-emerald-700"
                             >
                                 {isSubmitting ? 'Envoi...' : 'Soumettre'}
                             </Button>
@@ -581,6 +587,7 @@ const EducationForm = ({ formsPath }: { formsPath: string }) => {
         { id: 3, label: 'Étudiants', icon: FileText },
         { id: 4, label: 'Programmes', icon: CheckCircle2 },
     ];
+    const sectionCardClass = 'rounded-2xl border border-slate-200/70 bg-white/95 backdrop-blur-sm shadow-xl shadow-emerald-100/40 dark:border-slate-800 dark:bg-slate-900/80 dark:shadow-none';
 
     const progress = Math.round(((activeSection + 1) / sections.length) * 100);
 
@@ -615,17 +622,20 @@ const EducationForm = ({ formsPath }: { formsPath: string }) => {
     };
 
     return (
-        <div className="space-y-6">
+        <div className="space-y-6 rounded-[28px] border border-slate-200/70 bg-gradient-to-br from-white via-slate-50/80 to-emerald-50/40 p-4 shadow-[0_30px_70px_-40px_rgba(16,185,129,0.45)] sm:p-6 lg:p-8 dark:border-slate-800 dark:from-slate-950 dark:via-slate-900 dark:to-slate-900 [&_label]:mb-1.5 [&_label]:block [&_label]:text-xs [&_label]:font-semibold [&_label]:tracking-wide [&_label]:text-slate-600 dark:[&_label]:text-slate-300 [&_input]:h-11 [&_input]:rounded-xl [&_input]:border-slate-200 dark:[&_input]:border-slate-700 [&_textarea]:rounded-xl [&_textarea]:border-slate-200 dark:[&_textarea]:border-slate-700">
             {/* Header avec progress */}
-            <div className="flex items-center justify-between">
-                <div className="flex-1">
+            <div className="flex flex-col gap-4 rounded-2xl border border-emerald-100 bg-white/80 p-4 shadow-sm sm:p-5 lg:flex-row lg:items-center dark:border-emerald-900/40 dark:bg-slate-900/60">
+                <div className="flex-1 space-y-2">
                     <div className="flex items-center justify-between mb-2">
-                        <h2 className="text-sm font-medium">Progression du formulaire</h2>
-                        <span className="text-sm font-bold text-emerald-600">{progress}%</span>
+                        <h2 className="text-sm font-semibold tracking-wide text-slate-700 dark:text-slate-200">Progression du formulaire</h2>
+                        <span className="text-sm font-black text-emerald-600 dark:text-emerald-400">{progress}%</span>
                     </div>
-                    <Progress value={progress} className="h-2" />
+                    <Progress value={progress} className="h-2.5 rounded-full" />
+                    <p className="text-xs text-muted-foreground">
+                        Étape {activeSection + 1} sur {sections.length}
+                    </p>
                 </div>
-                <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-100 dark:bg-slate-800 border ml-4">
+                <div className="flex items-center justify-center gap-2 rounded-xl border bg-slate-50 px-3 py-2 dark:bg-slate-800">
                     {geoLoading ? (
                         <Loader2 className="h-3 w-3 animate-spin text-indigo-600" />
                     ) : coords ? (
@@ -640,25 +650,27 @@ const EducationForm = ({ formsPath }: { formsPath: string }) => {
             </div>
 
             {/* Sections et contenu */}
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
                 {/* Navigation */}
                 <div className="md:col-span-1">
-                    <div className="space-y-2 sticky top-4">
+                    <div className="md:sticky md:top-4">
+                        <div className="flex gap-2 overflow-x-auto rounded-2xl border border-slate-200/80 bg-white/80 p-2 shadow-sm md:flex-col dark:border-slate-800 dark:bg-slate-900/60">
                         {sections.map(section => (
                             <button
                                 key={section.id}
                                 onClick={() => setActiveSection(section.id)}
-                                className={`w-full text-left px-4 py-3 rounded-lg transition-all ${activeSection === section.id
-                                    ? 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 border-l-4 border-emerald-600'
-                                    : 'hover:bg-muted'
+                                className={`min-w-fit rounded-xl px-4 py-2.5 text-left transition-all md:w-full ${activeSection === section.id
+                                    ? 'bg-emerald-600 text-white shadow-md shadow-emerald-200/70 dark:bg-emerald-500 dark:text-white'
+                                    : 'bg-transparent text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800'
                                     }`}
                             >
                                 <div className="flex items-center gap-2">
                                     <section.icon className="h-4 w-4" />
-                                    <span className="text-sm font-medium">{section.label}</span>
+                                    <span className="text-xs font-semibold sm:text-sm">{section.label}</span>
                                 </div>
                             </button>
                         ))}
+                        </div>
                     </div>
                 </div>
 
@@ -666,13 +678,13 @@ const EducationForm = ({ formsPath }: { formsPath: string }) => {
                 <div className="md:col-span-3 space-y-6">
                     {/* Section 0: Informations */}
                     {activeSection === 0 && (
-                        <Card>
+                        <Card className={sectionCardClass}>
                             <CardHeader>
                                 <CardTitle>Informations de l'École</CardTitle>
                                 <CardDescription>Identifiez l'établissement scolaire</CardDescription>
                             </CardHeader>
                             <CardContent className="space-y-4">
-                                <div className="grid grid-cols-2 gap-4">
+                                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                                     <div>
                                         <label className="text-sm font-medium">Nom de l'école</label>
                                         <Input name="schoolName" value={formData.schoolName} onChange={handleInputChange} placeholder="Lycée Seydou Nourou Tall..." />
@@ -682,7 +694,7 @@ const EducationForm = ({ formsPath }: { formsPath: string }) => {
                                         <Input name="schoolCode" value={formData.schoolCode} onChange={handleInputChange} placeholder="SN-2024-001" />
                                     </div>
                                 </div>
-                                <div className="grid grid-cols-2 gap-4">
+                                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                                     <div>
                                         <label className="text-sm font-medium">Type d'école</label>
                                         <Select value={formData.schoolType} onValueChange={(v) => setFormData({ ...formData, schoolType: v })}>
@@ -711,7 +723,7 @@ const EducationForm = ({ formsPath }: { formsPath: string }) => {
                                         </Select>
                                     </div>
                                 </div>
-                                <div className="grid grid-cols-3 gap-4">
+                                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
                                     <div>
                                         <label className="text-sm font-medium">Région</label>
                                         <Input name="region" value={formData.region} onChange={handleInputChange} placeholder="Dakar" />
@@ -729,7 +741,7 @@ const EducationForm = ({ formsPath }: { formsPath: string }) => {
                                     <label className="text-sm font-medium">Adresse</label>
                                     <Textarea name="address" value={formData.address} onChange={handleInputChange} placeholder="50 Rue de l'Éducation..." />
                                 </div>
-                                <div className="grid grid-cols-2 gap-4">
+                                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                                     <div>
                                         <label className="text-sm font-medium">Téléphone</label>
                                         <Input name="phone" type="tel" value={formData.phone} onChange={handleInputChange} placeholder="+221 33..." />
@@ -749,13 +761,13 @@ const EducationForm = ({ formsPath }: { formsPath: string }) => {
 
                     {/* Section 1: Infrastructure */}
                     {activeSection === 1 && (
-                        <Card>
+                        <Card className={sectionCardClass}>
                             <CardHeader>
                                 <CardTitle>Infrastructure Scolaire</CardTitle>
                                 <CardDescription>Équipements et ressources disponibles</CardDescription>
                             </CardHeader>
                             <CardContent className="space-y-4">
-                                <div className="grid grid-cols-2 gap-4">
+                                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                                     <div>
                                         <label className="text-sm font-medium">Nombre total de salles de classe</label>
                                         <Input type="number" name="classrooms" value={formData.classrooms} onChange={handleInputChange} placeholder="20" />
@@ -774,9 +786,9 @@ const EducationForm = ({ formsPath }: { formsPath: string }) => {
                                     </div>
                                 </div>
 
-                                <div className="space-y-3 bg-muted/50 p-4 rounded-lg">
+                                <div className="space-y-3 rounded-2xl border border-slate-200/70 bg-slate-50/80 p-4 dark:border-slate-800 dark:bg-slate-900/40">
                                     <h4 className="font-medium text-sm">Services et équipements</h4>
-                                    <div className="grid grid-cols-2 gap-3">
+                                    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                                         {[
                                             { name: 'waterAccess', label: '💧 Eau potable' },
                                             { name: 'electricityAccess', label: '⚡ Électricité' },
@@ -785,7 +797,7 @@ const EducationForm = ({ formsPath }: { formsPath: string }) => {
                                             { name: 'library', label: '📚 Bibliothèque' },
                                             { name: 'computerLab', label: '🖥️ Salle informatique' }
                                         ].map(item => (
-                                            <label key={item.name} className="flex items-center gap-2 cursor-pointer">
+                                            <label key={item.name} className="flex cursor-pointer items-center gap-2 rounded-xl border border-transparent px-3 py-2 transition-colors hover:border-slate-200 hover:bg-white dark:hover:border-slate-700 dark:hover:bg-slate-900/60">
                                                 <Checkbox
                                                     name={item.name}
                                                     checked={(formData as any)[item.name]}
@@ -802,7 +814,7 @@ const EducationForm = ({ formsPath }: { formsPath: string }) => {
 
                     {/* Section 2: Personnel */}
                     {activeSection === 2 && (
-                        <Card>
+                        <Card className={sectionCardClass}>
                             <CardHeader>
                                 <CardTitle>Corps Enseignant</CardTitle>
                                 <CardDescription>Ressources humaines</CardDescription>
@@ -810,7 +822,7 @@ const EducationForm = ({ formsPath }: { formsPath: string }) => {
                             <CardContent className="space-y-6">
                                 <div>
                                     <h4 className="font-medium text-sm mb-4">Personnel enseignant</h4>
-                                    <div className="grid grid-cols-2 gap-4">
+                                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                                         <div>
                                             <label className="text-sm font-medium">Total d'enseignants</label>
                                             <Input type="number" name="totalTeachers" value={formData.totalTeachers} onChange={handleInputChange} placeholder="40" />
@@ -832,7 +844,7 @@ const EducationForm = ({ formsPath }: { formsPath: string }) => {
 
                                 <div>
                                     <h4 className="font-medium text-sm mb-4">Postes vacants</h4>
-                                    <div className="grid grid-cols-2 gap-4">
+                                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                                         <div>
                                             <label className="text-sm font-medium">Personnel de soutien</label>
                                             <Input type="number" name="supportStaff" value={formData.supportStaff} onChange={handleInputChange} placeholder="8" />
@@ -849,13 +861,13 @@ const EducationForm = ({ formsPath }: { formsPath: string }) => {
 
                     {/* Section 3: Étudiants */}
                     {activeSection === 3 && (
-                        <Card>
+                        <Card className={sectionCardClass}>
                             <CardHeader>
                                 <CardTitle>Population Scolaire</CardTitle>
                                 <CardDescription>Données des apprenants</CardDescription>
                             </CardHeader>
                             <CardContent className="space-y-4">
-                                <div className="grid grid-cols-2 gap-4">
+                                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                                     <div>
                                         <label className="text-sm font-medium">Total d'étudiants</label>
                                         <Input type="number" name="totalStudents" value={formData.totalStudents} onChange={handleInputChange} placeholder="1200" />
@@ -874,7 +886,7 @@ const EducationForm = ({ formsPath }: { formsPath: string }) => {
                                     </div>
                                 </div>
 
-                                <div className="grid grid-cols-2 gap-4">
+                                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                                     <div>
                                         <label className="text-sm font-medium">Abandons</label>
                                         <Input type="number" name="dropouts" value={formData.dropouts} onChange={handleInputChange} placeholder="20" />
@@ -890,12 +902,12 @@ const EducationForm = ({ formsPath }: { formsPath: string }) => {
 
                     {/* Section 4: Programmes */}
                     {activeSection === 4 && (
-                        <Card>
+                        <Card className={sectionCardClass}>
                             <CardHeader>
                                 <CardTitle>Programmes et Services</CardTitle>
                                 <CardDescription>Activités additionnelles</CardDescription>
                             </CardHeader>
-                            <CardContent className="space-y-3 bg-muted/50 p-4 rounded-lg">
+                            <CardContent className="space-y-3 rounded-2xl border border-slate-200/70 bg-slate-50/80 p-4 dark:border-slate-800 dark:bg-slate-900/40">
                                 {[
                                     { name: 'freeMeals', label: '🍚 Repas scolaires gratuits' },
                                     { name: 'meditationProgram', label: '🧘 Programme de bien-être' },
@@ -904,7 +916,7 @@ const EducationForm = ({ formsPath }: { formsPath: string }) => {
                                     { name: 'artProgram', label: '🎨 Programme artistique' },
                                     { name: 'scholarshipProgram', label: '🎓 Programme de bourses' }
                                 ].map(item => (
-                                    <label key={item.name} className="flex items-center gap-3 cursor-pointer">
+                                    <label key={item.name} className="flex cursor-pointer items-center gap-3 rounded-xl border border-transparent px-3 py-2 transition-colors hover:border-slate-200 hover:bg-white dark:hover:border-slate-700 dark:hover:bg-slate-900/60">
                                         <Checkbox
                                             name={item.name}
                                             checked={(formData as any)[item.name]}
@@ -918,7 +930,7 @@ const EducationForm = ({ formsPath }: { formsPath: string }) => {
                     )}
 
                     {/* Navigation buttons */}
-                    <div className="flex items-center justify-between">
+                    <div className="flex flex-col gap-3 rounded-2xl border border-slate-200/80 bg-white/80 p-3 sm:flex-row sm:items-center sm:justify-between dark:border-slate-800 dark:bg-slate-900/70">
                         <Button
                             variant="outline"
                             onClick={() => setActiveSection(Math.max(0, activeSection - 1))}
@@ -926,14 +938,14 @@ const EducationForm = ({ formsPath }: { formsPath: string }) => {
                         >
                             ← Précédent
                         </Button>
-                        <div className="text-sm text-muted-foreground">
+                        <div className="text-sm text-muted-foreground sm:order-none order-first">
                             Étape {activeSection + 1} / {sections.length}
                         </div>
                         {activeSection === sections.length - 1 ? (
                             <Button
                                 onClick={handleSubmit}
                                 disabled={isSubmitting}
-                                className="bg-green-600 hover:bg-green-700"
+                                className="bg-emerald-600 hover:bg-emerald-700"
                             >
                                 {isSubmitting ? 'Envoi...' : 'Soumettre'}
                             </Button>
@@ -961,21 +973,31 @@ export const FormSubmissionPage = () => {
 
     return (
         <MainLayout space="sector">
-            <div className="max-w-[1400px] mx-auto pb-12">
+            <div className="max-w-[1480px] mx-auto space-y-6 pb-12">
                 {/* Header */}
-                <div className="flex items-center gap-4 mb-8">
-                    <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => navigate(formsPath)}
-                    >
-                        <ArrowLeft className="h-5 w-5" />
-                    </Button>
-                    <div>
-                        <h1 className="text-3xl font-bold">Formulaire de Collecte</h1>
-                        <p className="text-muted-foreground">
+                <div className="relative overflow-hidden rounded-3xl border border-slate-200/70 bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 p-5 text-white shadow-2xl sm:p-7">
+                    <div className="absolute -right-12 -top-12 h-44 w-44 rounded-full bg-white/10 blur-3xl" />
+                    <div className="absolute -bottom-14 -left-10 h-40 w-40 rounded-full bg-emerald-400/20 blur-3xl" />
+                    <div className="relative flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                        <div className="flex items-start gap-3 sm:items-center">
+                            <Button
+                                variant="ghost"
+                                size="icon"
+                                className="shrink-0 bg-white/10 text-white hover:bg-white/20 hover:text-white"
+                                onClick={() => navigate(formsPath)}
+                            >
+                                <ArrowLeft className="h-5 w-5" />
+                            </Button>
+                            <div>
+                                <h1 className="text-2xl font-black tracking-tight sm:text-3xl">Formulaire de Collecte</h1>
+                                <p className="text-sm text-slate-300 sm:text-base">
+                                    {formType === 'health' ? 'Parcours Santé' : 'Parcours Éducation'}
+                                </p>
+                            </div>
+                        </div>
+                        <div className="inline-flex w-fit items-center rounded-full border border-white/20 bg-white/10 px-4 py-2 text-xs font-bold uppercase tracking-wider sm:text-sm">
                             {formType === 'health' ? 'Secteur Santé' : 'Secteur Éducation'}
-                        </p>
+                        </div>
                     </div>
                 </div>
 

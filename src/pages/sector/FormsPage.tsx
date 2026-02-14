@@ -34,20 +34,24 @@ export const FormsPage = () => {
     const navigate = useNavigate();
     const location = useLocation();
     const user = useAuthStore((state) => state.user);
+    const isAgentSpace = user?.role === 'local_manager';
     const isEducationSpace = location.pathname.includes('/sector/education');
     const currentSector = isEducationSpace ? 'education' : 'health';
-    const currentSectorLabel = isEducationSpace ? 'éducation' : 'santé';
+    const currentSectorLabel = isAgentSpace ? 'santé et éducation' : isEducationSpace ? 'éducation' : 'santé';
 
     useEffect(() => {
         const fetchData = async () => {
             try {
                 setIsLoading(true);
                 const [formsRes, submissionsRes] = await Promise.all([
-                    dataCollectionService.getForms({ sector: currentSector }),
+                    dataCollectionService.getForms(isAgentSpace ? undefined : { sector: currentSector }),
                     dataCollectionService.getSubmissions()
                 ]);
                 const loadedForms = formsRes.results || formsRes || [];
-                setForms(loadedForms.filter((form: any) => form.sector === currentSector));
+                const formsForSpace = isAgentSpace
+                    ? loadedForms.filter((form: any) => ['health', 'education'].includes(form.sector))
+                    : loadedForms.filter((form: any) => form.sector === currentSector);
+                setForms(formsForSpace);
                 setSubmissions(submissionsRes.results || submissionsRes || []);
             } catch (err) {
                 console.error('Failed to load forms', err);
@@ -56,7 +60,7 @@ export const FormsPage = () => {
             }
         };
         fetchData();
-    }, [currentSector]);
+    }, [currentSector, isAgentSpace]);
 
     const filteredForms = forms.filter(f =>
         f.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -78,16 +82,27 @@ export const FormsPage = () => {
 
     const getSectorColor = (sector: string) => {
         if (sector?.includes('santé') || sector?.includes('health')) {
-            return 'bg-red-100 text-red-800 dark:bg-red-900/20';
+            return 'bg-rose-100 text-rose-700 border border-rose-200 dark:bg-rose-900/20 dark:text-rose-300 dark:border-rose-800/40';
         }
         if (sector?.includes('éducation') || sector?.includes('education')) {
-            return 'bg-blue-100 text-blue-800 dark:bg-blue-900/20';
+            return 'bg-sky-100 text-sky-700 border border-sky-200 dark:bg-sky-900/20 dark:text-sky-300 dark:border-sky-800/40';
         }
-        return 'bg-gray-100 text-gray-800';
+        return 'bg-gray-100 text-gray-800 border border-gray-200 dark:border-gray-700';
     };
 
-    const handleFormClick = (formId: string) => {
-        navigate(`/sector/${currentSector}/forms/${formId}`);
+    const getSectorButtonClass = (sector: string) => {
+        if (sector === 'health') {
+            return 'bg-rose-600 hover:bg-rose-700';
+        }
+        if (sector === 'education') {
+            return 'bg-sky-600 hover:bg-sky-700';
+        }
+        return 'bg-indigo-600 hover:bg-indigo-700';
+    };
+
+    const handleFormClick = (formId: string, formSector?: string) => {
+        const targetSector = formSector === 'education' || formSector === 'health' ? formSector : currentSector;
+        navigate(`/sector/${targetSector}/forms/${formId}`);
     };
 
     // Stats pour le tableau de bord
@@ -100,13 +115,13 @@ export const FormsPage = () => {
             <div className="max-w-[1400px] mx-auto space-y-8 pb-12">
                 {/* Header */}
                 <div className="space-y-6">
-                    <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-950/30 dark:to-purple-950/30 p-8 rounded-xl border border-indigo-200/50 dark:border-indigo-800/50">
+                    <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between rounded-3xl border border-indigo-200/50 bg-gradient-to-r from-indigo-50 via-white to-sky-50 p-8 shadow-sm dark:border-indigo-800/50 dark:from-indigo-950/30 dark:via-slate-950 dark:to-sky-950/20">
                         <div className="flex items-center gap-4">
                             <div className="flex h-16 w-16 items-center justify-center rounded-xl bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400">
                                 <FileText className="h-8 w-8" />
                             </div>
                             <div>
-                                <h1 className="text-3xl font-bold tracking-tight text-foreground">Formulaires {isEducationSpace ? 'Éducation' : 'Santé'}</h1>
+                                <h1 className="text-3xl font-bold tracking-tight text-foreground">Formulaires {isAgentSpace ? 'Santé & Éducation' : isEducationSpace ? 'Éducation' : 'Santé'}</h1>
                                 <p className="text-muted-foreground mt-1">
                                     Remplissez les formulaires {currentSectorLabel} affectés à votre structure.
                                 </p>
@@ -182,7 +197,7 @@ export const FormsPage = () => {
                             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                             <Input
                                 placeholder="Rechercher un formulaire..."
-                                className="pl-10 h-11 bg-background"
+                                className="h-12 rounded-xl border-slate-200 bg-background pl-10 shadow-sm dark:border-slate-700"
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
                             />
@@ -220,10 +235,10 @@ export const FormsPage = () => {
                             {filteredForms.map((form) => (
                                 <Card
                                     key={form.id}
-                                    className="group hover:shadow-lg hover:border-indigo-300 dark:hover:border-indigo-700 transition-all cursor-pointer overflow-hidden h-full flex flex-col"
-                                    onClick={() => handleFormClick(form.id)}
+                                    className="group relative flex h-full cursor-pointer flex-col overflow-hidden rounded-3xl border border-slate-200/80 bg-white/90 shadow-sm transition-all hover:-translate-y-1 hover:border-indigo-300 hover:shadow-2xl dark:border-slate-800 dark:bg-slate-900/70 dark:hover:border-indigo-700"
+                                    onClick={() => handleFormClick(form.id, form.sector)}
                                 >
-                                    <CardHeader className="pb-3 bg-gradient-to-br from-slate-50 to-slate-100/50 dark:from-slate-900/20 dark:to-slate-900/10">
+                                    <CardHeader className="bg-gradient-to-br from-slate-50 to-slate-100/70 pb-3 dark:from-slate-900/40 dark:to-slate-900/20">
                                         <div className="flex items-start justify-between mb-3">
                                             <div className="flex-1">
                                                 <CardTitle className="text-lg group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors line-clamp-2">
@@ -261,9 +276,9 @@ export const FormsPage = () => {
                                         </div>
                                     </CardContent>
 
-                                    <div className="px-6 py-4 border-t bg-slate-50/50 dark:bg-slate-900/20">
+                                    <div className="border-t bg-slate-50/50 px-6 py-4 dark:bg-slate-900/20">
                                         <Button
-                                            className="w-full bg-indigo-600 hover:bg-indigo-700 text-white group-hover:shadow-md transition-all"
+                                            className={`w-full text-white transition-all group-hover:shadow-md ${getSectorButtonClass(form.sector)}`}
                                         >
                                             Remplir le formulaire
                                             <ChevronRight className="h-4 w-4 ml-2 group-hover:translate-x-1 transition-transform" />
